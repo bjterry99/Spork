@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "972957415278",
+    "project_id": "spork-28a50",
+    "storage_bucket": "spork-28a50.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:972957415278:android:1a36e2b2c8149ca92b337f",
+        "android_client_info": {
+          "package_name": "bradenterry.com.spork"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "972957415278-al3gftcalimkl8977vv1ck8tfg0tknsn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAoZ2uWjwRThOxo-Vai2v3TrEiJp3UOmA4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "972957415278-al3gftcalimkl8977vv1ck8tfg0tknsn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

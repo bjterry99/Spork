@@ -1,0 +1,52 @@
+name: spork
+description: Recipe book and grocery list app
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.16.2 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  flutter_spinkit: ^5.1.0
+  flutter_native_splash: ^2.1.6
+  duration_picker: ^1.1.0+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^1.0.0
+  firebase_core: ^1.14.1
+  cloud_firestore: ^3.1.12
+  provider: ^6.0.2
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: LibreBodoni
+      fonts:
+        - asset: assets/LibreBodoni-Italic-VariableFont_wght.ttf
+
+flutter_native_splash:
+  color: "#ff3838"
+  image: assets/spork.png
+
+  # Android 12 handles the splash screen differently than previous versions.  Please visit
+  # https://developer.android.com/guide/topics/ui/splash-screen
+  # Following are Android 12 specific parameter.
+  android_12:
+  # The image parameter sets the splash screen icon image.  If this parameter is not specified,
+  # the app's launcher icon will be used instead.
+  # Please note that the splash screen will be clipped to a circle on the center of the screen.
+  # App icon with an icon background: This should be 960×960 pixels, and fit within a circle
+  # 640 pixels in diameter.
+  # App icon without an icon background: This should be 1152×1152 pixels, and fit within a circle
+  # 768 pixels in diameter.
+    image: assets/spork.png
+
+  android: true
+  ios: true
+
