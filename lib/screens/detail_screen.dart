@@ -122,7 +122,8 @@ class _DetailScreenState extends State<DetailScreen> {
                 )),
           ],
         ),
-        systemOverlayStyle: const SystemUiOverlayStyle(
+        systemOverlayStyle: Platform.isIOS ? SystemUiOverlayStyle.light :
+        const SystemUiOverlayStyle(
           statusBarColor: CustomColors.primary,
           statusBarIconBrightness: Brightness.light,
         ),

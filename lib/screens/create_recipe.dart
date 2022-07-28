@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
@@ -284,9 +286,13 @@ class _CreateRecipeState extends State<CreateRecipe> {
       onTap: () {
         FocusScope.of(context).unfocus();
       },
+      onPanDown: (_) {
+        FocusScope.of(context).unfocus();
+      },
       child: Scaffold(
         appBar: AppBar(
-          systemOverlayStyle: const SystemUiOverlayStyle(
+          systemOverlayStyle: Platform.isIOS ? SystemUiOverlayStyle.light :
+          const SystemUiOverlayStyle(
             statusBarColor: CustomColors.primary,
             statusBarIconBrightness: Brightness.light,
           ),

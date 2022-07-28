@@ -90,6 +90,9 @@ class _GroceryScreenState extends State<GroceryScreen> {
             onTap: () {
               FocusScope.of(context).unfocus();
             },
+            onPanDown: (_) {
+              FocusScope.of(context).unfocus();
+            },
             child: NotificationListener<UserScrollNotification>(
               onNotification: (not) {
                 if (not.direction == ScrollDirection.forward) {

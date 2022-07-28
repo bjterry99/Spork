@@ -12,6 +12,9 @@ class MenuScreen extends StatelessWidget {
           onTap: () {
             FocusScope.of(context).unfocus();
           },
+          onPanDown: (_) {
+            FocusScope.of(context).unfocus();
+          },
           child: const Padding(
             padding: EdgeInsets.only(top: 15),
             child: MenuList(),

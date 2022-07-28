@@ -6,6 +6,7 @@ import 'package:spork/provider.dart';
 import 'package:spork/screens/detail_screen.dart';
 import 'package:spork/theme.dart';
 import 'package:provider/provider.dart';
+import 'package:swipeable_page_route/swipeable_page_route.dart';
 
 final _firestore = FirebaseFirestore.instance;
 
@@ -69,11 +70,9 @@ class RecipeCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 MyTextButton(text: 'View recipe', action: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DetailScreen(recipe: recipe),
-                  ),);
+                  Navigator.of(context).push(SwipeablePageRoute(
+                    builder: (BuildContext context) => DetailScreen(recipe: recipe),
+                  ));
                 },),
                 const SizedBox(width: 8),
                 StreamBuilder<QuerySnapshot>(
@@ -247,6 +246,7 @@ class MenuList extends StatelessWidget {
             }
           }
           return SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
             child: Column(
               children: [
                 if (main.isNotEmpty)
