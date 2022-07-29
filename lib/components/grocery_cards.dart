@@ -117,10 +117,17 @@ class GroceryList extends StatelessWidget {
           bool display = false;
 
           for (var item in items!) {
+            String recipeName = '';
+            if (item['recipeItem']) {
+              recipeName = item['recipeName'].toString().toLowerCase();
+            }
+
             if (item['name'].toString().toLowerCase().contains(query)) {
               display = true;
-            } else if (item['recipeName'].toString().toLowerCase().contains(query)) {
-              display = true;
+            } else if (item['recipeItem']) {
+              if (recipeName.contains(query)) {
+                display = true;
+              }
             } else {
               display = false;
             }

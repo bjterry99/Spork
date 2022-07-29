@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -70,9 +72,16 @@ class RecipeCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 MyTextButton(text: 'View recipe', action: (){
-                  Navigator.of(context).push(SwipeablePageRoute(
-                    builder: (BuildContext context) => DetailScreen(recipe: recipe),
-                  ));
+                  if (Platform.isIOS) {
+                    Navigator.of(context).push(SwipeablePageRoute(
+                      builder: (BuildContext context) => DetailScreen(recipe: recipe),
+                      canOnlySwipeFromEdge: true
+                    ));
+                  } else {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) => DetailScreen(recipe: recipe),
+                    ));
+                  }
                 },),
                 const SizedBox(width: 8),
                 StreamBuilder<QuerySnapshot>(
