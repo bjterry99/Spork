@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:spork/components/recipe_cards.dart';
 import 'package:spork/screens/create_recipe.dart';
 import 'package:spork/theme.dart';
@@ -14,6 +15,22 @@ class RecipesScreen extends StatefulWidget {
 class _RecipesScreenState extends State<RecipesScreen> {
   bool isFabVisible = true;
   String query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    KeyboardVisibilityController().onChange.listen((isVisible) {
+      if (!isVisible) {
+        setState(() {
+          isFabVisible = true;
+        });
+      } else {
+        setState(() {
+          isFabVisible = false;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

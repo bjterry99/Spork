@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:spork/components/grocery_cards.dart';
+import 'package:spork/components/my_text_button.dart';
 import 'package:spork/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -18,6 +19,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
   bool isFabVisible = true;
   String query = '';
   bool isInputVisible = false;
+  bool canSave = false;
   TextEditingController controller = TextEditingController();
 
   @override
@@ -35,6 +37,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
           isInputVisible = false;
           isFabVisible = true;
           controller.clear();
+          canSave = false;
         });
       } else {
         setState(() {
@@ -42,6 +45,23 @@ class _GroceryScreenState extends State<GroceryScreen> {
         });
       }
     });
+  }
+
+  void saveItem() async {
+    setState(() {
+      isInputVisible = false;
+      canSave = false;
+    });
+    if (controller.text != '') {
+      var ref = _firestore.collection('grocery').doc();
+      await ref.set({
+        "id": ref.id,
+        "name": controller.text,
+        "recipeItem": false,
+        "mark": false,
+      });
+    }
+    controller.clear();
   }
 
   @override
@@ -151,54 +171,65 @@ class _GroceryScreenState extends State<GroceryScreen> {
               ),
             ),
             if (isInputVisible)
-              Container(
-                decoration: const BoxDecoration(
-                  color: CustomColors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(20)),
+              Material(
+                color: CustomColors.white,
+                elevation: 3,
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(15),
+                  topLeft: Radius.circular(15),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: Builder(builder: (context) {
-                  return SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: TextFormField(
-                      autofocus: true,
-                      controller: controller,
-                      keyboardType: TextInputType.multiline,
-                      textInputAction: TextInputAction.done,
-                      maxLines: null,
-                      decoration: const InputDecoration(
-                        hintText: 'add item...',
-                        focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                          color: Colors.transparent,
-                        )),
-                        enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                          color: Colors.transparent,
-                        )),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          autofocus: true,
+                          controller: controller,
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.done,
+                          maxLines: null,
+                          decoration: const InputDecoration(
+                            hintText: 'add item...',
+                            focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                              color: Colors.transparent,
+                            )),
+                            enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                              color: Colors.transparent,
+                            )),
+                          ),
+                          style: const TextStyle(
+                            fontSize: CustomFontSize.primary,
+                          ),
+                          onChanged: (value) {
+                            if (value.isNotEmpty) {
+                              setState(() {
+                                canSave = true;
+                              });
+                            } else {
+                              setState(() {
+                                canSave = false;
+                              });
+                            }
+                          },
+                          onEditingComplete: () {
+                            saveItem();
+                          },
+                        ),
                       ),
-                      style: const TextStyle(
-                        fontSize: CustomFontSize.primary,
-                      ),
-                      onEditingComplete: () async {
-                        setState(() {
-                          isInputVisible = false;
-                        });
-                        if (controller.text != '') {
-                          var ref = _firestore.collection('grocery').doc();
-                          await ref.set({
-                            "id": ref.id,
-                            "name": controller.text,
-                            "recipeItem": false,
-                            "mark": false,
-                          });
-                        }
-                        controller.clear();
-                      },
-                    ),
-                  );
-                }),
+                      if (canSave)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 7),
+                          child: MyTextButton(text: 'Save', action: (){
+                            saveItem();
+                          }),
+                        ),
+                    ],
+                  ),
+                ),
               ),
           ],
         ),
