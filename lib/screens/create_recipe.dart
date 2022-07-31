@@ -1,8 +1,8 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:spork/notification_service.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/theme.dart';
 import 'package:duration_picker/duration_picker.dart';
@@ -20,7 +20,6 @@ class _CreateRecipeState extends State<CreateRecipe> {
   late String recipeClass;
   late List<String> ingredients;
   late List<String> ingredientAmounts;
-  // int numTools = 2;
   late List<String> instructions;
   late String cookTime;
   late String prepTime;
@@ -91,35 +90,6 @@ class _CreateRecipeState extends State<CreateRecipe> {
       children: inputs,
     );
   }
-
-  // Widget getToolsInput() {
-  //   List<Widget> inputs = [];
-  //
-  //   for (int i = 0; i < numTools; i++) {
-  //     inputs.add(
-  //       const TextField(
-  //         style: TextStyle(
-  //             color: CustomColors.black,
-  //             fontWeight: FontWeight.w400,
-  //             fontSize: CustomFontSize.secondary),
-  //         textCapitalization: TextCapitalization.sentences,
-  //         cursorColor: CustomColors.primary,
-  //         decoration: InputDecoration(
-  //           border: InputBorder.none,
-  //           focusedBorder: InputBorder.none,
-  //           enabledBorder: InputBorder.none,
-  //           errorBorder: InputBorder.none,
-  //           disabledBorder: InputBorder.none,
-  //           hintText: "tool...",
-  //         ),
-  //       ),
-  //     );
-  //   }
-  //
-  //   return Column(
-  //     children: inputs,
-  //   );
-  // }
 
   Widget getInstructionsInput() {
     List<Widget> inputs = [];
@@ -635,86 +605,6 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   endIndent: 0,
                   color: CustomColors.grey3,
                 ),
-                // Padding(
-                //   padding: const EdgeInsets.symmetric(vertical: 10),
-                //   child: Row(
-                //     children: [
-                //       const Icon(
-                //         Icons.blender_outlined,
-                //         size: 20,
-                //         color: CustomColors.grey4,
-                //       ),
-                //       const SizedBox(
-                //         width: 17,
-                //       ),
-                //       const Text(
-                //         'Tools',
-                //         style: TextStyle(
-                //             color: CustomColors.grey4,
-                //             fontWeight: FontWeight.w400,
-                //             fontSize: CustomFontSize.primary),
-                //       ),
-                //       const Spacer(),
-                //       GestureDetector(
-                //         onTap: () {
-                //           if (numTools > 1) {
-                //             setState(() {
-                //               numTools--;
-                //             });
-                //           }
-                //         },
-                //         child: Material(
-                //           elevation: 4,
-                //           shape: RoundedRectangleBorder(
-                //               borderRadius: BorderRadius.circular(40)),
-                //           child: const Padding(
-                //             padding: EdgeInsets.all(5),
-                //             child: Icon(
-                //               Icons.remove_rounded,
-                //               color: CustomColors.primary,
-                //             ),
-                //           ),
-                //         ),
-                //       ),
-                //       const SizedBox(
-                //         width: 17,
-                //       ),
-                //       GestureDetector(
-                //         onTap: () {
-                //           setState(() {
-                //             numTools++;
-                //           });
-                //         },
-                //         child: Material(
-                //           elevation: 4,
-                //           shape: RoundedRectangleBorder(
-                //               borderRadius: BorderRadius.circular(40)),
-                //           child: const Padding(
-                //             padding: EdgeInsets.all(5),
-                //             child: Icon(
-                //               Icons.add_rounded,
-                //               color: CustomColors.primary,
-                //             ),
-                //           ),
-                //         ),
-                //       ),
-                //       const SizedBox(
-                //         width: 17,
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                // Padding(
-                //   padding: const EdgeInsets.symmetric(horizontal: 12),
-                //   child: getToolsInput(),
-                // ),
-                // const Divider(
-                //   height: 10,
-                //   thickness: 1,
-                //   indent: 0,
-                //   endIndent: 0,
-                //   color: CustomColors.grey3,
-                // ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Row(
@@ -858,3 +748,113 @@ class _CreateRecipeState extends State<CreateRecipe> {
     );
   }
 }
+
+// Widget getToolsInput() {
+//   List<Widget> inputs = [];
+//
+//   for (int i = 0; i < numTools; i++) {
+//     inputs.add(
+//       const TextField(
+//         style: TextStyle(
+//             color: CustomColors.black,
+//             fontWeight: FontWeight.w400,
+//             fontSize: CustomFontSize.secondary),
+//         textCapitalization: TextCapitalization.sentences,
+//         cursorColor: CustomColors.primary,
+//         decoration: InputDecoration(
+//           border: InputBorder.none,
+//           focusedBorder: InputBorder.none,
+//           enabledBorder: InputBorder.none,
+//           errorBorder: InputBorder.none,
+//           disabledBorder: InputBorder.none,
+//           hintText: "tool...",
+//         ),
+//       ),
+//     );
+//   }
+//
+//   return Column(
+//     children: inputs,
+//   );
+// }
+
+// Padding(
+//   padding: const EdgeInsets.symmetric(vertical: 10),
+//   child: Row(
+//     children: [
+//       const Icon(
+//         Icons.blender_outlined,
+//         size: 20,
+//         color: CustomColors.grey4,
+//       ),
+//       const SizedBox(
+//         width: 17,
+//       ),
+//       const Text(
+//         'Tools',
+//         style: TextStyle(
+//             color: CustomColors.grey4,
+//             fontWeight: FontWeight.w400,
+//             fontSize: CustomFontSize.primary),
+//       ),
+//       const Spacer(),
+//       GestureDetector(
+//         onTap: () {
+//           if (numTools > 1) {
+//             setState(() {
+//               numTools--;
+//             });
+//           }
+//         },
+//         child: Material(
+//           elevation: 4,
+//           shape: RoundedRectangleBorder(
+//               borderRadius: BorderRadius.circular(40)),
+//           child: const Padding(
+//             padding: EdgeInsets.all(5),
+//             child: Icon(
+//               Icons.remove_rounded,
+//               color: CustomColors.primary,
+//             ),
+//           ),
+//         ),
+//       ),
+//       const SizedBox(
+//         width: 17,
+//       ),
+//       GestureDetector(
+//         onTap: () {
+//           setState(() {
+//             numTools++;
+//           });
+//         },
+//         child: Material(
+//           elevation: 4,
+//           shape: RoundedRectangleBorder(
+//               borderRadius: BorderRadius.circular(40)),
+//           child: const Padding(
+//             padding: EdgeInsets.all(5),
+//             child: Icon(
+//               Icons.add_rounded,
+//               color: CustomColors.primary,
+//             ),
+//           ),
+//         ),
+//       ),
+//       const SizedBox(
+//         width: 17,
+//       ),
+//     ],
+//   ),
+// ),
+// Padding(
+//   padding: const EdgeInsets.symmetric(horizontal: 12),
+//   child: getToolsInput(),
+// ),
+// const Divider(
+//   height: 10,
+//   thickness: 1,
+//   indent: 0,
+//   endIndent: 0,
+//   color: CustomColors.grey3,
+// ),

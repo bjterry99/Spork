@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:spork/components/recipe_cards.dart';
 import 'package:spork/screens/create_recipe.dart';
+import 'package:spork/screens/recipes_screen/recipe_list.dart';
 import 'package:spork/theme.dart';
 
 class RecipesScreen extends StatefulWidget {

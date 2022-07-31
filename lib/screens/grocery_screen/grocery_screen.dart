@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:spork/components/grocery_cards.dart';
+import 'package:spork/provider.dart';
+import 'package:spork/screens/grocery_screen/grocery_list.dart';
 import 'package:spork/components/my_text_button.dart';
 import 'package:spork/theme.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-
-final _firestore = FirebaseFirestore.instance;
+import 'package:provider/provider.dart';
 
 class GroceryScreen extends StatefulWidget {
   const GroceryScreen({Key? key}) : super(key: key);
@@ -53,13 +52,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
       canSave = false;
     });
     if (controller.text != '') {
-      var ref = _firestore.collection('grocery').doc();
-      await ref.set({
-        "id": ref.id,
-        "name": controller.text,
-        "recipeItem": false,
-        "mark": false,
-      });
+      await Provider.of<AppProvider>(context, listen: false).addGroceryItem(controller.text);
     }
     controller.clear();
   }

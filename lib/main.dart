@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:spork/notification_service.dart';
 import 'package:spork/provider.dart';
-import 'package:spork/screens/recipes_screen.dart';
-import 'package:spork/screens/menu_screen.dart';
-import 'package:spork/screens/grocery_screen.dart';
+import 'package:spork/screens/recipes_screen/recipes_screen.dart';
+import 'package:spork/screens/menu_screen/menu_screen.dart';
+import 'package:spork/screens/grocery_screen/grocery_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:spork/theme.dart';

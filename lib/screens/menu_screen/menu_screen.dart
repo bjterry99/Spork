@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spork/components/recipe_cards.dart';
+import 'package:spork/screens/menu_screen/menu_list.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({Key? key}) : super(key: key);
