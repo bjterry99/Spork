@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:spork/components/recipe_card.dart';
+import 'package:spork/models/models.dart';
 import 'package:spork/theme.dart';
 import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
@@ -11,19 +11,19 @@ class MenuList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
+    return StreamBuilder<List<Recipe>>(
       stream: Provider.of<AppProvider>(context, listen: false).menuStream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final recipes = snapshot.data?.docs;
+          final recipes = snapshot.data;
           List<RecipeCard> main = [];
           List<RecipeCard> side = [];
           List<RecipeCard> dessert = [];
 
           for (var recipe in recipes!) {
-            if (recipe['class'] == 'Dessert') {
+            if (recipe.className == 'Dessert') {
               dessert.add(RecipeCard(recipe));
-            } else if (recipe['class'] == 'Side') {
+            } else if (recipe.className == 'Side') {
               side.add(RecipeCard(recipe));
             } else {
               main.add(RecipeCard(recipe));

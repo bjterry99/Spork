@@ -3,8 +3,8 @@ import 'package:spork/theme.dart';
 
 class Ingredients extends StatelessWidget {
   const Ingredients(this.list, this.amounts, {Key? key}) : super(key: key);
-  final List list;
-  final List amounts;
+  final List<String> list;
+  final List<String> amounts;
 
   @override
   Widget build(BuildContext context) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:spork/components/grocery_card.dart';
+import 'package:spork/models/models.dart';
 import 'package:spork/theme.dart';
 import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
@@ -12,24 +12,24 @@ class GroceryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
+    return StreamBuilder<List<Grocery>>(
       stream: Provider.of<AppProvider>(context, listen: false).groceryStream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final items = snapshot.data?.docs;
+          final items = snapshot.data;
           List<GroceryCard> marked = [];
           List<GroceryCard> unmarked = [];
           bool display = false;
 
           for (var item in items!) {
             String recipeName = '';
-            if (item['recipeItem']) {
-              recipeName = item['recipeName'].toString().toLowerCase();
+            if (item.recipeId != '') {
+              recipeName = item.recipeName.toString().toLowerCase();
             }
 
-            if (item['name'].toString().toLowerCase().contains(query)) {
+            if (item.name.toString().toLowerCase().contains(query)) {
               display = true;
-            } else if (item['recipeItem']) {
+            } else if (item.recipeId != '') {
               if (recipeName.contains(query)) {
                 display = true;
               }
@@ -38,7 +38,7 @@ class GroceryList extends StatelessWidget {
             }
 
             if (display) {
-              if (item['mark']) {
+              if (item.mark) {
                 marked.add(GroceryCard(item));
               } else {
                 unmarked.add(GroceryCard(item));

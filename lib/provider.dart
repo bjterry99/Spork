@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:spork/models/models.dart';
 import 'package:spork/notification_service.dart';
 import 'package:spork/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -34,11 +35,26 @@ class AppProvider extends ChangeNotifier {
 
   /// Streams ///
 
-  Stream<QuerySnapshot<Object?>> recipeStream = _firestore.collection('recipes').snapshots();
+  // Stream<QuerySnapshot<Object?>> recipeStream = _firestore.collection('recipes').snapshots();
 
-  Stream<QuerySnapshot<Object?>> menuStream = _firestore.collection('menu').snapshots();
+  Stream<List<Recipe>> recipeStream = _firestore.collection('recipes').snapshots()
+      .map((snapshot) => snapshot.docs
+      .map((doc) => Recipe.fromJson(doc.data()))
+      .toList());
 
-  Stream<QuerySnapshot<Object?>> groceryStream = _firestore.collection('grocery').snapshots();
+  // Stream<QuerySnapshot<Object?>> menuStream = _firestore.collection('menu').snapshots();
+
+  Stream<List<Recipe>> menuStream = _firestore.collection('menu').snapshots()
+      .map((snapshot) => snapshot.docs
+      .map((doc) => Recipe.fromJson(doc.data()))
+      .toList());
+
+  // Stream<QuerySnapshot<Object?>> groceryStream = _firestore.collection('grocery').snapshots();
+
+  Stream<List<Grocery>> groceryStream = _firestore.collection('grocery').snapshots()
+      .map((snapshot) => snapshot.docs
+      .map((doc) => Grocery.fromJson(doc.data()))
+      .toList());
 
   Stream<QuerySnapshot<Object?>> specificMenuItem(String id) {
     return _firestore.collection('menu').where('id', isEqualTo: id).snapshots();
@@ -46,33 +62,42 @@ class AppProvider extends ChangeNotifier {
 
   /// Functions ///
 
-  Future<void> addToMenu(QueryDocumentSnapshot recipe) async {
+  Future<void> addToMenu(Recipe recipe) async {
     NotificationService.notify('Adding to menu...');
 
     try {
       var menuRef = _firestore.collection('menu').doc(recipe.id);
-      await menuRef.set({
-        "id": recipe.id,
-        "name": recipe['name'],
-        "class": recipe['class'],
-        "cookTime": recipe['cookTime'],
-        "prepTime": recipe['prepTime'],
-        "ingredient_amounts": recipe['ingredient_amounts'],
-        "ingredients": recipe['ingredients'],
-        "instructions": recipe['instructions'],
-      });
+      // await menuRef.set({
+      //   "id": recipe.id,
+      //   "name": recipe['name'],
+      //   "class": recipe['class'],
+      //   "cookTime": recipe['cookTime'],
+      //   "prepTime": recipe['prepTime'],
+      //   "ingredient_amounts": recipe['ingredient_amounts'],
+      //   "ingredients": recipe['ingredients'],
+      //   "instructions": recipe['instructions'],
+      // });
+      await menuRef.set(recipe.toJson());
 
-      for (int i = 0; i < recipe['ingredients'].length; i++) {
+      for (int i = 0; i < recipe.ingredients.length; i++) {
         var ref = _firestore.collection('grocery').doc();
-        await ref.set({
-          "id": ref.id,
-          "name": recipe['ingredients'][i],
-          "amount": recipe['ingredient_amounts'][i],
-          "recipeName": recipe['name'],
-          "recipeId": recipe.id,
-          "recipeItem": true,
-          "mark": false,
-        });
+        Grocery grocery = Grocery(
+            id: ref.id,
+            name: recipe.ingredients[i],
+            amount: recipe.ingredientAmounts[i],
+            recipeId: recipe.id,
+            recipeName: recipe.name,
+            mark: false);
+        // await ref.set({
+        //   "id": ref.id,
+        //   "name": recipe['ingredients'][i],
+        //   "amount": recipe['ingredient_amounts'][i],
+        //   "recipeName": recipe['name'],
+        //   "recipeId": recipe.id,
+        //   "recipeItem": true,
+        //   "mark": false,
+        // });
+        await ref.set(grocery.toJson());
       }
 
       NotificationService.notify('Added to menu.');
@@ -81,16 +106,15 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> removeFromMenu(QueryDocumentSnapshot recipe) async {
+  Future<void> removeFromMenu(String id) async {
     NotificationService.notify('Removing from menu...');
 
     try {
-      var collection = await _firestore.collection('grocery').where('recipeId', isEqualTo: recipe.id).get();
+      var collection = await _firestore.collection('grocery').where('recipeId', isEqualTo: id).get();
       for (var item in collection.docs) {
         await _firestore.collection('grocery').doc(item.id).delete();
       }
-
-      await _firestore.collection('menu').doc(recipe.id).delete();
+      await _firestore.collection('menu').doc(id).delete();
 
       NotificationService.notify('Removed from menu.');
     } catch (error) {
@@ -98,18 +122,18 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteRecipe(QueryDocumentSnapshot recipe) async {
+  Future<void> deleteRecipe(String id) async {
     NotificationService.notify('Deleting recipe...');
 
     try {
-      await _firestore.collection('recipes').doc(recipe.id).delete();
+      await _firestore.collection('recipes').doc(id).delete();
 
-      var menuDoc = await _firestore.collection('menu').doc(recipe.id).get();
+      var menuDoc = await _firestore.collection('menu').doc(id).get();
       if (menuDoc.exists) {
-        await _firestore.collection('menu').doc(recipe.id).delete();
+        await _firestore.collection('menu').doc(id).delete();
       }
 
-      var collection = await _firestore.collection('grocery').where('recipeId', isEqualTo: recipe.id).get();
+      var collection = await _firestore.collection('grocery').where('recipeId', isEqualTo: id).get();
       for (var item in collection.docs) {
         await _firestore.collection('grocery').doc(item.id).delete();
       }
@@ -126,16 +150,26 @@ class AppProvider extends ChangeNotifier {
 
     try {
       var recipeRef = _firestore.collection('recipes').doc();
-      await recipeRef.set({
-        "id": recipeRef.id,
-        "name": recipeName,
-        "class": recipeClass,
-        "cookTime": cookTime,
-        "prepTime": prepTime,
-        "ingredient_amounts": recipeAmounts,
-        "ingredients": recipeIngredients,
-        "instructions": recipeInstructions,
-      });
+      Recipe recipe = Recipe(
+          id: recipeRef.id,
+          name: recipeName,
+      className: recipeClass,
+      cookTime: cookTime,
+      prepTime: prepTime,
+      ingredientAmounts: recipeAmounts,
+      ingredients: recipeIngredients,
+      instructions: recipeInstructions);
+      // await recipeRef.set({
+      //   "id": recipeRef.id,
+      //   "name": recipeName,
+      //   "class": recipeClass,
+      //   "cookTime": cookTime,
+      //   "prepTime": prepTime,
+      //   "ingredient_amounts": recipeAmounts,
+      //   "ingredients": recipeIngredients,
+      //   "instructions": recipeInstructions,
+      // });
+      await recipeRef.set(recipe.toJson());
 
       NotificationService.notify('Recipe created.');
     } catch (error) {
@@ -143,36 +177,37 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateRecipe(QueryDocumentSnapshot recipe, String recipeName, String recipeClass, String cookTime, String prepTime,
-      List<String> recipeAmounts, List<String> recipeIngredients, List<String> recipeInstructions) async {
+  Future<void> updateRecipe(Recipe recipe) async {
     NotificationService.notify('Updating recipe...');
 
     try {
       var recipeRef = _firestore.collection('recipes').doc(recipe.id);
-      await recipeRef.update({
-        "id": recipeRef.id,
-        "name": recipeName,
-        "class": recipeClass,
-        "cookTime": cookTime,
-        "prepTime": prepTime,
-        "ingredient_amounts": recipeAmounts,
-        "ingredients": recipeIngredients,
-        "instructions": recipeInstructions,
-      });
+      // await recipeRef.update({
+      //   "id": recipeRef.id,
+      //   "name": recipeName,
+      //   "class": recipeClass,
+      //   "cookTime": cookTime,
+      //   "prepTime": prepTime,
+      //   "ingredient_amounts": recipeAmounts,
+      //   "ingredients": recipeIngredients,
+      //   "instructions": recipeInstructions,
+      // });
+      await recipeRef.update(recipe.toJson());
 
       var menuDoc = await _firestore.collection('menu').doc(recipe.id).get();
       if (menuDoc.exists) {
         var menuRef = _firestore.collection('menu').doc(recipe.id);
-        await menuRef.update({
-          "id": menuRef.id,
-          "name": recipeName,
-          "class": recipeClass,
-          "cookTime": cookTime,
-          "prepTime": prepTime,
-          "ingredient_amounts": recipeAmounts,
-          "ingredients": recipeIngredients,
-          "instructions": recipeInstructions,
-        });
+        // await menuRef.update({
+        //   "id": menuRef.id,
+        //   "name": recipeName,
+        //   "class": recipeClass,
+        //   "cookTime": cookTime,
+        //   "prepTime": prepTime,
+        //   "ingredient_amounts": recipeAmounts,
+        //   "ingredients": recipeIngredients,
+        //   "instructions": recipeInstructions,
+        // });
+        await menuRef.update(recipe.toJson());
       }
 
       NotificationService.notify('Recipe updated.');
@@ -182,24 +217,41 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> markGroceryItem(bool value, String id) async {
-    var ref = _firestore.collection('grocery').doc(id);
-    await ref.update({
-      "mark": value,
-    });
+    try {
+      var ref = _firestore.collection('grocery').doc(id);
+      await ref.update({
+        "mark": value,
+      });
+    } catch (error) {
+      NotificationService.notify('Failed to mark item.');
+    }
   }
 
   Future<void> deleteGroceryItem(String id) async {
-    await _firestore.collection('grocery').doc(id).delete();
+    try {
+      await _firestore.collection('grocery').doc(id).delete();
+    } catch (error) {
+      NotificationService.notify('Failed to delete item.');
+    }
   }
 
   Future<void> addGroceryItem(String name) async {
-    var ref = _firestore.collection('grocery').doc();
-    await ref.set({
-      "id": ref.id,
-      "name": name,
-      "recipeItem": false,
-      "mark": false,
-    });
+    try {
+      var ref = _firestore.collection('grocery').doc();
+      Grocery grocery = Grocery(
+          id: ref.id,
+          name: name,
+          mark: false);
+      // await ref.set({
+      //   "id": ref.id,
+      //   "name": name,
+      //   "recipeItem": false,
+      //   "mark": false,
+      // });
+      await ref.set(grocery.toJson());
+    } catch (error) {
+      NotificationService.notify('Failed to add item.');
+    }
   }
 }
 

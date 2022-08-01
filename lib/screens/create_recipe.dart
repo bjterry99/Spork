@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:spork/models/models.dart';
 import 'package:spork/notification_service.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/theme.dart';
@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 
 class CreateRecipe extends StatefulWidget {
   const CreateRecipe({this.recipe, Key? key}) : super(key: key);
-  final QueryDocumentSnapshot? recipe;
+  final Recipe? recipe;
 
   @override
   State<CreateRecipe> createState() => _CreateRecipeState();
@@ -171,7 +171,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
   void delete() async {
     Navigator.pop(context);
     Navigator.pop(context);
-    await Provider.of<AppProvider>(context, listen: false).deleteRecipe(widget.recipe!);
+    await Provider.of<AppProvider>(context, listen: false).deleteRecipe(widget.recipe!.id);
   }
 
   void submit() async {
@@ -220,7 +220,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
     Navigator.pop(context);
     if (edit) {
       Navigator.pop(context);
-      await Provider.of<AppProvider>(context, listen: false).updateRecipe(widget.recipe!, recipeName, recipeClass, cookTime, prepTime, recipeAmounts, recipeIngredients, recipeInstructions);
+      await Provider.of<AppProvider>(context, listen: false).updateRecipe(widget.recipe!);
     } else {
       await Provider.of<AppProvider>(context, listen: false).createRecipe(recipeName, recipeClass, cookTime, prepTime, recipeAmounts, recipeIngredients, recipeInstructions);
     }
@@ -230,14 +230,13 @@ class _CreateRecipeState extends State<CreateRecipe> {
   void initState() {
     if (widget.recipe != null) {
       edit = true;
-      recipeClass = widget.recipe!['class'];
-      ingredients = List<String>.from(widget.recipe!['ingredients']);
-      ingredientAmounts = List<String>.from(widget.recipe!['ingredient_amounts']);
-      instructions = List<String>.from(widget.recipe!['instructions']);
-      prepTime = widget.recipe!['prepTime'];
-      cookTime = widget.recipe!['cookTime'];
-      recipeName = widget.recipe!['name'];
-      recipeClass = widget.recipe!['class'];
+      recipeClass = widget.recipe!.className;
+      ingredients = List<String>.from(widget.recipe!.ingredients);
+      ingredientAmounts = List<String>.from(widget.recipe!.ingredientAmounts);
+      instructions = List<String>.from(widget.recipe!.instructions);
+      prepTime = widget.recipe!.prepTime;
+      cookTime = widget.recipe!.cookTime;
+      recipeName = widget.recipe!.name;
     } else {
       recipeClass = 'Main';
       ingredients = ['', '', '', ''];

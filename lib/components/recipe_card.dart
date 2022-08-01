@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:spork/components/my_text_button.dart';
+import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/screens/details_screen/detail_screen.dart';
 import 'package:spork/theme.dart';
@@ -10,17 +11,17 @@ import 'package:swipeable_page_route/swipeable_page_route.dart';
 
 class RecipeCard extends StatelessWidget {
   const RecipeCard(this.recipe, {Key? key}) : super(key: key);
-  final QueryDocumentSnapshot recipe;
+  final Recipe recipe;
 
   @override
   Widget build(BuildContext context) {
     Icon getIcon() {
-      if (recipe['class'] == 'Side') {
+      if (recipe.className == 'Side') {
         return const Icon(
           Icons.bakery_dining_outlined,
           color: CustomColors.grey4,
         );
-      } else if (recipe['class'] == 'Dessert') {
+      } else if (recipe.className == 'Dessert') {
         return const Icon(
           Icons.icecream_outlined,
           color: CustomColors.grey4,
@@ -54,7 +55,7 @@ class RecipeCard extends StatelessWidget {
                   const SizedBox(width: 15,),
                   Flexible(
                     child: Text(
-                      recipe['name'],
+                      recipe.name,
                       softWrap: true,
                       style: const TextStyle(
                           color: CustomColors.black,
@@ -93,7 +94,7 @@ class RecipeCard extends StatelessWidget {
                       bool onMenu = ids.contains(recipe.id);
 
                       return MyTextButton(text: onMenu ? 'remove from menu' : 'add to menu', action: onMenu ? () async {
-                        await Provider.of<AppProvider>(context, listen: false).removeFromMenu(recipe);
+                        await Provider.of<AppProvider>(context, listen: false).removeFromMenu(recipe.id);
                       } : () async {
                         await Provider.of<AppProvider>(context, listen: false).addToMenu(recipe);
                       },);

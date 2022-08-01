@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:spork/components/recipe_card.dart';
+import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/theme.dart';
 import 'package:provider/provider.dart';
@@ -12,9 +12,9 @@ class RecipesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool checkIngredients(var recipe) {
+    bool checkIngredients(Recipe recipe) {
       bool value = false;
-      for (String ingredient in recipe['ingredients']) {
+      for (String ingredient in recipe.ingredients) {
         if (ingredient.toLowerCase().contains(query.toLowerCase())) {
           value = true;
         }
@@ -22,20 +22,20 @@ class RecipesList extends StatelessWidget {
       return value;
     }
 
-    return StreamBuilder<QuerySnapshot>(
+    return StreamBuilder<List<Recipe>>(
       stream: Provider.of<AppProvider>(context, listen: false).recipeStream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final recipes = snapshot.data?.docs;
+          final recipes = snapshot.data;
           List<RecipeCard> main = [];
           List<RecipeCard> side = [];
           List<RecipeCard> dessert = [];
           bool display = false;
 
           for (var recipe in recipes!) {
-            if (recipe['name'].toString().toLowerCase().contains(query.toLowerCase())) {
+            if (recipe.name.toLowerCase().contains(query.toLowerCase())) {
               display = true;
-            } else if (recipe['class'].toString().toLowerCase().contains(query.toLowerCase())){
+            } else if (recipe.className.toLowerCase().contains(query.toLowerCase())){
               display = true;
             } else if (checkIngredients(recipe)){
               display = true;
@@ -44,9 +44,9 @@ class RecipesList extends StatelessWidget {
             }
 
             if (display) {
-              if (recipe['class'] == 'Dessert') {
+              if (recipe.className == 'Dessert') {
                 dessert.add(RecipeCard(recipe));
-              } else if (recipe['class'] == 'Side') {
+              } else if (recipe.className == 'Side') {
                 side.add(RecipeCard(recipe));
               } else {
                 main.add(RecipeCard(recipe));

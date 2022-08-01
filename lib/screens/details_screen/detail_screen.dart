@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/screens/create_recipe.dart';
 import 'package:spork/screens/details_screen/ingredients.dart';
@@ -14,7 +15,7 @@ final _firestore = FirebaseFirestore.instance;
 
 class DetailScreen extends StatefulWidget {
   const DetailScreen({required this.recipe, Key? key}) : super(key: key);
-  final QueryDocumentSnapshot recipe;
+  final Recipe recipe;
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();
@@ -26,13 +27,13 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String name = widget.recipe['name'];
-    String className = widget.recipe['class'];
-    String cookTime = widget.recipe['cookTime'];
-    String prepTime = widget.recipe['prepTime'];
-    List<dynamic> ingredients = widget.recipe['ingredients'];
-    List<dynamic> amounts = widget.recipe['ingredient_amounts'];
-    List<dynamic> instructions = widget.recipe['instructions'];
+    // String name = widget.recipe['name'];
+    // String className = widget.recipe['class'];
+    // String cookTime = widget.recipe['cookTime'];
+    // String prepTime = widget.recipe['prepTime'];
+    // List<dynamic> ingredients = widget.recipe['ingredients'];
+    // List<dynamic> amounts = widget.recipe['ingredient_amounts'];
+    // List<dynamic> instructions = widget.recipe['instructions'];
 
     String getTotalTime(String cookTime, String prepTime) {
       int hours = int.parse(cookTime.substring(
@@ -58,13 +59,13 @@ class _DetailScreenState extends State<DetailScreen> {
     }
 
     Icon getIcon() {
-      if (className == 'Side') {
+      if (widget.recipe.className == 'Side') {
         return const Icon(
           Icons.bakery_dining_outlined,
           color: CustomColors.grey4,
           size: 30,
         );
-      } else if (className == 'Dessert') {
+      } else if (widget.recipe.className == 'Dessert') {
         return const Icon(
           Icons.icecream_outlined,
           color: CustomColors.grey4,
@@ -136,7 +137,7 @@ class _DetailScreenState extends State<DetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              className == 'Dessert' ? className : '$className Dish',
+              widget.recipe.className == 'Dessert' ? widget.recipe.className : '${widget.recipe.className} Dish',
               style: const TextStyle(
                   fontWeight: FontWeight.w400,
                   fontSize: CustomFontSize.primary,
@@ -146,7 +147,7 @@ class _DetailScreenState extends State<DetailScreen> {
               height: 3,
             ),
             Text(
-              "Total Time: ${getTotalTime(cookTime, prepTime)}",
+              "Total Time: ${getTotalTime(widget.recipe.cookTime, widget.recipe.prepTime)}",
               style: const TextStyle(
                   fontWeight: FontWeight.w400,
                   fontSize: CustomFontSize.primary,
@@ -156,7 +157,7 @@ class _DetailScreenState extends State<DetailScreen> {
               height: 3,
             ),
             Text(
-              "Prep Time: $prepTime",
+              "Prep Time: ${widget.recipe.prepTime}",
               style: const TextStyle(
                   fontWeight: FontWeight.w400,
                   fontSize: CustomFontSize.secondary,
@@ -166,7 +167,7 @@ class _DetailScreenState extends State<DetailScreen> {
               height: 3,
             ),
             Text(
-              "Cook Time: $cookTime",
+              "Cook Time: ${widget.recipe.cookTime}",
               style: const TextStyle(
                   fontWeight: FontWeight.w400,
                   fontSize: CustomFontSize.secondary,
@@ -203,7 +204,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 backgroundColor: CustomColors.primary,
                 child: Icon(onMenu ? Icons.remove_rounded : Icons.add_rounded, color: CustomColors.white,),
                 onPressed: onMenu ? () async {
-                  await Provider.of<AppProvider>(context, listen: false).removeFromMenu(widget.recipe);
+                  await Provider.of<AppProvider>(context, listen: false).removeFromMenu(widget.recipe.id);
                 } : () async {
             await Provider.of<AppProvider>(context, listen: false).addToMenu(widget.recipe);
             }
@@ -248,7 +249,7 @@ class _DetailScreenState extends State<DetailScreen> {
                     const SizedBox(width: 10,),
                     Flexible(
                       child: Text(
-                        name,
+                        widget.recipe.name,
                         softWrap: true,
                         style: const TextStyle(
                             fontWeight: FontWeight.w700,
@@ -296,7 +297,7 @@ class _DetailScreenState extends State<DetailScreen> {
                         );
                       },
                       body: ListTile(
-                        title: Ingredients(ingredients, amounts),
+                        title: Ingredients(widget.recipe.ingredients, widget.recipe.ingredientAmounts),
                       ),
                       isExpanded: _expanded,
                       canTapOnHeader: true,
@@ -345,7 +346,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                 ),
                               ),
                             ),
-                            Instructions(instructions),
+                            Instructions(widget.recipe.instructions),
                           ],
                         ),
                       ),

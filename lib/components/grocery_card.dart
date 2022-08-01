@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/theme.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
 class GroceryCard extends StatelessWidget {
   const GroceryCard(this.item, {Key? key}) : super(key: key);
-  final QueryDocumentSnapshot item;
+  final Grocery item;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class GroceryCard extends StatelessWidget {
                   children: [
                     Checkbox(
                       activeColor: CustomColors.primary,
-                      value: item['mark'],
+                      value: item.mark,
                       onChanged: (value) async {
                         await Provider.of<AppProvider>(context, listen: false).markGroceryItem(value!, item.id);
                       },
@@ -46,10 +46,10 @@ class GroceryCard extends StatelessWidget {
                     ),
                     Flexible(
                       child: Text(
-                        item['name'],
+                        item.name,
                         softWrap: true,
                         style: TextStyle(
-                          decoration: item['mark'] ? TextDecoration.lineThrough : null,
+                          decoration: item.mark ? TextDecoration.lineThrough : null,
                             color: CustomColors.black,
                             fontSize: CustomFontSize.primary),
                       ),
@@ -57,21 +57,21 @@ class GroceryCard extends StatelessWidget {
                   ],
                 ),
               ),
-              if (item['recipeItem'])
+              if (item.recipeId != '')
               Padding(
                 padding: const EdgeInsets.only(left: 60),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item['amount'],
+                      item.amount,
                       style: const TextStyle(
                           color: CustomColors.grey4,
                           fontSize: CustomFontSize.secondary,
                           fontWeight: FontWeight.w400),
                     ),
                     Text(
-                      item['recipeName'],
+                      item.recipeName,
                       style: const TextStyle(
                           color: CustomColors.grey4,
                           fontSize: CustomFontSize.secondary,
@@ -80,7 +80,7 @@ class GroceryCard extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: item['recipeItem'] ? 15 : 5,)
+              SizedBox(height: item.recipeId != '' ? 15 : 5,)
             ],
           ),
         ),
