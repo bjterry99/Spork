@@ -90,7 +90,7 @@ class _MyNavBarState extends State<MyNavBar> {
                   topRight: Radius.circular(20), topLeft: Radius.circular(20)),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black38, spreadRadius: 0, blurRadius: 10),
+                    color: Colors.black38, spreadRadius: 0, blurRadius: 1.5),
               ],
             ),
             child: ClipRRect(
@@ -99,7 +99,7 @@ class _MyNavBarState extends State<MyNavBar> {
                 topRight: Radius.circular(20.0),
               ),
               child: BottomNavigationBar(
-                elevation: 6,
+                elevation: 1,
                 onTap: onTappedBar,
                 currentIndex: _currentIndex,
                 selectedItemColor: CustomColors.white,

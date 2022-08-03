@@ -27,14 +27,6 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // String name = widget.recipe['name'];
-    // String className = widget.recipe['class'];
-    // String cookTime = widget.recipe['cookTime'];
-    // String prepTime = widget.recipe['prepTime'];
-    // List<dynamic> ingredients = widget.recipe['ingredients'];
-    // List<dynamic> amounts = widget.recipe['ingredient_amounts'];
-    // List<dynamic> instructions = widget.recipe['instructions'];
-
     String getTotalTime(String cookTime, String prepTime) {
       int hours = int.parse(cookTime.substring(
           0, cookTime.indexOf(':')));
@@ -183,7 +175,7 @@ class _DetailScreenState extends State<DetailScreen> {
             bottom: Radius.circular(20),
           ),
         ),
-        elevation: 6,
+        elevation: 1,
       ),
       floatingActionButton: isFabVisible
           ? StreamBuilder<QuerySnapshot>(
@@ -201,6 +193,7 @@ class _DetailScreenState extends State<DetailScreen> {
             return Padding(
               padding: const EdgeInsets.all(15.0),
               child: FloatingActionButton(
+                elevation: 1,
                 backgroundColor: CustomColors.primary,
                 child: Icon(onMenu ? Icons.remove_rounded : Icons.add_rounded, color: CustomColors.white,),
                 onPressed: onMenu ? () async {
@@ -270,10 +263,10 @@ class _DetailScreenState extends State<DetailScreen> {
                       backgroundColor: Colors.transparent,
                       headerBuilder: (context, isExpanded) {
                         return Card(
-                          elevation: 3,
+                          elevation: 1,
                           color: CustomColors.white,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
+                              borderRadius: BorderRadius.circular(20)),
                           child: ListTile(
                             title: Row(
                               children: const [

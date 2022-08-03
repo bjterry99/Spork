@@ -12,8 +12,8 @@ class GroceryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(
-        left: 10.0,
-        right: 10,
+        left: 0,
+        right: 0,
         bottom: 5,
       ),
       child: Dismissible(
@@ -22,10 +22,10 @@ class GroceryCard extends StatelessWidget {
         },
         key: Key(item.id),
         child: Card(
-          elevation: 2,
+          elevation: 1,
           color: CustomColors.white,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

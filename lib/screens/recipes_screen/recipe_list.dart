@@ -61,8 +61,8 @@ class RecipesList extends StatelessWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     padding: EdgeInsets.only(
-                      right: 8,
-                      left: 8,
+                      right: 15,
+                      left: 15,
                       top: main.isEmpty ? 15 : 0,
                     ),
                     children: main,
@@ -80,8 +80,8 @@ class RecipesList extends StatelessWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     padding: EdgeInsets.only(
-                      right: 8,
-                      left: 8,
+                      right: 15,
+                      left: 15,
                       top: side.isEmpty ? 15 : 0,
                     ),
                     children: side,
@@ -99,8 +99,8 @@ class RecipesList extends StatelessWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     padding: EdgeInsets.only(
-                      right: 8,
-                      left: 8,
+                      right: 15,
+                      left: 15,
                       top: dessert.isEmpty ? 15 : 0,
                     ),
                     children: dessert,

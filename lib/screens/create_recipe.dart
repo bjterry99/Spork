@@ -291,7 +291,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
               bottom: Radius.circular(20),
             ),
           ),
-          elevation: 6,
+          elevation: 1,
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -552,9 +552,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
                           }
                         },
                         child: Material(
-                          elevation: 4,
+                          elevation: 1,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(40)),
+                              borderRadius: BorderRadius.circular(30)),
                           child: const Padding(
                             padding: EdgeInsets.all(5),
                             child: Icon(
@@ -575,9 +575,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
                           });
                         },
                         child: Material(
-                          elevation: 4,
+                          elevation: 1,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(40)),
+                              borderRadius: BorderRadius.circular(30)),
                           child: const Padding(
                             padding: EdgeInsets.all(5),
                             child: Icon(
@@ -634,9 +634,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
                           }
                         },
                         child: Material(
-                          elevation: 4,
+                          elevation: 1,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(40)),
+                              borderRadius: BorderRadius.circular(30)),
                           child: const Padding(
                             padding: EdgeInsets.all(5),
                             child: Icon(
@@ -656,9 +656,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
                           });
                         },
                         child: Material(
-                          elevation: 4,
+                          elevation: 1,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(40)),
+                              borderRadius: BorderRadius.circular(30)),
                           child: const Padding(
                             padding: EdgeInsets.all(5),
                             child: Icon(
@@ -688,11 +688,11 @@ class _CreateRecipeState extends State<CreateRecipe> {
                           Navigator.pop(context);
                         },
                         child: Material(
-                          elevation: 4,
+                          elevation: 1,
                           color: CustomColors.grey2,
                           shape: RoundedRectangleBorder(
                               side: const BorderSide(color: CustomColors.grey4, width: 2),
-                              borderRadius: BorderRadius.circular(40)),
+                              borderRadius: BorderRadius.circular(25)),
                           child: const Padding(
                             padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                             child: Text(
@@ -709,10 +709,10 @@ class _CreateRecipeState extends State<CreateRecipe> {
                       GestureDetector(
                         onTap: submit,
                         child: Material(
-                          elevation: 4,
+                          elevation: 1,
                           color: CustomColors.primary,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(40)),
+                              borderRadius: BorderRadius.circular(25)),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                             child: Row(

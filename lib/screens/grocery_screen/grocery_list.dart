@@ -51,10 +51,10 @@ class GroceryList extends StatelessWidget {
                 ListView(
                   physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
-                  padding: const EdgeInsets.only(
-                    right: 8,
-                    left: 8,
-                    top: 15,
+                  padding: EdgeInsets.only(
+                    right: 15,
+                    left: 15,
+                    top: unmarked.isEmpty ? 15 : 0,
                   ),
                   children: unmarked,
                 ),
@@ -70,9 +70,9 @@ class GroceryList extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   padding: EdgeInsets.only(
-                    right: 8,
-                    left: 8,
-                    top: unmarked.isEmpty ? 15 : 0,
+                    right: 15,
+                    left: 15,
+                    top: marked.isEmpty ? 15 : 0,
                   ),
                   children: marked,
                 ),

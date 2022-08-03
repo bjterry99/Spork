@@ -40,6 +40,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
             ? Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: FloatingActionButton(
+                  elevation: 1,
                   backgroundColor: CustomColors.primary,
                   child: const Icon(
                     Icons.add_rounded,
@@ -67,7 +68,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                   child: Material(
                     color: CustomColors.white,
                     borderRadius: BorderRadius.circular(30.0),
-                    elevation: 6,
+                    elevation: 1,
                     child: Padding(
                       padding: const EdgeInsets.only(
                         left: 10,

@@ -65,6 +65,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
             ? Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: FloatingActionButton(
+                  elevation: 1,
                   backgroundColor: CustomColors.primary,
                   child: const Icon(
                     Icons.add_rounded,
@@ -94,7 +95,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                         child: Material(
                           color: CustomColors.white,
                           borderRadius: BorderRadius.circular(30.0),
-                          elevation: 6,
+                          elevation: 1,
                           child: Padding(
                             padding: const EdgeInsets.only(
                               left: 10,
@@ -164,63 +165,73 @@ class _GroceryScreenState extends State<GroceryScreen> {
               ),
             ),
             if (isInputVisible)
-              Material(
-                color: CustomColors.white,
-                elevation: 3,
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(15),
-                  topLeft: Radius.circular(15),
+              Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(15), topLeft: Radius.circular(15)),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black38, spreadRadius: 0, blurRadius: 1),
+                  ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          autofocus: true,
-                          controller: controller,
-                          keyboardType: TextInputType.multiline,
-                          textInputAction: TextInputAction.done,
-                          maxLines: null,
-                          decoration: const InputDecoration(
-                            hintText: 'add item...',
-                            focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                              color: Colors.transparent,
-                            )),
-                            enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                              color: Colors.transparent,
-                            )),
+                child: Material(
+                  color: CustomColors.white,
+                  elevation: 1,
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(15),
+                    topLeft: Radius.circular(15),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            autofocus: true,
+                            controller: controller,
+                            keyboardType: TextInputType.multiline,
+                            textInputAction: TextInputAction.done,
+                            maxLines: null,
+                            decoration: const InputDecoration(
+                              hintText: 'add item...',
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                color: Colors.transparent,
+                              )),
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                color: Colors.transparent,
+                              )),
+                            ),
+                            style: const TextStyle(
+                              fontSize: CustomFontSize.primary,
+                            ),
+                            onChanged: (value) {
+                              if (value.isNotEmpty) {
+                                setState(() {
+                                  canSave = true;
+                                });
+                              } else {
+                                setState(() {
+                                  canSave = false;
+                                });
+                              }
+                            },
+                            onEditingComplete: () {
+                              saveItem();
+                            },
                           ),
-                          style: const TextStyle(
-                            fontSize: CustomFontSize.primary,
+                        ),
+                        if (canSave)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 7),
+                            child: MyTextButton(text: 'Save', action: (){
+                              saveItem();
+                            }),
                           ),
-                          onChanged: (value) {
-                            if (value.isNotEmpty) {
-                              setState(() {
-                                canSave = true;
-                              });
-                            } else {
-                              setState(() {
-                                canSave = false;
-                              });
-                            }
-                          },
-                          onEditingComplete: () {
-                            saveItem();
-                          },
-                        ),
-                      ),
-                      if (canSave)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 7),
-                          child: MyTextButton(text: 'Save', action: (){
-                            saveItem();
-                          }),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
