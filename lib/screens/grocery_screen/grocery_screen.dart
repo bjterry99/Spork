@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/screens/grocery_screen/grocery_list.dart';
-import 'package:spork/components/my_text_button.dart';
+import 'package:spork/components/buttons/my_text_button.dart';
 import 'package:spork/theme.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:provider/provider.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 ThemeData theme = ThemeData.light().copyWith(
-  splashColor: CustomColors.primary,
+  splashColor: CustomColors.secondary,
   colorScheme: const ColorScheme.light(
     primary: CustomColors.primary,
     secondary: CustomColors.primary,
@@ -16,6 +16,7 @@ ThemeData theme = ThemeData.light().copyWith(
 
 class CustomColors {
   static const primary = Color.fromRGBO(255,56,56, 1.0);
+  static const secondary = Color.fromRGBO(255,85,85, 1);
   static const white = Color.fromRGBO(250, 250, 250, 1);
   static const grey1 = Color(0xfff6f6f6);
   static const grey2 = Color(0xffe8e8e8);

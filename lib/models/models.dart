@@ -51,3 +51,21 @@ class Grocery {
   factory Grocery.fromJson(Map<String, dynamic> json) => _$GroceryFromJson(json);
   Map<String, dynamic> toJson() => _$GroceryToJson(this);
 }
+
+@JsonSerializable()
+class AppUser {
+  String id;
+  String name;
+  String userName;
+  String photoUrl;
+
+  AppUser({
+    required this.id,
+    required this.name,
+    required this.userName,
+    this.photoUrl = '',
+  });
+
+  factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
+  Map<String, dynamic> toJson() => _$AppUserToJson(this);
+}

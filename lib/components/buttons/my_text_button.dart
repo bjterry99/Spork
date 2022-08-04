@@ -9,7 +9,7 @@ class MyTextButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      child: Text(text.toUpperCase(), style: const TextStyle(fontSize: CustomFontSize.secondary),),
+      child: Text(text.toUpperCase(), style: const TextStyle(fontSize: CustomFontSize.secondary, color: CustomColors.secondary, fontWeight: FontWeight.w500),),
       onPressed: () async {
         await action();
       },

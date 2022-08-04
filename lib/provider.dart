@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:spork/models/models.dart';
@@ -7,6 +8,7 @@ import 'package:spork/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 final _firestore = FirebaseFirestore.instance;
+final _auth = FirebaseAuth.instance;
 
 class AppProvider extends ChangeNotifier {
 
@@ -61,6 +63,11 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Functions ///
+
+  Future<void> createAccount(String email, String password) async {
+    final newUser = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+    NotificationService.notify('Created User');
+  }
 
   Future<void> addToMenu(Recipe recipe) async {
     NotificationService.notify('Adding to menu...');

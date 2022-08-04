@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:spork/components/my_text_button.dart';
+import 'package:spork/components/buttons/my_text_button.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/screens/details_screen/detail_screen.dart';
