@@ -1,9 +1,9 @@
 import 'dart:io';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:spork/components/buttons/ghost_button.dart';
 import 'package:spork/components/buttons/primary_button.dart';
+import 'package:spork/home.dart';
+import 'package:spork/notification_service.dart';
 import 'package:spork/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:spork/screens/sign_in/register.dart';
@@ -18,11 +18,41 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
-  String email = '';
-  String password = '';
+  String phone = '';
+  TextEditingController codeController = TextEditingController();
+  bool enterCode = false;
+  String verificationId = '';
+
+  @override
+  void dispose() {
+    codeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    void updateItems(verify) {
+      NotificationService.notify('Verification code sent.');
+      setState(() {
+        verificationId = verify;
+        enterCode = true;
+      });
+    }
+
+    Future<void> submit() async {
+      await Provider.of<AppProvider>(context, listen: false)
+          .verifyPhoneNumber(phone, updateItems);
+    }
+
+    Future<void> verify() async {
+      bool verify = await Provider.of<AppProvider>(context, listen: false)
+          .sync(null, verificationId, codeController.text);
+
+      if (verify) {
+        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const Home()), (Route<dynamic> route) => false);
+      }
+    }
+
     return Scaffold(
       appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
       body: SafeArea(
@@ -51,8 +81,10 @@ class _SignInState extends State<SignIn> {
                   ),
                 ),
                 const SizedBox(height: 40,),
-                TextFormField(
-                  keyboardType: TextInputType.emailAddress,
+                !enterCode
+                    ? TextFormField(
+                  maxLength: 10,
+                  keyboardType: TextInputType.phone,
                   style: const TextStyle(
                       color: CustomColors.black,
                       fontWeight: FontWeight.w400,
@@ -60,41 +92,40 @@ class _SignInState extends State<SignIn> {
                   cursorColor: CustomColors.primary,
                   onChanged: (String? newValue) {
                     setState(() {
-                      email = newValue!;
+                      phone = '+1$newValue';
                     });
                   },
                   decoration: const InputDecoration(
-                      labelText: 'email address',
-                      border: InputBorder.none,
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: CustomColors.grey3),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: CustomColors.grey3),
-                      ),),
-                ),
-                TextFormField(
-                  obscureText: true,
-                  keyboardType: TextInputType.text,
-                  style: const TextStyle(
-                      color: CustomColors.black,
-                      fontWeight: FontWeight.w400,
-                      fontSize: CustomFontSize.primary),
-                  cursorColor: CustomColors.primary,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      password = newValue!;
-                    });
-                  },
-                  decoration: const InputDecoration(
-                    labelText: 'password',
+                    prefixText: '+1',
+                    labelText: '(###) ###-####',
                     border: InputBorder.none,
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: CustomColors.grey3),
                     ),
                     focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: CustomColors.grey3),
-                    ),),
+                    ),
+                  ),
+                )
+                    : TextFormField(
+                  maxLength: 6,
+                  controller: codeController,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(
+                      color: CustomColors.black,
+                      fontWeight: FontWeight.w400,
+                      fontSize: CustomFontSize.primary),
+                  cursorColor: CustomColors.primary,
+                  decoration: const InputDecoration(
+                    labelText: 'enter code',
+                    border: InputBorder.none,
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: CustomColors.grey3),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: CustomColors.grey3),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20,),
                 Padding(
@@ -114,10 +145,16 @@ class _SignInState extends State<SignIn> {
                         }
                       }),
                       const Spacer(),
-                      PrimaryButton(
-                        text: 'Login',
-                        action: (){},
-                        isActive: (email.isNotEmpty && password.isNotEmpty),
+                      !enterCode
+                          ? PrimaryButton(
+                        text: 'login',
+                        action: submit,
+                        isActive: (phone.length == 12),
+                      )
+                          : PrimaryButton(
+                        text: 'Verify',
+                        action: verify,
+                        isActive: (codeController.text.length == 6),
                       )
                     ],
                   ),

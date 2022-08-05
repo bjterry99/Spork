@@ -57,13 +57,17 @@ class AppUser {
   String id;
   String name;
   String userName;
+  String phone;
   String photoUrl;
+  List<String> followers;
 
   AppUser({
     required this.id,
     required this.name,
     required this.userName,
+    required this.phone,
     this.photoUrl = '',
+    this.followers = const <String>[],
   });
 
   factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);

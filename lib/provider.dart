@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,9 @@ final _firestore = FirebaseFirestore.instance;
 final _auth = FirebaseAuth.instance;
 
 class AppProvider extends ChangeNotifier {
+  AppProvider() {
+    _subscribeStreams();
+  }
 
   /// Widgets ///
 
@@ -37,21 +41,30 @@ class AppProvider extends ChangeNotifier {
 
   /// Streams ///
 
-  // Stream<QuerySnapshot<Object?>> recipeStream = _firestore.collection('recipes').snapshots();
+  final List<StreamSubscription> _subscriptions = [];
+  void subscribe(StreamSubscription subscription) => _subscriptions.add(subscription);
+
+  var fireUser = _auth.currentUser;
+
+  void _subscribeStreams() {
+    // Firebase User Stream
+    subscribe(_auth.authStateChanges().listen((data) {
+      fireUser = data;
+      notifyListeners();
+    }, onError: (error) {
+      NotificationService.notify("Failed to get authentication data.");
+    }));
+  }
 
   Stream<List<Recipe>> recipeStream = _firestore.collection('recipes').snapshots()
       .map((snapshot) => snapshot.docs
       .map((doc) => Recipe.fromJson(doc.data()))
       .toList());
 
-  // Stream<QuerySnapshot<Object?>> menuStream = _firestore.collection('menu').snapshots();
-
   Stream<List<Recipe>> menuStream = _firestore.collection('menu').snapshots()
       .map((snapshot) => snapshot.docs
       .map((doc) => Recipe.fromJson(doc.data()))
       .toList());
-
-  // Stream<QuerySnapshot<Object?>> groceryStream = _firestore.collection('grocery').snapshots();
 
   Stream<List<Grocery>> groceryStream = _firestore.collection('grocery').snapshots()
       .map((snapshot) => snapshot.docs
@@ -64,10 +77,106 @@ class AppProvider extends ChangeNotifier {
 
   /// Functions ///
 
-  Future<void> createAccount(String email, String password) async {
-    final newUser = await _auth.createUserWithEmailAndPassword(email: email, password: password);
-    NotificationService.notify('Created User');
+  // User Stuff //
+
+  Future<void> signOut() async {
+    await _auth.signOut();
   }
+
+  Future<void> createAccount(AppUser appUser) async {
+    try {
+      var userRef = _firestore.collection('users').doc();
+      appUser.id = userRef.id;
+      await userRef.set(appUser.toJson());
+
+      NotificationService.notify('Created User');
+    } catch (error) {
+      NotificationService.notify('Failed to create User.');
+    }
+  }
+
+  Future<bool> userNameExists(String userName) async {
+    try {
+      final query = await _firestore.collection('users').where('userName', isEqualTo: userName).limit(1).get();
+      if (query.docs.isNotEmpty) return true;
+    } catch (error) {
+      NotificationService.notify('Failed to find userName.');
+    }
+    return false;
+  }
+
+  Future<bool> sync(PhoneAuthCredential? credential, String? verifyId, String? code) async {
+    try {
+      bool check = true;
+      PhoneAuthCredential myCredential = credential ?? PhoneAuthProvider.credential(verificationId: verifyId!, smsCode: code!);
+
+      _auth.signInWithCredential(myCredential).then((value) async {
+        NotificationService.notify("Phone number verified.");
+      }).catchError((error) async {
+        if (error.toString() ==
+            '[firebase_auth/credential-already-in-use] This credential is already associated with a different user account.') {
+          NotificationService.notify("This phone number is already associated with a different account.");
+          check = false;
+        } else if (error.toString() ==
+            '[firebase_auth/invalid-verification-code] The sms verification code used to create the phone auth credential is invalid. Please resend the verification code sms and be sure use the verification code provided by the user.') {
+          NotificationService.notify(
+              "Verification code is incorrect.");
+          check = false;
+        } else if (error.toString() ==
+            '[firebase_auth/unknown] com.google.firebase.FirebaseException: User has already been linked to the given provider.') {
+          NotificationService.notify("Phone number verified.");
+        } else if (error.toString() ==
+            '[ERROR_PROVIDER_ALREADY_LINKED] - User can only be linked to one identity for the given provider.') {
+          NotificationService.notify("Phone number verified.");
+        } else if (error.toString() ==
+            '[firebase_auth/unknown] d5.j: User has already been linked to the given provider.') {
+          NotificationService.notify("Phone number verified.");
+        } else if (error.toString() ==
+            '[ERROR_PROVIDER_ALREADY_LINKED] - User can only be linked to one identity for the given provider.') {
+          NotificationService.notify("Phone number verified.");
+        } else {
+          NotificationService.notify(error.toString());
+          check = false;
+        }
+      });
+      return check;
+    } catch (error) {
+      NotificationService.notify('Failed to verify phone number');
+      return false;
+    }
+  }
+
+  Future<void> verifyPhoneNumber(String number, Function updateItems) async {
+    try {
+      NotificationService.notify('Sending verification code...');
+
+      await _auth.verifyPhoneNumber(
+        phoneNumber: number,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          await sync(credential, null, null);
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          if (e.code == 'invalid-phone-number') {
+            NotificationService.notify("Invalid phone number. Please try again.");
+          } else if (e.code == 'phone-number-already-in-use') {
+            NotificationService.notify("Phone number already in use. Please try a different number.");
+          } else if (e.code == 'too-many-requests') {
+            NotificationService.notify("Servers are full. Please try again later.");
+          } else {
+            NotificationService.notify("Error encountered. Please try again.");
+          }
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          updateItems(verificationId);
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {},
+      );
+    } catch (error) {
+      NotificationService.notify('Failed to verify phone number');
+    }
+  }
+
+  // User Stuff //
 
   Future<void> addToMenu(Recipe recipe) async {
     NotificationService.notify('Adding to menu...');
@@ -166,16 +275,6 @@ class AppProvider extends ChangeNotifier {
       ingredientAmounts: recipeAmounts,
       ingredients: recipeIngredients,
       instructions: recipeInstructions);
-      // await recipeRef.set({
-      //   "id": recipeRef.id,
-      //   "name": recipeName,
-      //   "class": recipeClass,
-      //   "cookTime": cookTime,
-      //   "prepTime": prepTime,
-      //   "ingredient_amounts": recipeAmounts,
-      //   "ingredients": recipeIngredients,
-      //   "instructions": recipeInstructions,
-      // });
       await recipeRef.set(recipe.toJson());
 
       NotificationService.notify('Recipe created.');

@@ -59,12 +59,19 @@ AppUser _$AppUserFromJson(Map<String, dynamic> json) => AppUser(
       id: json['id'] as String,
       name: json['name'] as String,
       userName: json['userName'] as String,
+      phone: json['phone'] as String,
       photoUrl: json['photoUrl'] as String? ?? '',
+      followers: (json['followers'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
     );
 
 Map<String, dynamic> _$AppUserToJson(AppUser instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'userName': instance.userName,
+      'phone': instance.phone,
       'photoUrl': instance.photoUrl,
+      'followers': instance.followers,
     };
