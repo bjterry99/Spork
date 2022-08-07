@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:spork/components/search_bar.dart';
 
-class DelegateProfile extends SliverPersistentHeaderDelegate {
+class DelegateDiscover extends SliverPersistentHeaderDelegate {
   final Function search;
 
-  DelegateProfile(this.search);
+  DelegateDiscover(this.search);
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {

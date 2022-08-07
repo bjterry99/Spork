@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spork/components/profile_image.dart';
 import 'package:spork/models/models.dart';
+import 'package:spork/screens/create_recipe.dart';
+import 'package:spork/screens/discover/discover_page.dart';
 import 'package:spork/screens/profile_screen/profile.dart';
 import 'package:spork/theme.dart';
 import 'package:provider/provider.dart';
@@ -17,11 +19,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int _currentIndex = 0;
   final PageController controller = PageController(initialPage: 0);
-
-  final List<Widget> _children = [
-    const ProfileScreen(),
-    const GroceryScreen(),
-  ];
+  bool isFabVisible = true;
+  bool isInputVisible = false;
 
   void onTappedBar(int index) {
     controller.animateToPage(
@@ -40,12 +39,76 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void toggleButtonOn() {
+    setState(() {
+      isFabVisible = true;
+    });
+  }
+
+  void toggleButtonOff() {
+    setState(() {
+      isFabVisible = false;
+    });
+  }
+
+  void toggleInputOn() {
+    setState(() {
+      isFabVisible = true;
+    });
+  }
+
+  void toggleInputOff() {
+    setState(() {
+      isFabVisible = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppProvider>(context).user;
 
+    final List<Widget> _children = [
+      ProfileScreen(
+        buttonOff: toggleButtonOff,
+        buttonOn: toggleButtonOn,
+      ),
+      GroceryScreen(
+        buttonOn: toggleButtonOn,
+        buttonOff: toggleButtonOff,
+      ),
+      DiscoverPage(buttonOn: toggleButtonOn, buttonOff: toggleButtonOff),
+    ];
+
+    void buttonAction() {
+      if (_currentIndex == 1) {
+
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const CreateRecipe(),
+          ),
+        );
+      }
+    }
+
     return Scaffold(
-        appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
+        appBar: Provider.of<AppProvider>(context, listen: false)
+            .getZeroAppBar(CustomColors.white),
+        floatingActionButton: isFabVisible
+            ? Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: FloatingActionButton(
+                  elevation: 1,
+                  backgroundColor: CustomColors.primary,
+                  child: const Icon(
+                    Icons.add_rounded,
+                    color: CustomColors.white,
+                  ),
+                  onPressed: buttonAction,
+                ),
+              )
+            : null,
         body: SafeArea(
           child: PageView(
             controller: controller,
@@ -75,16 +138,16 @@ class _HomeState extends State<Home> {
                 backgroundColor: CustomColors.primary,
                 items: [
                   BottomNavigationBarItem(
-                    icon: Padding(
-                      padding: const EdgeInsets.only(bottom: 3),
-                      child: ProfileImage(user.photoUrl, 25, 20),
-                    ),
-                    label: user.name
-                  ),
+                      icon: Padding(
+                        padding: const EdgeInsets.only(bottom: 3),
+                        child: ProfileImage(user.photoUrl, 25, 20),
+                      ),
+                      label: user.name),
                   const BottomNavigationBarItem(
-                    icon: Icon(Icons.shopping_cart_rounded),
-                    label: 'Grocery'
-                  ),
+                      icon: Icon(Icons.shopping_cart_rounded),
+                      label: 'Grocery'),
+                  const BottomNavigationBarItem(
+                      icon: Icon(Icons.public), label: 'Discover'),
                 ],
               ),
             )));

@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
           scaffoldMessengerKey: NotificationService.key,
           debugShowCheckedModeBanner: false,
           theme: theme,
-          home: Provider.of<AppProvider>(context).fireUser == null ? const SignIn() : const Home(),
+          home: Provider.of<AppProvider>(context).user.id == '' ? const SignIn() : const Home(),
         );
       }),
     );

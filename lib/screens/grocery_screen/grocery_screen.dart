@@ -9,16 +9,18 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:provider/provider.dart';
 
 class GroceryScreen extends StatefulWidget {
-  const GroceryScreen({Key? key}) : super(key: key);
+  const GroceryScreen({required this.buttonOn, required this.buttonOff, required this.isInputVisible, Key? key}) : super(key: key);
+  final Function buttonOn;
+  final Function buttonOff;
+  final bool isInputVisible;
 
   @override
   State<GroceryScreen> createState() => _GroceryScreenState();
 }
 
 class _GroceryScreenState extends State<GroceryScreen> {
-  bool isFabVisible = true;
   String query = '';
-  bool isInputVisible = false;
+  // bool isInputVisible = false;
   bool canSave = false;
   TextEditingController controller = TextEditingController();
 
@@ -33,16 +35,14 @@ class _GroceryScreenState extends State<GroceryScreen> {
     super.initState();
     KeyboardVisibilityController().onChange.listen((isVisible) {
       if (!isVisible) {
+        widget.buttonOn();
         setState(() {
-          isInputVisible = false;
-          isFabVisible = true;
+          widget.isInputVisible = false;
           controller.clear();
           canSave = false;
         });
       } else {
-        setState(() {
-          isFabVisible = false;
-        });
+        widget.buttonOff();
       }
     });
   }
@@ -68,24 +68,24 @@ class _GroceryScreenState extends State<GroceryScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        floatingActionButton: isFabVisible
-            ? Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: FloatingActionButton(
-                  elevation: 1,
-                  backgroundColor: CustomColors.primary,
-                  child: const Icon(
-                    Icons.add_rounded,
-                    color: CustomColors.white,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      isInputVisible = true;
-                    });
-                  },
-                ),
-              )
-            : null,
+        // floatingActionButton: isFabVisible
+        //     ? Padding(
+        //         padding: const EdgeInsets.all(15.0),
+        //         child: FloatingActionButton(
+        //           elevation: 1,
+        //           backgroundColor: CustomColors.primary,
+        //           child: const Icon(
+        //             Icons.add_rounded,
+        //             color: CustomColors.white,
+        //           ),
+        //           onPressed: () {
+        //             setState(() {
+        //               isInputVisible = true;
+        //             });
+        //           },
+        //         ),
+        //       )
+        //     : null,
         body: Column(
           children: [
             Expanded(
@@ -124,13 +124,9 @@ class _GroceryScreenState extends State<GroceryScreen> {
                   child: NotificationListener<UserScrollNotification>(
                     onNotification: (not) {
                       if (not.direction == ScrollDirection.forward) {
-                        setState(() {
-                          isFabVisible = true;
-                        });
+                        widget.buttonOn();
                       } else if (not.direction == ScrollDirection.reverse) {
-                        setState(() {
-                          isFabVisible = false;
-                        });
+                        widget.buttonOff();
                       }
 
                       return true;
@@ -142,7 +138,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                 ),
               ),
             ),
-            if (isInputVisible)
+            if (widget.isInputVisible)
               Container(
                 decoration: const BoxDecoration(
                   borderRadius: BorderRadius.only(

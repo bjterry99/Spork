@@ -117,6 +117,27 @@ class AppProvider extends ChangeNotifier {
   Future<void> syncUser() async {
     var ref = await _firestore.collection('users').doc(fireUser!.uid).get();
     user = AppUser.fromJson(ref.data()!);
+    notifyListeners();
+  }
+
+  Future<bool> editProfile(AppUser appUser) async {
+    try {
+      bool userName = await userNameExists(appUser.userName);
+      if (!userName) {
+        NotificationService.notify('Updating account...');
+
+        var userRef = _firestore.collection('users').doc(appUser.id);
+        await userRef.set(appUser.toJson());
+
+        NotificationService.notify('Created User');
+        return true;
+      } else {
+        NotificationService.notify('Username taken.');
+      }
+    } catch (error) {
+      NotificationService.notify('Failed to create User.');
+    }
+    return false;
   }
 
   Future<void> createAccount(AppUser appUser) async {
