@@ -31,6 +31,7 @@ class CustomColors {
 class CustomFontSize {
   static const primary = 20.0;
   static const secondary = 15.0;
+  static const small = 10.0;
   static const large = 30.0;
   static const big = 25.0;
 }

@@ -14,6 +14,8 @@ class Recipe {
   List<String> ingredientAmounts;
   List<String> ingredients;
   List<String> instructions;
+  List<String> menuIds;
+  String creatorId;
 
   Recipe({
     required this.id,
@@ -24,6 +26,8 @@ class Recipe {
     this.ingredientAmounts = const <String>[],
     this.ingredients = const <String>[],
     this.instructions = const <String>[],
+    this.menuIds = const <String>[],
+    this.creatorId = '',
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) => _$RecipeFromJson(json);
@@ -38,6 +42,8 @@ class Grocery {
   bool mark;
   String recipeId;
   String recipeName;
+  String creatorId;
+  List<String> homeIds;
 
   Grocery({
     required this.id,
@@ -46,6 +52,8 @@ class Grocery {
     this.mark = false,
     this.recipeId = '',
     this.recipeName = '',
+    this.creatorId = '',
+    this.homeIds = const <String>[],
   });
 
   factory Grocery.fromJson(Map<String, dynamic> json) => _$GroceryFromJson(json);
@@ -60,6 +68,7 @@ class AppUser {
   String phone;
   String photoUrl;
   List<String> followers;
+  String homeId;
 
   AppUser({
     required this.id,
@@ -68,8 +77,25 @@ class AppUser {
     required this.phone,
     this.photoUrl = '',
     this.followers = const <String>[],
+    this.homeId = '',
   });
 
   factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
   Map<String, dynamic> toJson() => _$AppUserToJson(this);
+}
+
+@JsonSerializable()
+class MyHome {
+  String id;
+  String name;
+  List<String> users;
+
+  MyHome({
+    required this.id,
+    required this.name,
+    this.users = const <String>[],
+  });
+
+  factory MyHome.fromJson(Map<String, dynamic> json) => _$MyHomeFromJson(json);
+  Map<String, dynamic> toJson() => _$MyHomeToJson(this);
 }

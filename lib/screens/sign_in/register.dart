@@ -85,8 +85,7 @@ class _RegisterState extends State<Register> {
     }
 
     Future<void> verify() async {
-      bool verify = await Provider.of<AppProvider>(context, listen: false)
-          .sync(null, verificationId, codeController.text);
+      bool verify = await Provider.of<AppProvider>(context, listen: false).sync(null, verificationId, codeController.text);
       if (verify) {
         AppUser appUser = AppUser(
             id: '',
@@ -95,8 +94,8 @@ class _RegisterState extends State<Register> {
             phone: phone,
             followers: <String>[],
             photoUrl: '');
-        await Provider.of<AppProvider>(context, listen: false)
-            .createAccount(appUser);
+        await Provider.of<AppProvider>(context, listen: false).createAccount(appUser);
+        await Provider.of<AppProvider>(context, listen: false).syncUser();
 
         Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const Home()), (Route<dynamic> route) => false);
       }

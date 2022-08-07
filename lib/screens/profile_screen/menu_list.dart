@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:spork/components/recipe_card.dart';
+import 'package:spork/screens/profile_screen/recipe_card.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/theme.dart';
 import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
 
 class MenuList extends StatelessWidget {
-  const MenuList({Key? key}) : super(key: key);
+  const MenuList({required this.query, Key? key}) : super(key: key);
+  final String query;
 
   @override
   Widget build(BuildContext context) {
+    bool checkIngredients(Recipe recipe) {
+      bool value = false;
+      for (String ingredient in recipe.ingredients) {
+        if (ingredient.toLowerCase().contains(query.toLowerCase())) {
+          value = true;
+        }
+      }
+      return value;
+    }
+
     return StreamBuilder<List<Recipe>>(
       stream: Provider.of<AppProvider>(context, listen: false).menuStream,
       builder: (context, snapshot) {
@@ -19,14 +30,27 @@ class MenuList extends StatelessWidget {
           List<RecipeCard> main = [];
           List<RecipeCard> side = [];
           List<RecipeCard> dessert = [];
+          bool display = false;
 
           for (var recipe in recipes!) {
-            if (recipe.className == 'Dessert') {
-              dessert.add(RecipeCard(recipe));
-            } else if (recipe.className == 'Side') {
-              side.add(RecipeCard(recipe));
+            if (recipe.name.toLowerCase().contains(query.toLowerCase())) {
+              display = true;
+            } else if (recipe.className.toLowerCase().contains(query.toLowerCase())){
+              display = true;
+            } else if (checkIngredients(recipe)){
+              display = true;
             } else {
-              main.add(RecipeCard(recipe));
+              display = false;
+            }
+
+            if (display) {
+              if (recipe.className == 'Dessert') {
+                dessert.add(RecipeCard(recipe));
+              } else if (recipe.className == 'Side') {
+                side.add(RecipeCard(recipe));
+              } else {
+                main.add(RecipeCard(recipe));
+              }
             }
           }
           return SingleChildScrollView(

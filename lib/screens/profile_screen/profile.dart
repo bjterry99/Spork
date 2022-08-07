@@ -1,20 +1,27 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:spork/screens/create_recipe.dart';
-import 'package:spork/screens/recipes_screen/recipe_list.dart';
+import 'package:spork/screens/profile_screen/menu_list.dart';
+import 'package:spork/screens/profile_screen/profile_header.dart';
+import 'package:spork/screens/profile_screen/profile_search_bar.dart';
+import 'package:spork/screens/profile_screen/recipe_list.dart';
 import 'package:spork/theme.dart';
+import 'package:spork/provider.dart';
+import 'package:provider/provider.dart';
 
-class RecipesScreen extends StatefulWidget {
-  const RecipesScreen({Key? key}) : super(key: key);
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({Key? key}) : super(key: key);
 
   @override
-  State<RecipesScreen> createState() => _RecipesScreenState();
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _RecipesScreenState extends State<RecipesScreen> {
+class _ProfileScreenState extends State<ProfileScreen> {
   bool isFabVisible = true;
   String query = '';
+  bool isOnRecipe = true;
 
   @override
   void initState() {
@@ -32,10 +39,23 @@ class _RecipesScreenState extends State<RecipesScreen> {
     });
   }
 
+  void search(String text) {
+    setState(() {
+      query = text;
+    });
+  }
+
+  void change() {
+    setState(() {
+      isOnRecipe = !isOnRecipe;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
         floatingActionButton: isFabVisible
             ? Padding(
                 padding: const EdgeInsets.all(15.0),
@@ -63,46 +83,16 @@ class _RecipesScreenState extends State<RecipesScreen> {
             return <Widget>[
               SliverAppBar(
                 elevation: 0,
-                flexibleSpace: Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
-                  child: Material(
-                    color: CustomColors.white,
-                    borderRadius: BorderRadius.circular(30.0),
-                    elevation: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        left: 10,
-                        right: 10,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 5, right: 5),
-                        child: TextFormField(
-                          onChanged: (value) {
-                            setState(() {
-                              query = value;
-                            });
-                          },
-                          cursorColor: CustomColors.primary,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            icon: Icon(
-                              Icons.search_rounded,
-                            ),
-                            hintText: "I'm hungry for...",
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                flexibleSpace: ProfileHeader(change: change, isOnRecipe: isOnRecipe,),
                 floating: true,
-                toolbarHeight: 60,
-                snap: true,
+                toolbarHeight: 170,
+                snap: false,
                 backgroundColor: Colors.transparent,
+              ),
+              SliverPersistentHeader(
+                pinned: true,
+                floating: false,
+                delegate: Delegate(search),
               ),
             ];
           },
@@ -127,7 +117,17 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
                 return true;
               },
-              child: RecipesList(query: query),
+              child: PageTransitionSwitcher(
+                  reverse: isOnRecipe,
+                  transitionBuilder: (child, animation, secondaryAnimation) {
+                    return SharedAxisTransition(
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType: SharedAxisTransitionType.horizontal,
+                      child: child,
+                    );
+                  },
+                  child: isOnRecipe ? RecipesList(query: query) : MenuList(query: query,)),
             ),
           ),
         ),

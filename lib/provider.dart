@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/notification_service.dart';
 import 'package:spork/theme.dart';
@@ -13,6 +17,14 @@ final _auth = FirebaseAuth.instance;
 
 class AppProvider extends ChangeNotifier {
   AppProvider() {
+    user = AppUser(
+      id: _auth.currentUser?.uid ?? '',
+      name: '',
+      userName: '',
+      photoUrl: '',
+      phone: '',
+    );
+
     _subscribeStreams();
   }
 
@@ -45,6 +57,7 @@ class AppProvider extends ChangeNotifier {
   void subscribe(StreamSubscription subscription) => _subscriptions.add(subscription);
 
   var fireUser = _auth.currentUser;
+  late AppUser user;
 
   void _subscribeStreams() {
     // Firebase User Stream
@@ -54,6 +67,20 @@ class AppProvider extends ChangeNotifier {
     }, onError: (error) {
       NotificationService.notify("Failed to get authentication data.");
     }));
+
+    // User stream
+    if (fireUser != null) {
+      subscribe(_firestore.collection('users')
+          .doc(fireUser!.uid)
+          .snapshots()
+          .map((snapshot) => AppUser.fromJson(snapshot.data()!))
+          .listen((data) {
+        user = data;
+        notifyListeners();
+      }, onError: (error) {
+        NotificationService.notify("Failed to get user info.");
+      }));
+    }
   }
 
   Stream<List<Recipe>> recipeStream = _firestore.collection('recipes').snapshots()
@@ -75,6 +102,10 @@ class AppProvider extends ChangeNotifier {
     return _firestore.collection('menu').where('id', isEqualTo: id).snapshots();
   }
 
+  Stream<QuerySnapshot<Object?>> numberFollowing(String id) {
+    return _firestore.collection('users').where('followers', arrayContains: id).snapshots();
+  }
+
   /// Functions ///
 
   // User Stuff //
@@ -83,9 +114,16 @@ class AppProvider extends ChangeNotifier {
     await _auth.signOut();
   }
 
+  Future<void> syncUser() async {
+    var ref = await _firestore.collection('users').doc(fireUser!.uid).get();
+    user = AppUser.fromJson(ref.data()!);
+  }
+
   Future<void> createAccount(AppUser appUser) async {
     try {
-      var userRef = _firestore.collection('users').doc();
+      NotificationService.notify('Creating account...');
+      await Future.delayed(const Duration(seconds: 2));
+      var userRef = _firestore.collection('users').doc(_auth.currentUser!.uid);
       appUser.id = userRef.id;
       await userRef.set(appUser.toJson());
 
@@ -100,7 +138,7 @@ class AppProvider extends ChangeNotifier {
       final query = await _firestore.collection('users').where('userName', isEqualTo: userName).limit(1).get();
       if (query.docs.isNotEmpty) return true;
     } catch (error) {
-      NotificationService.notify('Failed to find userName.');
+      NotificationService.notify('Failed to find Username.');
     }
     return false;
   }
@@ -146,6 +184,19 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> login(String number, Function updateItems) async {
+    try {
+      final query = await _firestore.collection('users').where('phone', isEqualTo: number).limit(1).get();
+      if (query.docs.isNotEmpty) {
+        await verifyPhoneNumber(number, updateItems);
+      } else {
+        NotificationService.notify('Account not found.');
+      }
+    } catch (error) {
+      NotificationService.notify('Failed to find account.');
+    }
+  }
+
   Future<void> verifyPhoneNumber(String number, Function updateItems) async {
     try {
       NotificationService.notify('Sending verification code...');
@@ -183,16 +234,6 @@ class AppProvider extends ChangeNotifier {
 
     try {
       var menuRef = _firestore.collection('menu').doc(recipe.id);
-      // await menuRef.set({
-      //   "id": recipe.id,
-      //   "name": recipe['name'],
-      //   "class": recipe['class'],
-      //   "cookTime": recipe['cookTime'],
-      //   "prepTime": recipe['prepTime'],
-      //   "ingredient_amounts": recipe['ingredient_amounts'],
-      //   "ingredients": recipe['ingredients'],
-      //   "instructions": recipe['instructions'],
-      // });
       await menuRef.set(recipe.toJson());
 
       for (int i = 0; i < recipe.ingredients.length; i++) {
@@ -204,15 +245,6 @@ class AppProvider extends ChangeNotifier {
             recipeId: recipe.id,
             recipeName: recipe.name,
             mark: false);
-        // await ref.set({
-        //   "id": ref.id,
-        //   "name": recipe['ingredients'][i],
-        //   "amount": recipe['ingredient_amounts'][i],
-        //   "recipeName": recipe['name'],
-        //   "recipeId": recipe.id,
-        //   "recipeItem": true,
-        //   "mark": false,
-        // });
         await ref.set(grocery.toJson());
       }
 
@@ -288,31 +320,11 @@ class AppProvider extends ChangeNotifier {
 
     try {
       var recipeRef = _firestore.collection('recipes').doc(recipe.id);
-      // await recipeRef.update({
-      //   "id": recipeRef.id,
-      //   "name": recipeName,
-      //   "class": recipeClass,
-      //   "cookTime": cookTime,
-      //   "prepTime": prepTime,
-      //   "ingredient_amounts": recipeAmounts,
-      //   "ingredients": recipeIngredients,
-      //   "instructions": recipeInstructions,
-      // });
       await recipeRef.update(recipe.toJson());
 
       var menuDoc = await _firestore.collection('menu').doc(recipe.id).get();
       if (menuDoc.exists) {
         var menuRef = _firestore.collection('menu').doc(recipe.id);
-        // await menuRef.update({
-        //   "id": menuRef.id,
-        //   "name": recipeName,
-        //   "class": recipeClass,
-        //   "cookTime": cookTime,
-        //   "prepTime": prepTime,
-        //   "ingredient_amounts": recipeAmounts,
-        //   "ingredients": recipeIngredients,
-        //   "instructions": recipeInstructions,
-        // });
         await menuRef.update(recipe.toJson());
       }
 
@@ -348,16 +360,88 @@ class AppProvider extends ChangeNotifier {
           id: ref.id,
           name: name,
           mark: false);
-      // await ref.set({
-      //   "id": ref.id,
-      //   "name": name,
-      //   "recipeItem": false,
-      //   "mark": false,
-      // });
       await ref.set(grocery.toJson());
     } catch (error) {
       NotificationService.notify('Failed to add item.');
     }
+  }
+
+  bool loader = false; // this variable is only used for this function
+  Future<String> uploadPicture(String id) async {
+    CroppedFile? croppedImage;
+    String url = '';
+    try {
+      final ImagePicker picker = ImagePicker();
+
+      // Pick an image
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+      if (image != null) {
+        // Crop image
+        croppedImage = await ImageCropper().cropImage(
+          sourcePath: image.path,
+          compressQuality: 10,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+          ],
+          uiSettings: [
+            AndroidUiSettings(
+              toolbarTitle: 'Crop Image',
+              toolbarColor: CustomColors.primary,
+              toolbarWidgetColor: CustomColors.white,
+              statusBarColor: CustomColors.primary,
+              initAspectRatio: CropAspectRatioPreset.original,
+              activeControlsWidgetColor: CustomColors.primary,
+              hideBottomControls: true,
+              lockAspectRatio: true,
+            ),
+            IOSUiSettings(
+              title: 'Crop Image',
+              minimumAspectRatio: 50,
+              rectX: 1,
+              rectY: 1,
+              rectWidth: 100000,
+              rectHeight: 100000,
+              resetButtonHidden: true,
+              rotateButtonsHidden: true,
+              aspectRatioLockEnabled: true,
+              aspectRatioPickerButtonHidden: true,
+              aspectRatioLockDimensionSwapEnabled: false,
+              resetAspectRatioEnabled: false,
+            ),
+          ],
+        );
+      }
+
+      if (croppedImage != null) {
+        loader = true;
+        notifyListeners();
+        NotificationService.notify("Uploading image...");
+
+        // converts image to base64
+        List<int> imageBytes = await croppedImage.readAsBytes();
+        String base64Image = base64Encode(imageBytes);
+
+        // upload to storage
+        final storageRef = FirebaseStorage.instance.ref();
+        final imageRef = storageRef.child(id);
+
+        await imageRef.putString(
+          base64Image,
+          format: PutStringFormat.base64,
+          metadata: SettableMetadata(contentType: 'image/jpeg'),
+        );
+
+        url = await imageRef.getDownloadURL();
+      } else {
+        NotificationService.notify("Failed to image.");
+      }
+    } catch (error) {
+      NotificationService.notify("Failed to upload.");
+    }
+    loader = false;
+    notifyListeners();
+    return url;
   }
 }
 

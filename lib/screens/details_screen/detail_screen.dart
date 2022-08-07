@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
@@ -10,8 +9,6 @@ import 'package:spork/screens/details_screen/ingredients.dart';
 import 'package:spork/screens/details_screen/instructions.dart';
 import 'package:spork/theme.dart';
 import 'package:provider/provider.dart';
-
-final _firestore = FirebaseFirestore.instance;
 
 class DetailScreen extends StatefulWidget {
   const DetailScreen({required this.recipe, Key? key}) : super(key: key);
@@ -178,11 +175,11 @@ class _DetailScreenState extends State<DetailScreen> {
         elevation: 1,
       ),
       floatingActionButton: isFabVisible
-          ? StreamBuilder<QuerySnapshot>(
-        stream: _firestore.collection('menu').snapshots(),
+          ? StreamBuilder<List<Recipe>>(
+        stream: Provider.of<AppProvider>(context, listen: false).menuStream,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final menuItems = snapshot.data?.docs;
+            final menuItems = snapshot.data;
             List<String> ids = [];
 
             for (var item in menuItems!) {

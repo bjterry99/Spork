@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:spork/components/profile_image.dart';
+import 'package:spork/models/models.dart';
+import 'package:spork/screens/profile_screen/profile.dart';
 import 'package:spork/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:spork/provider.dart';
 import 'screens/grocery_screen/grocery_screen.dart';
-import 'screens/menu_screen/menu_screen.dart';
-import 'screens/recipes_screen/recipes_screen.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -18,9 +19,8 @@ class _HomeState extends State<Home> {
   final PageController controller = PageController(initialPage: 0);
 
   final List<Widget> _children = [
-    const RecipesScreen(),
+    const ProfileScreen(),
     const GroceryScreen(),
-    const MenuScreen(),
   ];
 
   void onTappedBar(int index) {
@@ -42,6 +42,8 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    AppUser user = Provider.of<AppProvider>(context).user;
+
     return Scaffold(
         appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
         body: SafeArea(
@@ -71,18 +73,17 @@ class _HomeState extends State<Home> {
                 currentIndex: _currentIndex,
                 selectedItemColor: CustomColors.white,
                 backgroundColor: CustomColors.primary,
-                items: const [
+                items: [
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.restaurant_menu_rounded),
-                    label: 'Recipes',
+                    icon: Padding(
+                      padding: const EdgeInsets.only(bottom: 3),
+                      child: ProfileImage(user.photoUrl, 25, 20),
+                    ),
+                    label: user.name
                   ),
-                  BottomNavigationBarItem(
+                  const BottomNavigationBarItem(
                     icon: Icon(Icons.shopping_cart_rounded),
-                    label: 'Grocery',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.menu_book_rounded),
-                    label: 'Menu',
+                    label: 'Grocery'
                   ),
                 ],
               ),

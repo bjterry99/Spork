@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:spork/components/search_bar.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/screens/grocery_screen/grocery_list.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
@@ -57,6 +58,12 @@ class _GroceryScreenState extends State<GroceryScreen> {
     controller.clear();
   }
 
+  void search(String value) {
+    setState(() {
+      query = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -92,39 +99,10 @@ class _GroceryScreenState extends State<GroceryScreen> {
                       flexibleSpace: Padding(
                         padding:
                             const EdgeInsets.only(left: 20, right: 20, top: 10),
-                        child: Material(
-                          color: CustomColors.white,
-                          borderRadius: BorderRadius.circular(30.0),
-                          elevation: 1,
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              left: 10,
-                              right: 10,
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 5, right: 5),
-                              child: TextFormField(
-                                onChanged: (value) {
-                                  setState(() {
-                                    query = value;
-                                  });
-                                },
-                                cursorColor: CustomColors.primary,
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  errorBorder: InputBorder.none,
-                                  disabledBorder: InputBorder.none,
-                                  icon: Icon(
-                                    Icons.search_rounded,
-                                  ),
-                                  hintText: "I'm looking for...",
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                        child: SearchBar(
+                          text: "I'm looking for...",
+                          search: search,
+                        )
                       ),
                       floating: true,
                       toolbarHeight: 60,
