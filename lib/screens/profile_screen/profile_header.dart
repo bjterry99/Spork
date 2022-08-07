@@ -1,11 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:spork/components/buttons/custom_button.dart';
 import 'package:spork/components/profile_image.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
+import 'package:spork/screens/my_home_screen/my_home_screen_load.dart';
+import 'package:spork/screens/settings.dart';
 import 'package:spork/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:swipeable_page_route/swipeable_page_route.dart';
 
 class ProfileHeader extends StatelessWidget {
   const ProfileHeader({required this.isOnRecipe, required this.change, Key? key}) : super(key: key);
@@ -33,7 +38,20 @@ class ProfileHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    ProfileImage(user.photoUrl, 90, 60),
+                    GestureDetector(
+                      onTap: () {
+                        if (Platform.isIOS) {
+                          Navigator.of(context).push(SwipeablePageRoute(
+                              builder: (BuildContext context) => SettingsPage(user: user,),
+                              canOnlySwipeFromEdge: true
+                          ));
+                        } else {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (BuildContext context) => SettingsPage(user: user,),
+                          ));
+                        }
+                      },
+                        child: ProfileImage(user.photoUrl, 90, 60)),
                     const SizedBox(
                       width: 10,
                     ),
@@ -120,23 +138,37 @@ class ProfileHeader extends StatelessWidget {
                             SizedBox(
                               width: numberSpacing,
                             ),
-                            Column(
-                              children: const [
-                                Text(
-                                  'Create',
-                                  style: TextStyle(
-                                      color: CustomColors.grey4,
-                                      fontSize: CustomFontSize.secondary,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                Text(
-                                  'Home',
-                                  style: TextStyle(
-                                      color: CustomColors.grey4,
-                                      fontSize: CustomFontSize.secondary,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ],
+                            GestureDetector(
+                              onTap: () {
+                                if (Platform.isIOS) {
+                                  Navigator.of(context).push(SwipeablePageRoute(
+                                      builder: (BuildContext context) => const MyHomeScreenLoad(),
+                                      canOnlySwipeFromEdge: true
+                                  ));
+                                } else {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (BuildContext context) => const MyHomeScreenLoad(),
+                                  ));
+                                }
+                              },
+                              child: Column(
+                                children: const [
+                                  Text(
+                                    'My',
+                                    style: TextStyle(
+                                        color: CustomColors.grey4,
+                                        fontSize: CustomFontSize.secondary,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                  Text(
+                                    'Home',
+                                    style: TextStyle(
+                                        color: CustomColors.grey4,
+                                        fontSize: CustomFontSize.secondary,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         )

@@ -443,6 +443,52 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
     return url;
   }
+
+  Future<void> createHome(MyHome home) async {
+    try {
+      NotificationService.notify('Creating Home...');
+
+      var homeRef = _firestore.collection('homes').doc();
+      home.id = homeRef.id;
+
+      var userRef = _firestore.collection('users').doc(user.id);
+
+      await homeRef.set(home.toJson());
+      await userRef.update({
+        "homeId": homeRef.id,
+      });
+
+      NotificationService.notify('Home created.');
+    } catch (error) {
+      NotificationService.notify('Failed to create Home.');
+    }
+  }
+
+  Future<void> editHomeName(String id, String name) async {
+    try {
+      var homeRef = _firestore.collection('homes').doc(id);
+      await homeRef.update({
+        "name": name,
+      });
+    } catch (error) {
+      NotificationService.notify('Failed to update Home.');
+    }
+  }
+
+  /// Futures ///
+
+  Future<MyHome?> fetchHome(String id) async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>>? doc = await _firestore.collection('homes').doc(id).get();
+      if (doc.exists) {
+        MyHome home = MyHome.fromJson(doc.data()!);
+        return home;
+      }
+    } catch (error) {
+      NotificationService.notify("Failed to find Home.");
+    }
+    return null;
+  }
 }
 
 // Future<DocumentSnapshot<Map<String, dynamic>>> getRecipe(String id) async {

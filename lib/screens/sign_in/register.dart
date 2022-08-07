@@ -140,7 +140,6 @@ class _RegisterState extends State<Register> {
                       decoration: InputDecoration(
                         errorText: nameError,
                         labelText: 'Name',
-                        // border: InputBorder.none,
                         enabledBorder: const UnderlineInputBorder(
                           borderSide: BorderSide(color: CustomColors.grey3),
                         ),

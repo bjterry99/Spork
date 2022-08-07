@@ -77,7 +77,7 @@ class AppUser {
     required this.phone,
     this.photoUrl = '',
     this.followers = const <String>[],
-    this.homeId = '',
+    this.homeId = 'null',
   });
 
   factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
@@ -88,11 +88,13 @@ class AppUser {
 class MyHome {
   String id;
   String name;
+  String creatorId;
   List<String> users;
 
   MyHome({
     required this.id,
     required this.name,
+    required this.creatorId,
     this.users = const <String>[],
   });
 

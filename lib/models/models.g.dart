@@ -95,6 +95,7 @@ Map<String, dynamic> _$AppUserToJson(AppUser instance) => <String, dynamic>{
 MyHome _$MyHomeFromJson(Map<String, dynamic> json) => MyHome(
       id: json['id'] as String,
       name: json['name'] as String,
+      creatorId: json['creatorId'] as String,
       users:
           (json['users'] as List<dynamic>?)?.map((e) => e as String).toList() ??
               const <String>[],
@@ -103,5 +104,6 @@ MyHome _$MyHomeFromJson(Map<String, dynamic> json) => MyHome(
 Map<String, dynamic> _$MyHomeToJson(MyHome instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
+      'creatorId': instance.creatorId,
       'users': instance.users,
     };
