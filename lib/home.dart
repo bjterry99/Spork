@@ -21,6 +21,14 @@ class _HomeState extends State<Home> {
   final PageController controller = PageController(initialPage: 0);
   bool isFabVisible = true;
   bool isInputVisible = false;
+  TextEditingController textController = TextEditingController();
+
+  @override
+  void dispose() {
+    textController.dispose();
+    controller.dispose();
+    super.dispose();
+  }
 
   void onTappedBar(int index) {
     controller.animateToPage(
@@ -53,13 +61,13 @@ class _HomeState extends State<Home> {
 
   void toggleInputOn() {
     setState(() {
-      isFabVisible = true;
+      isInputVisible = true;
     });
   }
 
   void toggleInputOff() {
     setState(() {
-      isFabVisible = false;
+      isInputVisible = false;
     });
   }
 
@@ -75,13 +83,16 @@ class _HomeState extends State<Home> {
       GroceryScreen(
         buttonOn: toggleButtonOn,
         buttonOff: toggleButtonOff,
+        toggleInputOff: toggleInputOff,
+        isInputVisible: isInputVisible,
+        controller: textController,
       ),
       DiscoverPage(buttonOn: toggleButtonOn, buttonOff: toggleButtonOff),
     ];
 
     void buttonAction() {
       if (_currentIndex == 1) {
-
+        toggleInputOn();
       } else {
         Navigator.push(
           context,
