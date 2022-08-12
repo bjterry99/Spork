@@ -27,7 +27,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
           return <Widget>[
             SliverAppBar(
               elevation: 0,
-              flexibleSpace: DiscoverHeader(change: (){}, isOnRecipe: true,),
+              flexibleSpace: DiscoverHeader(change: (){}, isOnFollow: true,),
               floating: true,
               toolbarHeight: 170,
               snap: false,
