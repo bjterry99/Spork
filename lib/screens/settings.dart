@@ -42,7 +42,24 @@ class _SettingsPageState extends State<SettingsPage> {
 
     void signOut() {
       Provider.of<AppProvider>(context, listen: false).signOut;
-      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const SignIn()), (Route<dynamic> route) => false);
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const SignIn()),
+          (Route<dynamic> route) => false);
+    }
+
+    void edit() async {
+      AppUser appUser = AppUser(
+          id: widget.user.id,
+          name: newName,
+          userName: newUserName,
+          phone: widget.user.phone,
+          photoUrl: newPic,
+          followers: widget.user.followers,
+          homeId: widget.user.homeId);
+      bool edit = await Provider.of<AppProvider>(context, listen: false).editProfile(appUser);
+      if (edit) {
+        Navigator.pop(context);
+      }
     }
 
     return GestureDetector(
@@ -57,12 +74,15 @@ class _SettingsPageState extends State<SettingsPage> {
           systemOverlayStyle: Platform.isIOS
               ? SystemUiOverlayStyle.light
               : const SystemUiOverlayStyle(
-            statusBarColor: CustomColors.primary,
-            statusBarIconBrightness: Brightness.light,
-          ),
+                  statusBarColor: CustomColors.primary,
+                  statusBarIconBrightness: Brightness.light,
+                ),
           title: const Text(
             'Settings',
-            style: TextStyle(fontWeight: FontWeight.w500, fontSize: CustomFontSize.primary, color: CustomColors.white),
+            style: TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: CustomFontSize.primary,
+                color: CustomColors.white),
           ),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(
@@ -87,24 +107,30 @@ class _SettingsPageState extends State<SettingsPage> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 5,),
+                  const SizedBox(
+                    height: 5,
+                  ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(top: 10),
+                            padding: const EdgeInsets.only(top: 10, left: 5),
                             child: ProfileImage(widget.user.photoUrl, 85, 40),
                           ),
-                          const SizedBox(width: 15,),
+                          const SizedBox(
+                            width: 15,
+                          ),
                           Expanded(
                             child: Column(
                               children: [
                                 TextFormField(
                                   initialValue: widget.user.name,
                                   style: const TextStyle(
-                                      color: CustomColors.black, fontWeight: FontWeight.w500, fontSize: CustomFontSize.big),
+                                      color: CustomColors.black,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: CustomFontSize.big),
                                   textCapitalization: TextCapitalization.words,
                                   cursorColor: CustomColors.primary,
                                   onChanged: (String? newValue) {
@@ -114,10 +140,12 @@ class _SettingsPageState extends State<SettingsPage> {
                                   },
                                   decoration: const InputDecoration(
                                     enabledBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(color: CustomColors.grey3),
+                                      borderSide:
+                                          BorderSide(color: CustomColors.grey3),
                                     ),
                                     focusedBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(color: CustomColors.grey3),
+                                      borderSide:
+                                          BorderSide(color: CustomColors.grey3),
                                     ),
                                     hintText: "New name...",
                                   ),
@@ -125,7 +153,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                 TextFormField(
                                   initialValue: widget.user.userName,
                                   style: const TextStyle(
-                                      color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
+                                      color: CustomColors.black,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: CustomFontSize.primary),
                                   textCapitalization: TextCapitalization.words,
                                   cursorColor: CustomColors.primary,
                                   onChanged: (String? newValue) {
@@ -135,10 +165,12 @@ class _SettingsPageState extends State<SettingsPage> {
                                   },
                                   decoration: const InputDecoration(
                                     enabledBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(color: CustomColors.grey3),
+                                      borderSide:
+                                          BorderSide(color: CustomColors.grey3),
                                     ),
                                     focusedBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(color: CustomColors.grey3),
+                                      borderSide:
+                                          BorderSide(color: CustomColors.grey3),
                                     ),
                                     hintText: "New username...",
                                     prefixText: '@',
@@ -149,24 +181,34 @@ class _SettingsPageState extends State<SettingsPage> {
                           )
                         ],
                       ),
-                      const SizedBox(height: 10,),
+                      const SizedBox(
+                        height: 10,
+                      ),
                       Row(
                         children: [
-                          MyTextButton(text: 'New Image', action: (){}),
-                          const Spacer(),
+                          MyTextButton(text: 'New Image', action: () {}),
+                          const SizedBox(
+                            width: 15,
+                          ),
                           CustomButton(
                               content: Text(
                                 'SAVE',
                                 style: TextStyle(
-                                    color: validate() ? CustomColors.white : CustomColors.grey4,
+                                    color: validate()
+                                        ? CustomColors.white
+                                        : CustomColors.grey4,
                                     fontSize: CustomFontSize.secondary,
                                     fontWeight: FontWeight.w500),
                               ),
-                              action: (){},
+                              action: edit,
+                              width: MediaQuery.of(context).size.width / 1.76,
+                              height: 35,
                               isActive: validate(),
-                              verticalPadding: 10,
-                              horizontalPadding: 10),
-                          const SizedBox(width: 10,)
+                              verticalPadding: 0,
+                              horizontalPadding: 5),
+                          const SizedBox(
+                            width: 10,
+                          )
                         ],
                       ),
                       const Divider(
@@ -185,9 +227,12 @@ class _SettingsPageState extends State<SettingsPage> {
                           child: Row(
                             children: const [
                               Icon(
-                                  Icons.logout_outlined,
-                              color: CustomColors.grey4,),
-                              SizedBox(width: 10,),
+                                Icons.logout_outlined,
+                                color: CustomColors.grey4,
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
                               Text(
                                 'Logout',
                                 style: TextStyle(
@@ -208,7 +253,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         color: CustomColors.grey3,
                       ),
                       InkWell(
-                        onTap: (){},
+                        onTap: () {},
                         splashColor: CustomColors.secondary,
                         borderRadius: BorderRadius.circular(20),
                         child: Padding(
@@ -217,8 +262,11 @@ class _SettingsPageState extends State<SettingsPage> {
                             children: const [
                               Icon(
                                 Icons.delete_forever_outlined,
-                                color: CustomColors.grey4,),
-                              SizedBox(width: 10,),
+                                color: CustomColors.grey4,
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
                               Text(
                                 'Delete Account',
                                 style: TextStyle(

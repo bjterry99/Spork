@@ -9,7 +9,12 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:provider/provider.dart';
 
 class GroceryScreen extends StatefulWidget {
-  const GroceryScreen({Key? key}) : super(key: key);
+  const GroceryScreen({required this.buttonOn, required this.buttonOff, required this.isInputVisible, required this.toggleInputOff, required this.controller, Key? key}) : super(key: key);
+  final Function buttonOn;
+  final Function buttonOff;
+  final bool isInputVisible;
+  final Function toggleInputOff;
+  final TextEditingController controller;
 
   @override
   State<GroceryScreen> createState() => _GroceryScreenState();
@@ -35,6 +40,8 @@ class _GroceryScreenState extends State<GroceryScreen> {
     super.initState();
     KeyboardVisibilityController().onChange.listen((isVisible) {
       if (!isVisible) {
+        widget.buttonOn();
+        widget.toggleInputOff();
         setState(() {
           isInputVisible = false;
           isFabVisible = true;
@@ -50,6 +57,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
   }
 
   void saveItem() async {
+    widget.toggleInputOff();
     setState(() {
       isInputVisible = false;
       canSave = false;
@@ -118,9 +126,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                 body: GestureDetector(
                   onTap: () {
                     FocusScope.of(context).unfocus();
-                    setState(() {
-                      isInputVisible = false;
-                    });
+                    widget.toggleInputOff();
                   },
                   onPanDown: (_) {
                     FocusScope.of(context).unfocus();
@@ -128,13 +134,9 @@ class _GroceryScreenState extends State<GroceryScreen> {
                   child: NotificationListener<UserScrollNotification>(
                     onNotification: (not) {
                       if (not.direction == ScrollDirection.forward) {
-                        setState(() {
-                          isFabVisible = true;
-                        });
+                        widget.buttonOn();
                       } else if (not.direction == ScrollDirection.reverse) {
-                        setState(() {
-                          isFabVisible = false;
-                        });
+                        widget.buttonOff();
                       }
 
                       return true;
@@ -146,7 +148,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                 ),
               ),
             ),
-            if (isInputVisible)
+            if (widget.isInputVisible)
               Container(
                 decoration: const BoxDecoration(
                   borderRadius: BorderRadius.only(
@@ -171,7 +173,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                         Expanded(
                           child: TextFormField(
                             autofocus: true,
-                            controller: controller,
+                            controller: widget.controller,
                             keyboardType: TextInputType.multiline,
                             textInputAction: TextInputAction.done,
                             maxLines: null,

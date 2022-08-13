@@ -12,7 +12,9 @@ import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({required this.buttonOn, required this.buttonOff, Key? key}) : super(key: key);
+  final Function buttonOn;
+  final Function buttonOff;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -29,13 +31,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     KeyboardVisibilityController().onChange.listen((isVisible) {
       if (!isVisible) {
-        setState(() {
-          isFabVisible = true;
-        });
+        widget.buttonOn();
       } else {
-        setState(() {
-          isFabVisible = false;
-        });
+        widget.buttonOff();
       }
     });
   }
@@ -99,7 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SliverPersistentHeader(
                 pinned: true,
                 floating: false,
-                delegate: Delegate(search, controller),
+                delegate: DelegateProfile(search),
               ),
             ];
           },
@@ -113,13 +111,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: NotificationListener<UserScrollNotification>(
               onNotification: (not) {
                 if (not.direction == ScrollDirection.forward) {
-                  setState(() {
-                    isFabVisible = true;
-                  });
+                  widget.buttonOn();
                 } else if (not.direction == ScrollDirection.reverse) {
-                  setState(() {
-                    isFabVisible = false;
-                  });
+                  widget.buttonOff();
                 }
 
                 return true;
