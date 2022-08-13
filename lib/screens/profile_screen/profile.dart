@@ -22,6 +22,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool isFabVisible = true;
   String query = '';
   bool isOnRecipe = true;
+  final TextEditingController controller = TextEditingController();
 
   @override
   void initState() {
@@ -37,6 +38,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   void search(String text) {
@@ -92,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SliverPersistentHeader(
                 pinned: true,
                 floating: false,
-                delegate: Delegate(search),
+                delegate: Delegate(search, controller),
               ),
             ];
           },

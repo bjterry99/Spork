@@ -21,10 +21,12 @@ class _GroceryScreenState extends State<GroceryScreen> {
   bool isInputVisible = false;
   bool canSave = false;
   TextEditingController controller = TextEditingController();
+  TextEditingController searchController = TextEditingController();
 
   @override
   void dispose() {
     controller.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
@@ -56,6 +58,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
       await Provider.of<AppProvider>(context, listen: false).addGroceryItem(controller.text);
     }
     controller.clear();
+    searchController.clear();
   }
 
   void search(String value) {
@@ -102,6 +105,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                         child: SearchBar(
                           text: "I'm looking for...",
                           search: search,
+                          controller: searchController,
                         )
                       ),
                       floating: true,
