@@ -6,10 +6,12 @@ class SearchBar extends StatelessWidget {
     Key? key,
     required this.search,
     required this.text,
+    required this.controller,
   }) : super(key: key);
 
   final Function search;
   final String text;
+  final TextEditingController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +27,7 @@ class SearchBar extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.only(left: 5, right: 5),
           child: TextFormField(
+            controller: controller,
             onChanged: (value) {
               search(value);
             },

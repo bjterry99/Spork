@@ -2,7 +2,6 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:spork/screens/create_recipe.dart';
 import 'package:spork/screens/profile_screen/menu_list.dart';
 import 'package:spork/screens/profile_screen/profile_header.dart';
 import 'package:spork/screens/profile_screen/profile_search_bar.dart';
@@ -23,6 +22,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String query = '';
   bool isOnRecipe = true;
+  final TextEditingController controller = TextEditingController();
 
   @override
   void initState() {
@@ -34,6 +34,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         widget.buttonOff();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   void search(String text) {
@@ -53,27 +59,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
-        // floatingActionButton: isFabVisible
-        //     ? Padding(
-        //         padding: const EdgeInsets.all(15.0),
-        //         child: FloatingActionButton(
-        //           elevation: 1,
-        //           backgroundColor: CustomColors.primary,
-        //           child: const Icon(
-        //             Icons.add_rounded,
-        //             color: CustomColors.white,
-        //           ),
-        //           onPressed: () {
-        //             Navigator.push(
-        //               context,
-        //               MaterialPageRoute(
-        //                 builder: (context) => const CreateRecipe(),
-        //               ),
-        //             );
-        //           },
-        //         ),
-        //       )
-        //     : null,
         body: NestedScrollView(
           floatHeaderSlivers: true,
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -89,7 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SliverPersistentHeader(
                 pinned: true,
                 floating: false,
-                delegate: DelegateProfile(search),
+                delegate: DelegateProfile(search, controller),
               ),
             ];
           },

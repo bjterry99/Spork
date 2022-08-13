@@ -98,6 +98,11 @@ class AppProvider extends ChangeNotifier {
       .map((doc) => Grocery.fromJson(doc.data()))
       .toList());
 
+  Stream<List<AppUser>> userStream = _firestore.collection('users').snapshots()
+      .map((snapshot) => snapshot.docs
+      .map((doc) => AppUser.fromJson(doc.data()))
+      .toList());
+
   Stream<QuerySnapshot<Object?>> specificMenuItem(String id) {
     return _firestore.collection('menu').where('id', isEqualTo: id).snapshots();
   }
