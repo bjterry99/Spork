@@ -9,31 +9,22 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:provider/provider.dart';
 
 class GroceryScreen extends StatefulWidget {
-  const GroceryScreen({required this.buttonOn, required this.buttonOff, required this.isInputVisible, required this.toggleInputOff, required this.controller, Key? key}) : super(key: key);
+  const GroceryScreen({required this.buttonOn, required this.buttonOff, required this.isInputVisible, required this.toggleInputOff, required this.controller, required this.myFocusNode, Key? key}) : super(key: key);
   final Function buttonOn;
   final Function buttonOff;
   final bool isInputVisible;
   final Function toggleInputOff;
   final TextEditingController controller;
+  final FocusNode myFocusNode;
 
   @override
   State<GroceryScreen> createState() => _GroceryScreenState();
 }
 
 class _GroceryScreenState extends State<GroceryScreen> {
-  bool isFabVisible = true;
   String query = '';
-  bool isInputVisible = false;
   bool canSave = false;
-  TextEditingController controller = TextEditingController();
-  TextEditingController searchController = TextEditingController();
-
-  @override
-  void dispose() {
-    controller.dispose();
-    searchController.dispose();
-    super.dispose();
-  }
+  final TextEditingController controller = TextEditingController();
 
   @override
   void initState() {
@@ -43,30 +34,30 @@ class _GroceryScreenState extends State<GroceryScreen> {
         widget.buttonOn();
         widget.toggleInputOff();
         setState(() {
-          isInputVisible = false;
-          isFabVisible = true;
-          controller.clear();
+          widget.controller.clear();
           canSave = false;
         });
       } else {
-        setState(() {
-          isFabVisible = false;
-        });
+        widget.buttonOff();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   void saveItem() async {
     widget.toggleInputOff();
     setState(() {
-      isInputVisible = false;
       canSave = false;
     });
-    if (controller.text != '') {
-      await Provider.of<AppProvider>(context, listen: false).addGroceryItem(controller.text);
+    if (widget.controller.text != '') {
+      await Provider.of<AppProvider>(context, listen: false).addGroceryItem(widget.controller.text);
     }
-    controller.clear();
-    searchController.clear();
+    widget.controller.clear();
   }
 
   void search(String value) {
@@ -79,24 +70,6 @@ class _GroceryScreenState extends State<GroceryScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        floatingActionButton: isFabVisible
-            ? Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: FloatingActionButton(
-                  elevation: 1,
-                  backgroundColor: CustomColors.primary,
-                  child: const Icon(
-                    Icons.add_rounded,
-                    color: CustomColors.white,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      isInputVisible = true;
-                    });
-                  },
-                ),
-              )
-            : null,
         body: Column(
           children: [
             Expanded(
@@ -113,7 +86,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                         child: SearchBar(
                           text: "I'm looking for...",
                           search: search,
-                          controller: searchController,
+                          controller: controller,
                         )
                       ),
                       floating: true,
@@ -172,7 +145,8 @@ class _GroceryScreenState extends State<GroceryScreen> {
                       children: [
                         Expanded(
                           child: TextFormField(
-                            autofocus: true,
+                            // autofocus: true,
+                            focusNode: widget.myFocusNode,
                             controller: widget.controller,
                             keyboardType: TextInputType.multiline,
                             textInputAction: TextInputAction.done,

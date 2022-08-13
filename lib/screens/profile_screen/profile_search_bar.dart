@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:spork/components/search_bar.dart';
 
-class Delegate extends SliverPersistentHeaderDelegate {
+class DelegateProfile extends SliverPersistentHeaderDelegate {
   final Function search;
   final TextEditingController controller;
 
-  Delegate(this.search, this.controller);
+  DelegateProfile(this.search, this.controller);
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {

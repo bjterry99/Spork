@@ -1,16 +1,7 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:spork/components/buttons/custom_button.dart';
-import 'package:spork/components/profile_image.dart';
-import 'package:spork/models/models.dart';
-import 'package:spork/provider.dart';
-import 'package:provider/provider.dart';
-import 'package:spork/screens/my_home_screen/my_home_screen_load.dart';
-import 'package:spork/screens/settings.dart';
 import 'package:spork/theme.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:swipeable_page_route/swipeable_page_route.dart';
 
 class DiscoverHeader extends StatelessWidget {
   const DiscoverHeader({required this.isOnFollow, required this.change, Key? key}) : super(key: key);
@@ -19,14 +10,9 @@ class DiscoverHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppUser user = Provider.of<AppProvider>(context).user;
-    double numberSpacing = MediaQuery.of(context).size.width/18;
-
     return Material(
       color: CustomColors.white,
-      borderRadius:
-      const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
-      elevation: 1,
+      elevation: 0,
       child: Container(
         color: Colors.transparent,
         child: Padding(
@@ -55,7 +41,7 @@ class DiscoverHeader extends StatelessWidget {
                         verticalPadding: 0,
                         height: 35,
                         width: 120,
-                        content: Icon(Icons.restaurant_menu_rounded, color: isOnFollow ? CustomColors.grey4 : CustomColors.white,),
+                        content: Icon(Icons.group, color: isOnFollow ? CustomColors.grey4 : CustomColors.white,),
                         action: () {
                           change();
                         },
@@ -65,7 +51,7 @@ class DiscoverHeader extends StatelessWidget {
                         verticalPadding: 0,
                         height: 35,
                         width: 120,
-                        content: Icon(Icons.menu_book_rounded, color: !isOnFollow ? CustomColors.grey4 : CustomColors.white,),
+                        content: Icon(Icons.public, color: !isOnFollow ? CustomColors.grey4 : CustomColors.white,),
                         action: () {
                           change();
                         },

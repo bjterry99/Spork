@@ -22,11 +22,13 @@ class _HomeState extends State<Home> {
   bool isFabVisible = true;
   bool isInputVisible = false;
   TextEditingController textController = TextEditingController();
+  final FocusNode myFocusNode = FocusNode();
 
   @override
   void dispose() {
     textController.dispose();
     controller.dispose();
+    myFocusNode.dispose();
     super.dispose();
   }
 
@@ -86,6 +88,7 @@ class _HomeState extends State<Home> {
         toggleInputOff: toggleInputOff,
         isInputVisible: isInputVisible,
         controller: textController,
+        myFocusNode: myFocusNode,
       ),
       DiscoverPage(buttonOn: toggleButtonOn, buttonOff: toggleButtonOff),
     ];
@@ -93,6 +96,7 @@ class _HomeState extends State<Home> {
     void buttonAction() {
       if (_currentIndex == 1) {
         toggleInputOn();
+        myFocusNode.requestFocus();
       } else {
         Navigator.push(
           context,
