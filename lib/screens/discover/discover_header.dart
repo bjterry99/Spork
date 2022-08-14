@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:spork/components/buttons/custom_button.dart';
+import 'package:spork/components/my_switcher.dart';
 import 'package:spork/theme.dart';
 
 class DiscoverHeader extends StatelessWidget {
@@ -12,7 +12,9 @@ class DiscoverHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: CustomColors.white,
-      elevation: 0,
+      borderRadius:
+      const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+      elevation: 3,
       child: Container(
         color: Colors.transparent,
         child: Padding(
@@ -33,31 +35,7 @@ class DiscoverHeader extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    CustomButton(
-                        horizontalPadding: 10,
-                        verticalPadding: 0,
-                        height: 35,
-                        width: 120,
-                        content: Icon(Icons.group, color: isOnFollow ? CustomColors.grey4 : CustomColors.white,),
-                        action: () {
-                          change();
-                        },
-                        isActive: !isOnFollow),
-                    CustomButton(
-                        horizontalPadding: 10,
-                        verticalPadding: 0,
-                        height: 35,
-                        width: 120,
-                        content: Icon(Icons.public, color: !isOnFollow ? CustomColors.grey4 : CustomColors.white,),
-                        action: () {
-                          change();
-                        },
-                        isActive: isOnFollow),
-                  ],
-                ),
+                child: MySwitcher(change: change, isOnFollow: isOnFollow, iconLeft: Icons.public, iconRight: Icons.group,),
               )
             ],
           ),

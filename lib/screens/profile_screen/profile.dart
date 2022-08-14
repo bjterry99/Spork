@@ -67,7 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 elevation: 0,
                 flexibleSpace: ProfileHeader(change: change, isOnRecipe: isOnRecipe,),
                 floating: true,
-                toolbarHeight: 170,
+                toolbarHeight: 175,
                 snap: false,
                 backgroundColor: Colors.transparent,
               ),

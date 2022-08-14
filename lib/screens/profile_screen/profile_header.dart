@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:spork/components/buttons/custom_button.dart';
+import 'package:spork/components/my_switcher.dart';
 import 'package:spork/components/profile_image.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
@@ -26,7 +27,7 @@ class ProfileHeader extends StatelessWidget {
         color: CustomColors.white,
         borderRadius:
         const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
-        elevation: 1,
+        elevation: 3,
         child: Container(
           color: Colors.transparent,
           child: Padding(
@@ -178,31 +179,7 @@ class ProfileHeader extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      CustomButton(
-                          horizontalPadding: 10,
-                          verticalPadding: 0,
-                          height: 35,
-                          width: 120,
-                          content: Icon(Icons.restaurant_menu_rounded, color: isOnRecipe ? CustomColors.grey4 : CustomColors.white,),
-                          action: () {
-                            change();
-                          },
-                          isActive: !isOnRecipe),
-                      CustomButton(
-                          horizontalPadding: 10,
-                          verticalPadding: 0,
-                          height: 35,
-                          width: 120,
-                          content: Icon(Icons.menu_book_rounded, color: !isOnRecipe ? CustomColors.grey4 : CustomColors.white,),
-                          action: () {
-                            change();
-                          },
-                          isActive: isOnRecipe),
-                    ],
-                  ),
+                  child: MySwitcher(change: change, isOnFollow: isOnRecipe, iconRight: Icons.restaurant_menu_rounded, iconLeft: Icons.menu_book_rounded,)
                 )
               ],
             ),

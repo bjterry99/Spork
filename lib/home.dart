@@ -110,11 +110,11 @@ class _HomeState extends State<Home> {
     return Scaffold(
         appBar: Provider.of<AppProvider>(context, listen: false)
             .getZeroAppBar(CustomColors.white),
-        floatingActionButton: isFabVisible
+        floatingActionButton: isFabVisible && _currentIndex != 2
             ? Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: FloatingActionButton(
-                  elevation: 1,
+                  elevation: 3,
                   backgroundColor: CustomColors.primary,
                   child: const Icon(
                     Icons.add_rounded,

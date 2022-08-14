@@ -53,11 +53,13 @@ class _GroceryScreenState extends State<GroceryScreen> {
     widget.toggleInputOff();
     setState(() {
       canSave = false;
+      query = '';
     });
     if (widget.controller.text != '') {
       await Provider.of<AppProvider>(context, listen: false).addGroceryItem(widget.controller.text);
     }
     widget.controller.clear();
+    controller.clear();
   }
 
   void search(String value) {

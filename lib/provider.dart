@@ -103,6 +103,19 @@ class AppProvider extends ChangeNotifier {
       .map((doc) => AppUser.fromJson(doc.data()))
       .toList());
 
+  Future<List<Recipe>> searchRecipes(int pageSize, String query, int page) async {
+    QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore.collection('recipes')
+        .where('queryName', isGreaterThanOrEqualTo: query)
+        // .where('name', isGreaterThanOrEqualTo: query+ '\uf8ff')
+        // .startAt([page])
+        // .limit(pageSize)
+        .get();
+
+    List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
+
+    return recipes;
+  }
+
   Stream<QuerySnapshot<Object?>> specificMenuItem(String id) {
     return _firestore.collection('menu').where('id', isEqualTo: id).snapshots();
   }
