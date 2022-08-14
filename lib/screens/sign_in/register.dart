@@ -93,6 +93,7 @@ class _RegisterState extends State<Register> {
             userName: userName,
             phone: phone,
             followers: <String>[],
+            queryName: name.toLowerCase(),
             photoUrl: '');
         await Provider.of<AppProvider>(context, listen: false).createAccount(appUser);
         await Provider.of<AppProvider>(context, listen: false).syncUser();

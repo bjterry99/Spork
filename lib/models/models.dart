@@ -15,7 +15,10 @@ class Recipe {
   List<String> ingredients;
   List<String> instructions;
   List<String> menuIds;
+  List<String> savedIds;
   String creatorId;
+  String queryName;
+  String visibility;
 
   Recipe({
     required this.id,
@@ -27,7 +30,10 @@ class Recipe {
     this.ingredients = const <String>[],
     this.instructions = const <String>[],
     this.menuIds = const <String>[],
+    this.savedIds = const <String>[],
     this.creatorId = '',
+    this.queryName = '',
+    this.visibility = 'private',
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) => _$RecipeFromJson(json);
@@ -69,6 +75,7 @@ class AppUser {
   String photoUrl;
   List<String> followers;
   String homeId;
+  String queryName;
 
   AppUser({
     required this.id,
@@ -78,6 +85,7 @@ class AppUser {
     this.photoUrl = '',
     this.followers = const <String>[],
     this.homeId = 'null',
+    this.queryName = '',
   });
 
   factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);

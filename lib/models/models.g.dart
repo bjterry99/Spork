@@ -28,7 +28,13 @@ Recipe _$RecipeFromJson(Map<String, dynamic> json) => Recipe(
               ?.map((e) => e as String)
               .toList() ??
           const <String>[],
+      savedIds: (json['savedIds'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
       creatorId: json['creatorId'] as String? ?? '',
+      queryName: json['queryName'] as String? ?? '',
+      visibility: json['visibility'] as String? ?? 'private',
     );
 
 Map<String, dynamic> _$RecipeToJson(Recipe instance) => <String, dynamic>{
@@ -41,7 +47,10 @@ Map<String, dynamic> _$RecipeToJson(Recipe instance) => <String, dynamic>{
       'ingredients': instance.ingredients,
       'instructions': instance.instructions,
       'menuIds': instance.menuIds,
+      'savedIds': instance.savedIds,
       'creatorId': instance.creatorId,
+      'queryName': instance.queryName,
+      'visibility': instance.visibility,
     };
 
 Grocery _$GroceryFromJson(Map<String, dynamic> json) => Grocery(
@@ -79,7 +88,8 @@ AppUser _$AppUserFromJson(Map<String, dynamic> json) => AppUser(
               ?.map((e) => e as String)
               .toList() ??
           const <String>[],
-      homeId: json['homeId'] as String? ?? '',
+      homeId: json['homeId'] as String? ?? 'null',
+      queryName: json['queryName'] as String? ?? '',
     );
 
 Map<String, dynamic> _$AppUserToJson(AppUser instance) => <String, dynamic>{
@@ -90,6 +100,7 @@ Map<String, dynamic> _$AppUserToJson(AppUser instance) => <String, dynamic>{
       'photoUrl': instance.photoUrl,
       'followers': instance.followers,
       'homeId': instance.homeId,
+      'queryName': instance.queryName,
     };
 
 MyHome _$MyHomeFromJson(Map<String, dynamic> json) => MyHome(

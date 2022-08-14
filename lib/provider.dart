@@ -31,24 +31,25 @@ class AppProvider extends ChangeNotifier {
   /// Widgets ///
 
   PreferredSizeWidget getZeroAppBar(Color color) {
-    return Platform.isAndroid ? PreferredSize(
-      preferredSize: Size.zero,
-      child: AppBar(
-        elevation: 0,
-        backgroundColor: color,
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: color,
-          statusBarIconBrightness:
-          color == CustomColors.primary ? Brightness.light : Brightness.dark,
-        ),
-      ),
-    ) : PreferredSize(
-      preferredSize: Size.zero,
-      child: AppBar(
-        elevation: 0,
-        backgroundColor: color,
-      ),
-    );
+    return Platform.isAndroid
+        ? PreferredSize(
+            preferredSize: Size.zero,
+            child: AppBar(
+              elevation: 0,
+              backgroundColor: color,
+              systemOverlayStyle: SystemUiOverlayStyle(
+                statusBarColor: color,
+                statusBarIconBrightness: color == CustomColors.primary ? Brightness.light : Brightness.dark,
+              ),
+            ),
+          )
+        : PreferredSize(
+            preferredSize: Size.zero,
+            child: AppBar(
+              elevation: 0,
+              backgroundColor: color,
+            ),
+          );
   }
 
   /// Streams ///
@@ -70,7 +71,8 @@ class AppProvider extends ChangeNotifier {
 
     // User stream
     if (fireUser != null) {
-      subscribe(_firestore.collection('users')
+      subscribe(_firestore
+          .collection('users')
           .doc(fireUser!.uid)
           .snapshots()
           .map((snapshot) => AppUser.fromJson(snapshot.data()!))
@@ -83,38 +85,25 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  Stream<List<Recipe>> recipeStream = _firestore.collection('recipes').snapshots()
-      .map((snapshot) => snapshot.docs
-      .map((doc) => Recipe.fromJson(doc.data()))
-      .toList());
+  Stream<List<Recipe>> recipeStream = _firestore
+      .collection('recipes')
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
 
-  Stream<List<Recipe>> menuStream = _firestore.collection('menu').snapshots()
-      .map((snapshot) => snapshot.docs
-      .map((doc) => Recipe.fromJson(doc.data()))
-      .toList());
+  Stream<List<Recipe>> menuStream = _firestore
+      .collection('menu')
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
 
-  Stream<List<Grocery>> groceryStream = _firestore.collection('grocery').snapshots()
-      .map((snapshot) => snapshot.docs
-      .map((doc) => Grocery.fromJson(doc.data()))
-      .toList());
+  Stream<List<Grocery>> groceryStream = _firestore
+      .collection('grocery')
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map((doc) => Grocery.fromJson(doc.data())).toList());
 
-  Stream<List<AppUser>> userStream = _firestore.collection('users').snapshots()
-      .map((snapshot) => snapshot.docs
-      .map((doc) => AppUser.fromJson(doc.data()))
-      .toList());
-
-  Future<List<Recipe>> searchRecipes(int pageSize, String query, int page) async {
-    QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore.collection('recipes')
-        .where('queryName', isGreaterThanOrEqualTo: query)
-        // .where('name', isGreaterThanOrEqualTo: query+ '\uf8ff')
-        // .startAt([page])
-        // .limit(pageSize)
-        .get();
-
-    List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
-
-    return recipes;
-  }
+  Stream<List<AppUser>> userStream = _firestore
+      .collection('users')
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList());
 
   Stream<QuerySnapshot<Object?>> specificMenuItem(String id) {
     return _firestore.collection('menu').where('id', isEqualTo: id).snapshots();
@@ -185,7 +174,8 @@ class AppProvider extends ChangeNotifier {
   Future<bool> sync(PhoneAuthCredential? credential, String? verifyId, String? code) async {
     try {
       bool check = true;
-      PhoneAuthCredential myCredential = credential ?? PhoneAuthProvider.credential(verificationId: verifyId!, smsCode: code!);
+      PhoneAuthCredential myCredential =
+          credential ?? PhoneAuthProvider.credential(verificationId: verifyId!, smsCode: code!);
 
       _auth.signInWithCredential(myCredential).then((value) async {
         NotificationService.notify("Phone number verified.");
@@ -196,8 +186,7 @@ class AppProvider extends ChangeNotifier {
           check = false;
         } else if (error.toString() ==
             '[firebase_auth/invalid-verification-code] The sms verification code used to create the phone auth credential is invalid. Please resend the verification code sms and be sure use the verification code provided by the user.') {
-          NotificationService.notify(
-              "Verification code is incorrect.");
+          NotificationService.notify("Verification code is incorrect.");
           check = false;
         } else if (error.toString() ==
             '[firebase_auth/unknown] com.google.firebase.FirebaseException: User has already been linked to the given provider.') {
@@ -338,14 +327,17 @@ class AppProvider extends ChangeNotifier {
     try {
       var recipeRef = _firestore.collection('recipes').doc();
       Recipe recipe = Recipe(
-          id: recipeRef.id,
-          name: recipeName,
-      className: recipeClass,
-      cookTime: cookTime,
-      prepTime: prepTime,
-      ingredientAmounts: recipeAmounts,
-      ingredients: recipeIngredients,
-      instructions: recipeInstructions);
+        id: recipeRef.id,
+        name: recipeName,
+        className: recipeClass,
+        cookTime: cookTime,
+        prepTime: prepTime,
+        ingredientAmounts: recipeAmounts,
+        ingredients: recipeIngredients,
+        instructions: recipeInstructions,
+        queryName: recipeName.toLowerCase(),
+        visibility: 'explore'
+      );
       await recipeRef.set(recipe.toJson());
 
       NotificationService.notify('Recipe created.');
@@ -395,10 +387,7 @@ class AppProvider extends ChangeNotifier {
   Future<void> addGroceryItem(String name) async {
     try {
       var ref = _firestore.collection('grocery').doc();
-      Grocery grocery = Grocery(
-          id: ref.id,
-          name: name,
-          mark: false);
+      Grocery grocery = Grocery(id: ref.id, name: name, mark: false);
       await ref.set(grocery.toJson());
     } catch (error) {
       NotificationService.notify('Failed to add item.');
@@ -528,6 +517,44 @@ class AppProvider extends ChangeNotifier {
     }
     return null;
   }
+
+  Future<List<Recipe>> searchRecipesExplore(int pageSize, String query, int page) async {
+    if (query != '') {
+      if (page != 0) {
+        final skipThese = await _firestore
+            .collection('recipes')
+            .where('visibility', isEqualTo: 'explore')
+            .where('queryName', isGreaterThanOrEqualTo: query)
+            .limit(page)
+            .get();
+        final lastVisible = skipThese.docs[skipThese.size - 1];
+
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('recipes')
+            .where('visibility', isEqualTo: 'explore')
+            .where('queryName', isGreaterThanOrEqualTo: query)
+            .startAt([lastVisible])
+            .limit(pageSize)
+            .get();
+
+        List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
+        return recipes;
+      } else {
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('recipes')
+            .where('visibility', isEqualTo: 'explore')
+            .where('queryName', isGreaterThanOrEqualTo: query)
+            .limit(pageSize)
+            .get();
+
+        List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
+        return recipes;
+      }
+    } else {
+      return <Recipe>[];
+    }
+  }
+
 }
 
 // Future<DocumentSnapshot<Map<String, dynamic>>> getRecipe(String id) async {

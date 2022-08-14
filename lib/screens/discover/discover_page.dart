@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:spork/screens/discover/discover_header.dart';
 import 'package:spork/screens/discover/discover_list.dart';
 import 'package:spork/screens/discover/disocover_search_bar.dart';
+import 'package:spork/screens/discover/follow_list.dart';
 import 'package:spork/theme.dart';
 
 class DiscoverPage extends StatefulWidget {
@@ -36,7 +37,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
   Future<void> _fetchPage(int pageKey) async {
     try {
-      final newItems = await Provider.of<AppProvider>(context, listen: false).searchRecipes(_pageSize, controller.text.toLowerCase(), pageKey);
+      final newItems = await Provider.of<AppProvider>(context, listen: false).searchRecipesExplore(_pageSize, controller.text.toLowerCase(), pageKey);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
@@ -69,6 +70,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
   }
 
   void updateSearch(value) {
+    if (value == '') {
+      controller.clear();
+    }
     _pagingController.refresh();
   }
 
@@ -139,9 +143,17 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
                       return true;
                     },
-                    child: DiscoverList(
-                      pagingController: _pagingController,
-                    )
+                    child: PageTransitionSwitcher(
+                        reverse: isOnFollow,
+                        transitionBuilder: (child, animation, secondaryAnimation) {
+                          return SharedAxisTransition(
+                            animation: animation,
+                            secondaryAnimation: secondaryAnimation,
+                            transitionType: SharedAxisTransitionType.horizontal,
+                            child: child,
+                          );
+                        },
+                        child: isOnFollow ? FollowList(pagingController: _pagingController,) : DiscoverList(pagingController: _pagingController,),),
                   ),
                 ),),
           ),
