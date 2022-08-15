@@ -26,18 +26,23 @@ class _DiscoverPageState extends State<DiscoverPage> {
   bool isOnRecipe = true;
   static const _pageSize = 20;
   final PagingController<int, Recipe> _pagingController = PagingController(firstPageKey: 0);
+  final PagingController<int, AppUser> _pagingControllerUsers = PagingController(firstPageKey: 0);
 
   @override
   void initState() {
     _pagingController.addPageRequestListener((pageKey) {
       _fetchPage(pageKey);
     });
+    _pagingControllerUsers.addPageRequestListener((pageKey) {
+      _fetchPageUsers(pageKey);
+    });
     super.initState();
   }
 
   Future<void> _fetchPage(int pageKey) async {
     try {
-      final newItems = await Provider.of<AppProvider>(context, listen: false).searchRecipesExplore(_pageSize, controller.text.toLowerCase(), pageKey);
+      final newItems = await Provider.of<AppProvider>(context, listen: false)
+          .searchRecipesExplore(_pageSize, controller.text.toLowerCase(), pageKey);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
@@ -50,10 +55,27 @@ class _DiscoverPageState extends State<DiscoverPage> {
     }
   }
 
+  Future<void> _fetchPageUsers(int pageKey) async {
+    try {
+      final newItems = await Provider.of<AppProvider>(context, listen: false)
+          .searchPeopleExplore(_pageSize, controller.text.toLowerCase(), pageKey);
+      final isLastPage = newItems.length < _pageSize;
+      if (isLastPage) {
+        _pagingControllerUsers.appendLastPage(newItems);
+      } else {
+        final nextPageKey = pageKey + newItems.length;
+        _pagingControllerUsers.appendPage(newItems, nextPageKey);
+      }
+    } catch (error) {
+      _pagingControllerUsers.error = error;
+    }
+  }
+
   @override
   void dispose() {
     controller.dispose();
     _pagingController.dispose();
+    _pagingControllerUsers.dispose();
     super.dispose();
   }
 
@@ -74,10 +96,27 @@ class _DiscoverPageState extends State<DiscoverPage> {
       controller.clear();
     }
     _pagingController.refresh();
+    _pagingControllerUsers.refresh();
   }
 
   @override
   Widget build(BuildContext context) {
+    Widget getList() {
+      if (controller.text == '') {
+        return const SizedBox();
+      } else {
+        return isOnFollow
+            ? FollowList(
+                pagingController: _pagingController,
+              )
+            : DiscoverList(
+                pagingController: _pagingController,
+          isOnRecipes: isOnRecipe,
+          pagingControllerUsers: _pagingControllerUsers,
+              );
+      }
+    }
+
     return Scaffold(
       appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
       body: NestedScrollView(
@@ -86,7 +125,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
           return <Widget>[
             SliverAppBar(
               elevation: 0,
-              flexibleSpace: DiscoverHeader(change: change, isOnFollow: isOnFollow,),
+              flexibleSpace: DiscoverHeader(
+                change: change,
+                isOnFollow: isOnFollow,
+              ),
               floating: true,
               toolbarHeight: 110,
               snap: false,
@@ -117,45 +159,50 @@ class _DiscoverPageState extends State<DiscoverPage> {
               return true;
             },
             child: PageTransitionSwitcher(
-                reverse: true,
-                transitionBuilder: (child, animation, secondaryAnimation) {
-                  return SharedAxisTransition(
-                    animation: animation,
-                    secondaryAnimation: secondaryAnimation,
-                    transitionType: SharedAxisTransitionType.horizontal,
-                    child: child,
-                  );
+              reverse: true,
+              transitionBuilder: (child, animation, secondaryAnimation) {
+                return SharedAxisTransition(
+                  animation: animation,
+                  secondaryAnimation: secondaryAnimation,
+                  transitionType: SharedAxisTransitionType.horizontal,
+                  child: child,
+                );
+              },
+              child: GestureDetector(
+                onTap: () {
+                  FocusScope.of(context).unfocus();
                 },
-                child: GestureDetector(
-                  onTap: () {
-                    FocusScope.of(context).unfocus();
-                  },
-                  onPanDown: (_) {
-                    FocusScope.of(context).unfocus();
-                  },
-                  child: NotificationListener<UserScrollNotification>(
-                    onNotification: (not) {
-                      if (not.direction == ScrollDirection.forward) {
-                        widget.buttonOn();
-                      } else if (not.direction == ScrollDirection.reverse) {
-                        widget.buttonOff();
-                      }
+                onPanDown: (_) {
+                  FocusScope.of(context).unfocus();
+                },
+                child: NotificationListener<UserScrollNotification>(
+                  onNotification: (not) {
+                    if (not.direction == ScrollDirection.forward) {
+                      widget.buttonOn();
+                    } else if (not.direction == ScrollDirection.reverse) {
+                      widget.buttonOff();
+                    }
 
-                      return true;
+                    return true;
+                  },
+                  child: PageTransitionSwitcher(
+                    reverse: isOnFollow,
+                    transitionBuilder: (child, animation, secondaryAnimation) {
+                      return SharedAxisTransition(
+                        animation: animation,
+                        secondaryAnimation: secondaryAnimation,
+                        transitionType: SharedAxisTransitionType.horizontal,
+                        child: child,
+                      );
                     },
-                    child: PageTransitionSwitcher(
-                        reverse: isOnFollow,
-                        transitionBuilder: (child, animation, secondaryAnimation) {
-                          return SharedAxisTransition(
-                            animation: animation,
-                            secondaryAnimation: secondaryAnimation,
-                            transitionType: SharedAxisTransitionType.horizontal,
-                            child: child,
-                          );
-                        },
-                        child: isOnFollow ? FollowList(pagingController: _pagingController,) : DiscoverList(pagingController: _pagingController,),),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: getList(),
+                    ),
                   ),
-                ),),
+                ),
+              ),
+            ),
           ),
         ),
       ),

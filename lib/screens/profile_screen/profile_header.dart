@@ -1,7 +1,5 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:spork/components/buttons/custom_button.dart';
 import 'package:spork/components/my_switcher.dart';
 import 'package:spork/components/profile_image.dart';
 import 'package:spork/models/models.dart';

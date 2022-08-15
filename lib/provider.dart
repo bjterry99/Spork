@@ -25,6 +25,12 @@ class AppProvider extends ChangeNotifier {
       phone: '',
     );
 
+    myHome = MyHome(
+      id: user.homeId,
+      name: '',
+      creatorId: ''
+    );
+
     _subscribeStreams();
   }
 
@@ -59,6 +65,7 @@ class AppProvider extends ChangeNotifier {
 
   var fireUser = _auth.currentUser;
   late AppUser user;
+  late MyHome? myHome;
 
   void _subscribeStreams() {
     // Firebase User Stream
@@ -552,6 +559,43 @@ class AppProvider extends ChangeNotifier {
       }
     } else {
       return <Recipe>[];
+    }
+  }
+
+  Future<List<AppUser>> searchPeopleExplore(int pageSize, String query, int page) async {
+    if (query != '') {
+      if (page != 0) {
+        final skipThese = await _firestore
+            .collection('users')
+            .where('queryName', isNotEqualTo: user.queryName)
+            .where('queryName', isGreaterThanOrEqualTo: query)
+            .limit(page)
+            .get();
+        final lastVisible = skipThese.docs[skipThese.size - 1];
+
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('users')
+            .where('queryName', isNotEqualTo: user.queryName)
+            .where('queryName', isGreaterThanOrEqualTo: query)
+            .startAt([lastVisible])
+            .limit(pageSize)
+            .get();
+
+        List<AppUser> users = snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList();
+        return users;
+      } else {
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('users')
+            .where('queryName', isNotEqualTo: user.queryName)
+            .where('queryName', isGreaterThanOrEqualTo: query)
+            .limit(pageSize)
+            .get();
+
+        List<AppUser> users = snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList();
+        return users;
+      }
+    } else {
+      return <AppUser>[];
     }
   }
 
