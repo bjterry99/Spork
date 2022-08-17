@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fire_auth;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,11 +13,12 @@ import 'package:spork/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 final _firestore = FirebaseFirestore.instance;
-final _auth = FirebaseAuth.instance;
 
 class AppProvider extends ChangeNotifier {
   AppProvider() {
-    user = AppUser(
+    _auth = fire_auth.FirebaseAuth.instance;
+
+    _user = AppUser(
       id: _auth.currentUser?.uid ?? '',
       name: '',
       userName: '',
@@ -25,13 +26,7 @@ class AppProvider extends ChangeNotifier {
       phone: '',
     );
 
-    myHome = MyHome(
-      id: user.homeId,
-      name: '',
-      creatorId: ''
-    );
-
-    _subscribeStreams();
+    _subscribeFireUser();
   }
 
   /// Widgets ///
@@ -63,33 +58,49 @@ class AppProvider extends ChangeNotifier {
   final List<StreamSubscription> _subscriptions = [];
   void subscribe(StreamSubscription subscription) => _subscriptions.add(subscription);
 
-  var fireUser = _auth.currentUser;
-  late AppUser user;
-  late MyHome? myHome;
+  Future unsubscribe(StreamSubscription subscription) async => await subscription.cancel();
+  void unsubscribeAll() {
+    for (var subscription in _subscriptions) {
+      unsubscribe(subscription);
+    }
+  }
 
-  void _subscribeStreams() {
+  @override
+  void dispose() {
+    super.dispose();
+    unsubscribeAll();
+  }
+
+  late fire_auth.FirebaseAuth _auth;
+  fire_auth.User? _fireUser;
+  late AppUser _user;
+
+  AppUser get user => _user;
+  fire_auth.User? get fireUser => _fireUser;
+
+  void _subscribeFireUser() {
     // Firebase User Stream
     subscribe(_auth.authStateChanges().listen((data) {
-      fireUser = data;
+      _fireUser = data;
       notifyListeners();
     }, onError: (error) {
       NotificationService.notify("Failed to get authentication data.");
     }));
+  }
 
+  void subscribeUser() {
     // User stream
-    if (fireUser != null) {
-      subscribe(_firestore
-          .collection('users')
-          .doc(fireUser!.uid)
-          .snapshots()
-          .map((snapshot) => AppUser.fromJson(snapshot.data()!))
-          .listen((data) {
-        user = data;
-        notifyListeners();
-      }, onError: (error) {
-        NotificationService.notify("Failed to get user info.");
-      }));
-    }
+    subscribe(_firestore
+        .collection('users')
+        .doc(_fireUser!.uid)
+        .snapshots()
+        .map((snapshot) => AppUser.fromJson(snapshot.data()!))
+        .listen((data) {
+      _user = data;
+      notifyListeners();
+    }, onError: (error) {
+      NotificationService.notify("Failed to get user info.");
+    }));
   }
 
   Stream<List<Recipe>> recipeStream = _firestore
@@ -120,6 +131,14 @@ class AppProvider extends ChangeNotifier {
     return _firestore.collection('users').where('followers', arrayContains: id).snapshots();
   }
 
+  Stream<QuerySnapshot<Object?>> specificHomeInvite(String id) {
+    return _firestore.collection('homeInvites').where('id', isEqualTo: '${_user.id}_$id').snapshots();
+  }
+
+  Stream<QuerySnapshot<Object?>> specificHome(String id) {
+    return _firestore.collection('homes').where('users', arrayContains: id).snapshots();
+  }
+
   /// Functions ///
 
   // User Stuff //
@@ -129,8 +148,8 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> syncUser() async {
-    var ref = await _firestore.collection('users').doc(fireUser!.uid).get();
-    user = AppUser.fromJson(ref.data()!);
+    var ref = await _firestore.collection('users').doc(_fireUser!.uid).get();
+    _user = AppUser.fromJson(ref.data()!);
     notifyListeners();
   }
 
@@ -178,11 +197,11 @@ class AppProvider extends ChangeNotifier {
     return false;
   }
 
-  Future<bool> sync(PhoneAuthCredential? credential, String? verifyId, String? code) async {
+  Future<bool> sync(fire_auth.PhoneAuthCredential? credential, String? verifyId, String? code) async {
     try {
       bool check = true;
-      PhoneAuthCredential myCredential =
-          credential ?? PhoneAuthProvider.credential(verificationId: verifyId!, smsCode: code!);
+      fire_auth.PhoneAuthCredential myCredential =
+          credential ?? fire_auth.PhoneAuthProvider.credential(verificationId: verifyId!, smsCode: code!);
 
       _auth.signInWithCredential(myCredential).then((value) async {
         NotificationService.notify("Phone number verified.");
@@ -238,10 +257,10 @@ class AppProvider extends ChangeNotifier {
 
       await _auth.verifyPhoneNumber(
         phoneNumber: number,
-        verificationCompleted: (PhoneAuthCredential credential) async {
+        verificationCompleted: (fire_auth.PhoneAuthCredential credential) async {
           await sync(credential, null, null);
         },
-        verificationFailed: (FirebaseAuthException e) {
+        verificationFailed: (fire_auth.FirebaseAuthException e) {
           if (e.code == 'invalid-phone-number') {
             NotificationService.notify("Invalid phone number. Please try again.");
           } else if (e.code == 'phone-number-already-in-use') {
@@ -486,7 +505,7 @@ class AppProvider extends ChangeNotifier {
       var homeRef = _firestore.collection('homes').doc();
       home.id = homeRef.id;
 
-      var userRef = _firestore.collection('users').doc(user.id);
+      var userRef = _firestore.collection('users').doc(_user.id);
 
       await homeRef.set(home.toJson());
       await userRef.update({
@@ -507,6 +526,66 @@ class AppProvider extends ChangeNotifier {
       });
     } catch (error) {
       NotificationService.notify('Failed to update Home.');
+    }
+  }
+
+  Future<void> inviteToHome(String id) async {
+    try {
+      NotificationService.notify('Inviting to Home...');
+
+      var inviteRef = _firestore.collection('homeInvites').doc('${_user.id}_$id');
+      HomeInvite invite = HomeInvite(id: '${_user.id}_$id', inviterId: _user.id, receiverId: id);
+      await inviteRef.set(invite.toJson());
+    } catch (error) {
+      NotificationService.notify('Failed to invite to Home.');
+    }
+  }
+
+  Future<void> removeInviteToHome(String id) async {
+    try {
+      var inviteRef = _firestore.collection('homeInvites').doc(id);
+      await inviteRef.delete();
+    } catch (error) {
+      NotificationService.notify('Failed to invite to Home.');
+    }
+  }
+
+  Future<void> removeFromHome(String id) async {
+    try {
+      NotificationService.notify('Removing from Home...');
+
+      var ref = _firestore.collection('homes').doc(_user.homeId);
+      await ref.update({
+        "users": FieldValue.arrayRemove([id])
+      });
+    } catch (error) {
+      NotificationService.notify('Failed to invite to Home.');
+    }
+  }
+
+  Future<void> follow(String id) async {
+    try {
+      NotificationService.notify('Following...');
+
+      var ref = _firestore.collection('users').doc(id);
+      await ref.update({
+        "followers": FieldValue.arrayUnion([_user.id])
+      });
+    } catch (error) {
+      NotificationService.notify('Failed to follow user.');
+    }
+  }
+
+  Future<void> unfollow(String id) async {
+    try {
+      NotificationService.notify('Unfollowing...');
+
+      var ref = _firestore.collection('users').doc(id);
+      await ref.update({
+        "followers": FieldValue.arrayRemove([_user.id])
+      });
+    } catch (error) {
+      NotificationService.notify('Failed to unfollow user.');
     }
   }
 
@@ -567,7 +646,7 @@ class AppProvider extends ChangeNotifier {
       if (page != 0) {
         final skipThese = await _firestore
             .collection('users')
-            .where('queryName', isNotEqualTo: user.queryName)
+            .where('queryName', isNotEqualTo: _user.queryName)
             .where('queryName', isGreaterThanOrEqualTo: query)
             .limit(page)
             .get();
@@ -575,7 +654,7 @@ class AppProvider extends ChangeNotifier {
 
         QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
             .collection('users')
-            .where('queryName', isNotEqualTo: user.queryName)
+            .where('queryName', isNotEqualTo: _user.queryName)
             .where('queryName', isGreaterThanOrEqualTo: query)
             .startAt([lastVisible])
             .limit(pageSize)
@@ -586,7 +665,7 @@ class AppProvider extends ChangeNotifier {
       } else {
         QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
             .collection('users')
-            .where('queryName', isNotEqualTo: user.queryName)
+            .where('queryName', isNotEqualTo: _user.queryName)
             .where('queryName', isGreaterThanOrEqualTo: query)
             .limit(pageSize)
             .get();

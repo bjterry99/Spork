@@ -109,3 +109,19 @@ class MyHome {
   factory MyHome.fromJson(Map<String, dynamic> json) => _$MyHomeFromJson(json);
   Map<String, dynamic> toJson() => _$MyHomeToJson(this);
 }
+
+@JsonSerializable()
+class HomeInvite {
+  String id;
+  String inviterId;
+  String receiverId;
+
+  HomeInvite({
+    required this.id,
+    required this.inviterId,
+    required this.receiverId,
+  });
+
+  factory HomeInvite.fromJson(Map<String, dynamic> json) => _$HomeInviteFromJson(json);
+  Map<String, dynamic> toJson() => _$HomeInviteToJson(this);
+}

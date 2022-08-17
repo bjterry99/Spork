@@ -15,7 +15,7 @@ class MyHomeScreenLoad extends StatelessWidget {
     AppUser user = Provider.of<AppProvider>(context).user;
 
     return FutureBuilder<MyHome?>(
-      future: Provider.of<AppProvider>(context).fetchHome(user.homeId),
+      future: Provider.of<AppProvider>(context, listen: false).fetchHome(user.homeId),
       builder: (builder, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasData) {

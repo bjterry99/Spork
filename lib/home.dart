@@ -25,6 +25,12 @@ class _HomeState extends State<Home> {
   final FocusNode myFocusNode = FocusNode();
 
   @override
+  void initState() {
+    Provider.of<AppProvider>(context, listen: false).subscribeUser();
+    super.initState();
+  }
+
+  @override
   void dispose() {
     textController.dispose();
     controller.dispose();

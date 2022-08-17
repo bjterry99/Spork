@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:spork/home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -26,14 +27,24 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AppProvider()),
       ],
-      child: Builder(builder: (context) {
-        return MaterialApp(
-          scaffoldMessengerKey: NotificationService.key,
-          debugShowCheckedModeBanner: false,
-          theme: theme,
-          home: Provider.of<AppProvider>(context).user.id == '' ? const SignIn() : const Home(),
-        );
-      }),
+      child: Builder(
+        builder: (context) {
+          return MaterialApp(
+            scaffoldMessengerKey: NotificationService.key,
+            debugShowCheckedModeBanner: false,
+            theme: theme,
+            home: Builder(
+              builder: (context) {
+                if (Provider.of<AppProvider>(context).fireUser == null) {
+                  return const SignIn();
+                } else {
+                  return const Home();
+                }
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }

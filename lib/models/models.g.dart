@@ -118,3 +118,16 @@ Map<String, dynamic> _$MyHomeToJson(MyHome instance) => <String, dynamic>{
       'creatorId': instance.creatorId,
       'users': instance.users,
     };
+
+HomeInvite _$HomeInviteFromJson(Map<String, dynamic> json) => HomeInvite(
+      id: json['id'] as String,
+      inviterId: json['inviterId'] as String,
+      receiverId: json['receiverId'] as String,
+    );
+
+Map<String, dynamic> _$HomeInviteToJson(HomeInvite instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'inviterId': instance.inviterId,
+      'receiverId': instance.receiverId,
+    };

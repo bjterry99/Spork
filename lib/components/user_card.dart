@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:spork/components/profile_image.dart';
 import 'package:spork/models/models.dart';
+import 'package:spork/notification_service.dart';
 import 'package:spork/theme.dart';
 import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserCard extends StatelessWidget {
   const UserCard(this.user, {Key? key}) : super(key: key);
@@ -12,38 +14,6 @@ class UserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppUser appUser = Provider.of<AppProvider>(context).user;
-    MyHome? home = Provider.of<AppProvider>(context).myHome;
-
-    Widget getHomeIcon() {
-      if (home != null) {
-        if (home.creatorId == appUser.id) {
-          if (home.users.contains(user.id)) {
-            return IconButton(
-              padding: const EdgeInsets.all(5),
-              splashRadius: 20,
-              splashColor: CustomColors.secondary,
-              color: CustomColors.secondary,
-              onPressed: () {},
-              icon: const Icon(
-                Icons.home,
-              ),
-            );
-          } else {
-            return IconButton(
-              padding: const EdgeInsets.all(5),
-              splashRadius: 20,
-              splashColor: CustomColors.secondary,
-              color: CustomColors.secondary,
-              onPressed: () {},
-              icon: const Icon(
-                Icons.home_outlined,
-              ),
-            );
-          }
-        }
-      }
-      return const SizedBox();
-    }
 
     return Padding(
       padding: const EdgeInsets.only(
@@ -79,13 +49,68 @@ class UserCard extends StatelessWidget {
                   ),
                   Row(
                     children: [
+                      StreamBuilder<QuerySnapshot>(
+                        stream: Provider.of<AppProvider>(context, listen: false).numberFollowing(appUser.id),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final users = snapshot.data?.docs;
+                            List<String> ids = [];
+
+                            for (var item in users!) {
+                              ids.add(item.id.toString());
+                            }
+                            bool isFollowing = ids.contains(user.id);
+
+                            if (inHome) {
+                              return IconButton(
+                                padding: const EdgeInsets.all(5),
+                                splashRadius: 20,
+                                splashColor: CustomColors.secondary,
+                                color: CustomColors.secondary,
+                                onPressed: () async {
+                                  await Provider.of<AppProvider>(context, listen: false).removeFromHome(user.id);
+                                },
+                                icon: const Icon(
+                                  Icons.home,
+                                ),
+                              );
+                            } else {
+                              return IconButton(
+                                padding: const EdgeInsets.all(5),
+                                splashRadius: 20,
+                                splashColor: CustomColors.secondary,
+                                color: CustomColors.secondary,
+                                onPressed: () async {
+                                  await Provider.of<AppProvider>(context, listen: false).inviteToHome(user.id);
+                                },
+                                icon: const Icon(
+                                  Icons.home_outlined,
+                                ),
+                              );
+                            }
+                          } else {
+                            return IconButton(
+                              padding: const EdgeInsets.all(5),
+                              splashRadius: 20,
+                              splashColor: CustomColors.secondary,
+                              color: CustomColors.secondary,
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.home_outlined,
+                              ),
+                            );
+                          }
+                        },
+                      ),
                       user.followers.contains(appUser.id)
                           ? IconButton(
                               padding: const EdgeInsets.all(5),
                               splashRadius: 20,
                               splashColor: CustomColors.secondary,
                               color: CustomColors.secondary,
-                              onPressed: () {},
+                              onPressed: () async {
+                                await Provider.of<AppProvider>(context, listen: false).unfollow(user.id);
+                              },
                               icon: const Icon(
                                 Icons.group_remove,
                               ),
@@ -95,21 +120,143 @@ class UserCard extends StatelessWidget {
                               splashRadius: 20,
                               splashColor: CustomColors.secondary,
                               color: CustomColors.secondary,
-                              onPressed: () {},
+                              onPressed: () async {
+                                await Provider.of<AppProvider>(context, listen: false).follow(user.id);
+                              },
                               icon: const Icon(
                                 Icons.group_add_outlined,
                               ),
                             ),
-                      getHomeIcon(),
+                      appUser.homeId != ''
+                          ? FutureBuilder<MyHome?>(
+                              future: Provider.of<AppProvider>(context, listen: false).fetchHome(appUser.homeId),
+                              builder: (builder, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.done) {
+                                  if (snapshot.hasData) {
+                                    MyHome myHome = snapshot.data!;
+
+                                    if (myHome.creatorId == appUser.id) {
+                                      return StreamBuilder<QuerySnapshot>(
+                                        stream: Provider.of<AppProvider>(context, listen: false)
+                                            .specificHomeInvite(user.id),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.hasData) {
+                                            final invites = snapshot.data?.docs;
+                                            List<String> ids = [];
+
+                                            for (var item in invites!) {
+                                              ids.add(item.id.toString());
+                                            }
+                                            bool inviteExists = ids.contains('${appUser.id}_${user.id}');
+
+                                            if (inviteExists) {
+                                              return IconButton(
+                                                padding: const EdgeInsets.all(5),
+                                                splashRadius: 20,
+                                                splashColor: CustomColors.secondary,
+                                                color: CustomColors.secondary,
+                                                onPressed: () async {
+                                                  NotificationService.notify('Uninviting to Home...');
+                                                  await Provider.of<AppProvider>(context, listen: false)
+                                                      .removeInviteToHome('${appUser.id}_${user.id}');
+                                                },
+                                                icon: const Icon(
+                                                  Icons.home,
+                                                ),
+                                              );
+                                            } else {
+                                              return StreamBuilder<QuerySnapshot>(
+                                                stream: Provider.of<AppProvider>(context, listen: false)
+                                                    .specificHome(user.id),
+                                                builder: (context, snapshot) {
+                                                  if (snapshot.hasData) {
+                                                    final homes = snapshot.data?.docs;
+                                                    List<String> ids = [];
+
+                                                    for (var item in homes!) {
+                                                      ids.add(item.id.toString());
+                                                    }
+                                                    bool inHome = ids.contains(appUser.homeId);
+
+                                                    if (inHome) {
+                                                      return IconButton(
+                                                        padding: const EdgeInsets.all(5),
+                                                        splashRadius: 20,
+                                                        splashColor: CustomColors.secondary,
+                                                        color: CustomColors.secondary,
+                                                        onPressed: () async {
+                                                          await Provider.of<AppProvider>(context, listen: false)
+                                                              .removeFromHome(user.id);
+                                                        },
+                                                        icon: const Icon(
+                                                          Icons.home,
+                                                        ),
+                                                      );
+                                                    } else {
+                                                      return IconButton(
+                                                        padding: const EdgeInsets.all(5),
+                                                        splashRadius: 20,
+                                                        splashColor: CustomColors.secondary,
+                                                        color: CustomColors.secondary,
+                                                        onPressed: () async {
+                                                          await Provider.of<AppProvider>(context, listen: false)
+                                                              .inviteToHome(user.id);
+                                                        },
+                                                        icon: const Icon(
+                                                          Icons.home_outlined,
+                                                        ),
+                                                      );
+                                                    }
+                                                  } else {
+                                                    return IconButton(
+                                                      padding: const EdgeInsets.all(5),
+                                                      splashRadius: 20,
+                                                      splashColor: CustomColors.secondary,
+                                                      color: CustomColors.secondary,
+                                                      onPressed: () {},
+                                                      icon: const Icon(
+                                                        Icons.home_outlined,
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                              );
+                                            }
+                                          } else {
+                                            return IconButton(
+                                              padding: const EdgeInsets.all(5),
+                                              splashRadius: 20,
+                                              splashColor: CustomColors.secondary,
+                                              color: CustomColors.secondary,
+                                              onPressed: () {},
+                                              icon: const Icon(
+                                                Icons.home_outlined,
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      );
+                                    } else {
+                                      return const SizedBox();
+                                    }
+                                  } else {
+                                    return const SizedBox();
+                                  }
+                                } else {
+                                  return const SizedBox();
+                                }
+                              },
+                            )
+                          : const SizedBox(),
                       IconButton(
-                          padding: const EdgeInsets.all(5),
-                          splashRadius: 20,
-                          splashColor: CustomColors.secondary,
-                          color: CustomColors.secondary,
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.report_gmailerrorred_rounded,
-                          ),
+                        padding: const EdgeInsets.all(5),
+                        splashRadius: 20,
+                        splashColor: CustomColors.secondary,
+                        color: CustomColors.secondary,
+                        onPressed: () {},
+                        icon: const Icon(
+                          Icons.report_gmailerrorred_rounded,
+                        ),
                       ),
                     ],
                   )
