@@ -13,7 +13,7 @@ class GroceryList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Grocery>>(
-      stream: Provider.of<AppProvider>(context, listen: false).groceryStream,
+      stream: Provider.of<AppProvider>(context, listen: false).groceryStream(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final items = snapshot.data;

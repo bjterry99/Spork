@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:spork/components/search_bar.dart';
 import 'package:spork/provider.dart';
+import 'package:spork/screens/grocery_screen/grocery_header.dart';
 import 'package:spork/screens/grocery_screen/grocery_list.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
+import 'package:spork/screens/grocery_screen/grocery_search_bar.dart';
 import 'package:spork/theme.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:provider/provider.dart';
@@ -53,10 +55,10 @@ class _GroceryScreenState extends State<GroceryScreen> {
 
   void saveItem() async {
     widget.toggleInputOff();
-    // setState(() {
-    //   canSave = false;
-    //   query = '';
-    // });
+    setState(() {
+      canSave = false;
+      query = '';
+    });
     if (widget.controller.text != '') {
       await Provider.of<AppProvider>(context, listen: false).addGroceryItem(widget.controller.text);
     }
@@ -79,47 +81,46 @@ class _GroceryScreenState extends State<GroceryScreen> {
             Expanded(
               child: NestedScrollView(
                 floatHeaderSlivers: true,
-                headerSliverBuilder:
-                    (BuildContext context, bool innerBoxIsScrolled) {
+                headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
                   return <Widget>[
-                    SliverAppBar(
+                    const SliverAppBar(
                       elevation: 0,
-                      flexibleSpace: Padding(
-                        padding:
-                            const EdgeInsets.only(left: 20, right: 20, top: 10),
-                        child: SearchBar(
-                          text: "I'm looking for...",
-                          search: search,
-                          controller: controller,
-                        )
-                      ),
+                      flexibleSpace: GroceryHeader(),
                       floating: true,
                       toolbarHeight: 60,
-                      snap: true,
+                      snap: false,
                       backgroundColor: Colors.transparent,
+                    ),
+                    SliverPersistentHeader(
+                      pinned: true,
+                      floating: false,
+                      delegate: DelegateGrocery(search, controller),
                     ),
                   ];
                 },
-                body: GestureDetector(
-                  onTap: () {
-                    FocusScope.of(context).unfocus();
-                    widget.toggleInputOff();
-                  },
-                  onPanDown: (_) {
-                    FocusScope.of(context).unfocus();
-                  },
-                  child: NotificationListener<UserScrollNotification>(
-                    onNotification: (not) {
-                      if (not.direction == ScrollDirection.forward) {
-                        widget.buttonOn();
-                      } else if (not.direction == ScrollDirection.reverse) {
-                        widget.buttonOff();
-                      }
-
-                      return true;
+                body: Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: GestureDetector(
+                    onTap: () {
+                      FocusScope.of(context).unfocus();
+                      widget.toggleInputOff();
                     },
-                    child: GroceryList(
-                      query: query,
+                    onPanDown: (_) {
+                      FocusScope.of(context).unfocus();
+                    },
+                    child: NotificationListener<UserScrollNotification>(
+                      onNotification: (not) {
+                        if (not.direction == ScrollDirection.forward) {
+                          widget.buttonOn();
+                        } else if (not.direction == ScrollDirection.reverse) {
+                          widget.buttonOff();
+                        }
+
+                        return true;
+                      },
+                      child: GroceryList(
+                        query: query,
+                      ),
                     ),
                   ),
                 ),

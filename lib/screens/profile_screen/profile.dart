@@ -78,34 +78,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ];
           },
-          body: GestureDetector(
-            onTap: () {
-              FocusScope.of(context).unfocus();
-            },
-            onPanDown: (_) {
-              FocusScope.of(context).unfocus();
-            },
-            child: NotificationListener<UserScrollNotification>(
-              onNotification: (not) {
-                if (not.direction == ScrollDirection.forward) {
-                  widget.buttonOn();
-                } else if (not.direction == ScrollDirection.reverse) {
-                  widget.buttonOff();
-                }
-
-                return true;
+          body: Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: GestureDetector(
+              onTap: () {
+                FocusScope.of(context).unfocus();
               },
-              child: PageTransitionSwitcher(
-                  reverse: isOnRecipe,
-                  transitionBuilder: (child, animation, secondaryAnimation) {
-                    return SharedAxisTransition(
-                      animation: animation,
-                      secondaryAnimation: secondaryAnimation,
-                      transitionType: SharedAxisTransitionType.horizontal,
-                      child: child,
-                    );
-                  },
-                  child: isOnRecipe ? RecipesList(query: query) : MenuList(query: query,)),
+              onPanDown: (_) {
+                FocusScope.of(context).unfocus();
+              },
+              child: NotificationListener<UserScrollNotification>(
+                onNotification: (not) {
+                  if (not.direction == ScrollDirection.forward) {
+                    widget.buttonOn();
+                  } else if (not.direction == ScrollDirection.reverse) {
+                    widget.buttonOff();
+                  }
+
+                  return true;
+                },
+                child: PageTransitionSwitcher(
+                    reverse: isOnRecipe,
+                    transitionBuilder: (child, animation, secondaryAnimation) {
+                      return SharedAxisTransition(
+                        animation: animation,
+                        secondaryAnimation: secondaryAnimation,
+                        transitionType: SharedAxisTransitionType.horizontal,
+                        child: child,
+                      );
+                    },
+                    child: isOnRecipe ? RecipesList(query: query) : MenuList(query: query,)),
+              ),
             ),
           ),
         ),

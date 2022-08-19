@@ -22,7 +22,7 @@ class GroceryCard extends StatelessWidget {
         },
         key: Key(item.id),
         child: Card(
-          elevation: 1,
+          elevation: 3,
           color: CustomColors.white,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

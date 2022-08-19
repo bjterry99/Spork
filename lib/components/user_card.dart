@@ -228,7 +228,9 @@ class UserCard extends StatelessWidget {
                         splashRadius: 20,
                         splashColor: CustomColors.secondary,
                         color: CustomColors.secondary,
-                        onPressed: () {},
+                        onPressed: () async {
+                          await Provider.of<AppProvider>(context, listen: false).reportUser(user.id);
+                        },
                         icon: const Icon(
                           Icons.report_gmailerrorred_rounded,
                         ),

@@ -41,7 +41,7 @@ class RecipeCard extends StatelessWidget {
         bottom: 5,
       ),
       child: Card(
-        elevation: 1,
+        elevation: 3,
         color: CustomColors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Column(

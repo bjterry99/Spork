@@ -113,10 +113,13 @@ class AppProvider extends ChangeNotifier {
       .snapshots()
       .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
 
-  Stream<List<Grocery>> groceryStream = _firestore
-      .collection('grocery')
-      .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => Grocery.fromJson(doc.data())).toList());
+  Stream<List<Grocery>> groceryStream() {
+    if (_user.homeId == '') {
+      return _firestore.collection('grocery').where('creatorId', isEqualTo: _user.id).snapshots().map((snapshot) => snapshot.docs.map((doc) => Grocery.fromJson(doc.data())).toList());
+    } else {
+      return _firestore.collection('grocery').where('homeId', isEqualTo: _user.homeId).snapshots().map((snapshot) => snapshot.docs.map((doc) => Grocery.fromJson(doc.data())).toList());
+    }
+  }
 
   Stream<List<AppUser>> userStream = _firestore
       .collection('users')
@@ -298,13 +301,28 @@ class AppProvider extends ChangeNotifier {
             amount: recipe.ingredientAmounts[i],
             recipeId: recipe.id,
             recipeName: recipe.name,
-            mark: false);
+            mark: false,
+            creatorId: _user.id,
+            homeId: _user.homeId,);
         await ref.set(grocery.toJson());
       }
 
       NotificationService.notify('Added to menu.');
     } catch (error) {
       NotificationService.notify('Failed to add to menu.');
+    }
+  }
+
+  Future<void> reportUser(String id) async {
+    NotificationService.notify('Reporting user...');
+
+    try {
+      var ref = _firestore.collection('reportedUsers').doc(id);
+      await ref.set({
+        'id': id,
+      });
+    } catch (error) {
+      NotificationService.notify('Failed to report user.');
     }
   }
 
@@ -413,7 +431,7 @@ class AppProvider extends ChangeNotifier {
   Future<void> addGroceryItem(String name) async {
     try {
       var ref = _firestore.collection('grocery').doc();
-      Grocery grocery = Grocery(id: ref.id, name: name, mark: false);
+      Grocery grocery = Grocery(id: ref.id, name: name, mark: false, creatorId: _user.id);
       await ref.set(grocery.toJson());
     } catch (error) {
       NotificationService.notify('Failed to add item.');
@@ -651,7 +669,6 @@ class AppProvider extends ChangeNotifier {
           final skipThese = await _firestore
               .collection('recipes')
               .where('creatorId', whereIn: followingList)
-              // .where('visibility', isNotEqualTo: 'private')
               .where('queryName', isGreaterThanOrEqualTo: query)
               .limit(page)
               .get();
@@ -660,59 +677,114 @@ class AppProvider extends ChangeNotifier {
           QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
               .collection('recipes')
               .where('creatorId', whereIn: followingList)
-              // .where('visibility', isNotEqualTo: 'private')
               .where('queryName', isGreaterThanOrEqualTo: query)
               .startAt([lastVisible])
-              .limit(pageSize)
               .get();
-
           List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
-          return recipes;
+
+          List<Recipe> sortedRecipes = [];
+          for (var recipe in recipes) {
+            if (recipe.visibility != 'private') {
+              sortedRecipes.add(recipe);
+              if (sortedRecipes.length == pageSize) {
+                return sortedRecipes;
+              }
+            }
+          }
+
+          return sortedRecipes;
         } else {
           QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
               .collection('recipes')
               .where('creatorId', whereIn: followingList)
-              // .where('visibility', isNotEqualTo: 'private')
               .where('queryName', isGreaterThanOrEqualTo: query)
-              .limit(pageSize)
               .get();
-
           List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
-          return recipes;
+
+          List<Recipe> sortedRecipes = [];
+          for (var recipe in recipes) {
+            if (recipe.visibility != 'private') {
+              sortedRecipes.add(recipe);
+              if (sortedRecipes.length == pageSize) {
+                return sortedRecipes;
+              }
+            }
+          }
+
+          return sortedRecipes;
         }
       } else {
         if (page != 0) {
           final skipThese = await _firestore
               .collection('recipes')
               .where('creatorId', whereIn: followingList)
-              .where('visibility', isNotEqualTo: 'private')
               .where('queryName', isGreaterThanOrEqualTo: query)
               .limit(page)
               .get();
           final lastVisible = skipThese.docs[skipThese.size - 1];
 
-          QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
-              .collection('recipes')
-              .where('creatorId', whereIn: followingList)
-              .where('visibility', isNotEqualTo: 'private')
-              .where('queryName', isGreaterThanOrEqualTo: query)
-              .startAt([lastVisible])
-              .limit(pageSize)
-              .get();
+          List<Recipe> recipes = [];
+          for (int i=0; i < followingList.length; i=i+10) {
+            List<String> someFollowing = [];
+            if (followingList.skip(i).length > 10) {
+              someFollowing.addAll(followingList.sublist(i, i + 10));
+            } else {
+              someFollowing.addAll(followingList.skip(i));
+            }
 
-          List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
-          return recipes;
+            QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+                .collection('recipes')
+                .where('creatorId', whereIn: followingList)
+                .where('visibility', isNotEqualTo: 'private')
+                .where('queryName', isGreaterThanOrEqualTo: query)
+                .startAt([lastVisible])
+                .get();
+
+            recipes.addAll(snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+          }
+
+          List<Recipe> sortedRecipes = [];
+          for (var recipe in recipes) {
+            if (recipe.visibility != 'private') {
+              sortedRecipes.add(recipe);
+              if (sortedRecipes.length == pageSize) {
+                return sortedRecipes;
+              }
+            }
+          }
+
+          return sortedRecipes;
         } else {
-          QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
-              .collection('recipes')
-              .where('creatorId', whereIn: followingList)
-              .where('visibility', isNotEqualTo: 'private')
-              .where('queryName', isGreaterThanOrEqualTo: query)
-              .limit(pageSize)
-              .get();
+          List<Recipe> recipes = [];
 
-          List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
-          return recipes;
+          for (int i=0; i < followingList.length; i=i+10) {
+            List<String> someFollowing = [];
+            if (followingList.skip(i).length > 10) {
+              someFollowing.addAll(followingList.sublist(i, i + 10));
+            } else {
+              someFollowing.addAll(followingList.skip(i));
+            }
+
+            QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+                .collection('recipes')
+                .where('creatorId', whereIn: someFollowing)
+                .where('queryName', isGreaterThanOrEqualTo: query)
+                .get();
+
+            recipes.addAll(snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+          }
+
+          List<Recipe> sortedRecipes = [];
+          for (var recipe in recipes) {
+            if (recipe.visibility != 'private') {
+              sortedRecipes.add(recipe);
+              if (sortedRecipes.length == pageSize) {
+                return sortedRecipes;
+              }
+            }
+          }
+
+          return sortedRecipes;
         }
       }
     } else {

@@ -114,17 +114,22 @@ class _HomeState extends State<Home> {
     }
 
     return Scaffold(
-        appBar: Provider.of<AppProvider>(context, listen: false)
-            .getZeroAppBar(CustomColors.white),
+        appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
         floatingActionButton: isFabVisible && _currentIndex != 2
             ? Padding(
                 padding: const EdgeInsets.all(15.0),
-                child: FloatingActionButton(
+                child: FloatingActionButton.extended(
                   elevation: 3,
                   backgroundColor: CustomColors.primary,
-                  child: const Icon(
-                    Icons.add_rounded,
+                  icon: Icon(
+                    _currentIndex == 0 ? Icons.restaurant_menu_rounded : Icons.shopping_cart_rounded,
                     color: CustomColors.white,
+                    size: 30,
+                  ),
+                  label: Text(
+                    _currentIndex == 0 ? 'Create' : 'Add',
+                    style: const TextStyle(
+                        color: CustomColors.white, fontWeight: FontWeight.w500, fontSize: CustomFontSize.big),
                   ),
                   onPressed: buttonAction,
                 ),
@@ -139,11 +144,9 @@ class _HomeState extends State<Home> {
         ),
         bottomNavigationBar: Container(
             decoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20), topLeft: Radius.circular(20)),
+              borderRadius: BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20)),
               boxShadow: [
-                BoxShadow(
-                    color: Colors.black38, spreadRadius: 0, blurRadius: 1.5),
+                BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 1.5),
               ],
             ),
             child: ClipRRect(
@@ -164,11 +167,8 @@ class _HomeState extends State<Home> {
                         child: ProfileImage(user.photoUrl, 25, 20),
                       ),
                       label: user.name),
-                  const BottomNavigationBarItem(
-                      icon: Icon(Icons.shopping_cart_rounded),
-                      label: 'Grocery'),
-                  const BottomNavigationBarItem(
-                      icon: Icon(Icons.public), label: 'Discover'),
+                  const BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_rounded), label: 'Grocery'),
+                  const BottomNavigationBarItem(icon: Icon(Icons.public), label: 'Discover'),
                 ],
               ),
             )));

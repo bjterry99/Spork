@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:spork/components/buttons/primary_button.dart';
+import 'package:spork/components/buttons/secondary_button.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/notification_service.dart';
 import 'package:spork/provider.dart';
@@ -36,9 +38,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
             child: TextFormField(
               initialValue: ingredients[i],
               style: const TextStyle(
-                  color: CustomColors.black,
-                  fontWeight: FontWeight.w400,
-                  fontSize: CustomFontSize.secondary),
+                  color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.secondary),
               textCapitalization: TextCapitalization.sentences,
               cursorColor: CustomColors.primary,
               onChanged: (String? newValue) {
@@ -63,9 +63,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
             child: TextFormField(
               initialValue: ingredientAmounts[i],
               style: const TextStyle(
-                  color: CustomColors.black,
-                  fontWeight: FontWeight.w400,
-                  fontSize: CustomFontSize.secondary),
+                  color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.secondary),
               cursorColor: CustomColors.primary,
               onChanged: (String? newValue) {
                 setState(() {
@@ -99,16 +97,14 @@ class _CreateRecipeState extends State<CreateRecipe> {
         TextFormField(
           keyboardType: TextInputType.multiline,
           maxLines: null,
-          initialValue: instructions[i-1],
+          initialValue: instructions[i - 1],
           style: const TextStyle(
-              color: CustomColors.black,
-              fontWeight: FontWeight.w400,
-              fontSize: CustomFontSize.secondary),
+              color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.secondary),
           textCapitalization: TextCapitalization.sentences,
           cursorColor: CustomColors.primary,
           onChanged: (String? newValue) {
             setState(() {
-              instructions[i-1] = newValue!;
+              instructions[i - 1] = newValue!;
             });
           },
           decoration: InputDecoration(
@@ -222,7 +218,8 @@ class _CreateRecipeState extends State<CreateRecipe> {
       Navigator.pop(context);
       await Provider.of<AppProvider>(context, listen: false).updateRecipe(widget.recipe!);
     } else {
-      await Provider.of<AppProvider>(context, listen: false).createRecipe(recipeName, recipeClass, cookTime, prepTime, recipeAmounts, recipeIngredients, recipeInstructions);
+      await Provider.of<AppProvider>(context, listen: false).createRecipe(
+          recipeName, recipeClass, cookTime, prepTime, recipeAmounts, recipeIngredients, recipeInstructions);
     }
   }
 
@@ -261,38 +258,36 @@ class _CreateRecipeState extends State<CreateRecipe> {
       },
       child: Scaffold(
         appBar: AppBar(
-          systemOverlayStyle: Platform.isIOS ? SystemUiOverlayStyle.light :
-          const SystemUiOverlayStyle(
-            statusBarColor: CustomColors.primary,
-            statusBarIconBrightness: Brightness.light,
-          ),
+          systemOverlayStyle: Platform.isIOS
+              ? SystemUiOverlayStyle.light
+              : const SystemUiOverlayStyle(
+                  statusBarColor: CustomColors.primary,
+                  statusBarIconBrightness: Brightness.light,
+                ),
           actions: [
             if (edit)
-            Padding(
-              padding: const EdgeInsets.only(right: 15),
-              child: GestureDetector(
-                onTap: delete,
-                child: const Icon(
-                  Icons.delete_outline,
-                  color: CustomColors.white,
-                  size: 25,
-                ),
-              )
-            ),
+              Padding(
+                  padding: const EdgeInsets.only(right: 15),
+                  child: GestureDetector(
+                    onTap: delete,
+                    child: const Icon(
+                      Icons.delete_outline,
+                      color: CustomColors.white,
+                      size: 25,
+                    ),
+                  )),
           ],
           title: Text(
             edit ? 'Edit Recipe' : 'Create New Recipe',
             style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: CustomFontSize.primary,
-                color: CustomColors.white),
+                fontWeight: FontWeight.w500, fontSize: CustomFontSize.primary, color: CustomColors.white),
           ),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(
               bottom: Radius.circular(20),
             ),
           ),
-          elevation: 1,
+          elevation: 3,
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -302,9 +297,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 TextFormField(
                   initialValue: recipeName,
                   style: const TextStyle(
-                      color: CustomColors.black,
-                      fontWeight: FontWeight.w400,
-                      fontSize: CustomFontSize.primary),
+                      color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
                   textCapitalization: TextCapitalization.words,
                   cursorColor: CustomColors.primary,
                   onChanged: (String? newValue) {
@@ -367,8 +360,10 @@ class _CreateRecipeState extends State<CreateRecipe> {
                               });
                             },
                           ),
-                          const Text('Main',
-                          style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),),
+                          const Text(
+                            'Main',
+                            style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
+                          ),
                           const Spacer(),
                           Radio<String>(
                             value: 'Side',
@@ -380,8 +375,10 @@ class _CreateRecipeState extends State<CreateRecipe> {
                               });
                             },
                           ),
-                          const Text('Side',
-                              style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),),
+                          const Text(
+                            'Side',
+                            style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
+                          ),
                           const Spacer(),
                           Radio<String>(
                             value: 'Dessert',
@@ -393,9 +390,13 @@ class _CreateRecipeState extends State<CreateRecipe> {
                               });
                             },
                           ),
-                          const Text('Dessert',
-                            style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),),
-                          const SizedBox(width: 15,)
+                          const Text(
+                            'Dessert',
+                            style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(
+                            width: 15,
+                          )
                         ],
                       )
                     ],
@@ -443,9 +444,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                         const Text(
                           'Prep time',
                           style: TextStyle(
-                              color: CustomColors.grey4,
-                              fontWeight: FontWeight.w400,
-                              fontSize: CustomFontSize.primary),
+                              color: CustomColors.grey4, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
                         ),
                         const SizedBox(
                           width: 22,
@@ -453,9 +452,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                         Text(
                           prepTime,
                           style: const TextStyle(
-                              color: CustomColors.black,
-                              fontWeight: FontWeight.w500,
-                              fontSize: CustomFontSize.primary),
+                              color: CustomColors.black, fontWeight: FontWeight.w500, fontSize: CustomFontSize.primary),
                         ),
                       ],
                     ),
@@ -474,11 +471,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
 
                       if (duration != null) {
                         String durationString = duration.toString();
-                        String hours = durationString.substring(
-                            0, durationString.indexOf(':'));
+                        String hours = durationString.substring(0, durationString.indexOf(':'));
                         durationString = durationString.replaceRange(0, int.parse(hours) > 9 ? 3 : 2, '');
-                        String minutes = durationString.substring(
-                            0, durationString.indexOf(':'));
+                        String minutes = durationString.substring(0, durationString.indexOf(':'));
 
                         setState(() {
                           cookTime = hours + ':' + minutes;
@@ -498,9 +493,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                         const Text(
                           'Cook time',
                           style: TextStyle(
-                              color: CustomColors.grey4,
-                              fontWeight: FontWeight.w400,
-                              fontSize: CustomFontSize.primary),
+                              color: CustomColors.grey4, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
                         ),
                         const SizedBox(
                           width: 17,
@@ -508,9 +501,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                         Text(
                           cookTime,
                           style: const TextStyle(
-                              color: CustomColors.black,
-                              fontWeight: FontWeight.w500,
-                              fontSize: CustomFontSize.primary),
+                              color: CustomColors.black, fontWeight: FontWeight.w500, fontSize: CustomFontSize.primary),
                         ),
                       ],
                     ),
@@ -538,33 +529,30 @@ class _CreateRecipeState extends State<CreateRecipe> {
                       const Text(
                         'Ingredients',
                         style: TextStyle(
-                            color: CustomColors.grey4,
-                            fontWeight: FontWeight.w400,
-                            fontSize: CustomFontSize.primary),
+                            color: CustomColors.grey4, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
                       ),
                       const Spacer(),
                       if (ingredients.length > 1)
-                      GestureDetector(
-                        onTap: () {
-                          if (ingredients.length > 1) {
-                            setState(() {
-                              ingredients.removeLast();
-                            });
-                          }
-                        },
-                        child: Material(
-                          elevation: 1,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                          child: const Padding(
-                            padding: EdgeInsets.all(5),
-                            child: Icon(
-                              Icons.remove_rounded,
-                              color: CustomColors.primary,
+                        GestureDetector(
+                          onTap: () {
+                            if (ingredients.length > 1) {
+                              setState(() {
+                                ingredients.removeLast();
+                              });
+                            }
+                          },
+                          child: Material(
+                            elevation: 1,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                            child: const Padding(
+                              padding: EdgeInsets.all(5),
+                              child: Icon(
+                                Icons.remove_rounded,
+                                color: CustomColors.primary,
+                              ),
                             ),
                           ),
                         ),
-                      ),
                       const SizedBox(
                         width: 17,
                       ),
@@ -577,8 +565,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                         },
                         child: Material(
                           elevation: 1,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                           child: const Padding(
                             padding: EdgeInsets.all(5),
                             child: Icon(
@@ -620,33 +607,30 @@ class _CreateRecipeState extends State<CreateRecipe> {
                       const Text(
                         'Instructions',
                         style: TextStyle(
-                            color: CustomColors.grey4,
-                            fontWeight: FontWeight.w400,
-                            fontSize: CustomFontSize.primary),
+                            color: CustomColors.grey4, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
                       ),
                       const Spacer(),
                       if (instructions.length > 1)
                         GestureDetector(
-                        onTap: () {
-                          if (instructions.length > 1) {
-                            setState(() {
-                              instructions.removeLast();
-                            });
-                          }
-                        },
-                        child: Material(
-                          elevation: 1,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                          child: const Padding(
-                            padding: EdgeInsets.all(5),
-                            child: Icon(
-                              Icons.remove_rounded,
-                              color: CustomColors.primary,
+                          onTap: () {
+                            if (instructions.length > 1) {
+                              setState(() {
+                                instructions.removeLast();
+                              });
+                            }
+                          },
+                          child: Material(
+                            elevation: 1,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                            child: const Padding(
+                              padding: EdgeInsets.all(5),
+                              child: Icon(
+                                Icons.remove_rounded,
+                                color: CustomColors.primary,
+                              ),
                             ),
                           ),
                         ),
-                      ),
                       const SizedBox(
                         width: 17,
                       ),
@@ -658,8 +642,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                         },
                         child: Material(
                           elevation: 1,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                           child: const Padding(
                             padding: EdgeInsets.all(5),
                             child: Icon(
@@ -684,59 +667,19 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Material(
-                          elevation: 1,
-                          color: CustomColors.grey2,
-                          shape: RoundedRectangleBorder(
-                              side: const BorderSide(color: CustomColors.grey4, width: 2),
-                              borderRadius: BorderRadius.circular(25)),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                            child: Text(
-                              'Cancel',
-                              style: TextStyle(
-                                  fontSize: CustomFontSize.big,
-                                  color: CustomColors.grey4,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                        ),
+                      SecondaryButton(text: 'Cancel', action: () => Navigator.pop(context)),
+                      const SizedBox(
+                        width: 15,
                       ),
-                      const SizedBox(width: 15,),
-                      GestureDetector(
-                        onTap: submit,
-                        child: Material(
-                          elevation: 1,
-                          color: CustomColors.primary,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25)),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.restaurant_menu_rounded,
-                                  color: CustomColors.white,
-                                  size: 25,
-                                ),
-                                const SizedBox(width: 5,),
-                                Text(
-                                  edit ? 'Save' : 'Create',
-                                  style: const TextStyle(
-                                      fontSize: CustomFontSize.big,
-                                      color: CustomColors.white,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                              ],
-                            ),
-                          ),
+                      PrimaryButton(
+                        text: 'Create',
+                        action: submit,
+                        isActive: true,
+                        icon: const Icon(
+                          Icons.restaurant_menu_rounded,
+                          color: CustomColors.white,
                         ),
-                      ),
+                      )
                     ],
                   ),
                 )
