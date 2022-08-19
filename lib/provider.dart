@@ -643,35 +643,77 @@ class AppProvider extends ChangeNotifier {
 
   Future<List<Recipe>> searchRecipesFollow(int pageSize, String query, int page) async {
     if (query != '') {
-      if (page != 0) {
-        final skipThese = await _firestore
-            .collection('recipes')
-            .where('visibility', whereIn: ['explore', 'follow'])
-            .where('queryName', isGreaterThanOrEqualTo: query)
-            .limit(page)
-            .get();
-        final lastVisible = skipThese.docs[skipThese.size - 1];
+      final following = await _firestore.collection('users').where('followers', arrayContains: _user.id).get();
+      List<String> followingList = following.docs.map((e) => e.id).toList();
 
-        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
-            .collection('recipes')
-            .where('visibility', whereIn: ['explore', 'follow'])
-            .where('queryName', isGreaterThanOrEqualTo: query)
-            .startAt([lastVisible])
-            .limit(pageSize)
-            .get();
+      if (followingList.length <= 10) {
+        if (page != 0) {
+          final skipThese = await _firestore
+              .collection('recipes')
+              .where('creatorId', whereIn: followingList)
+              // .where('visibility', isNotEqualTo: 'private')
+              .where('queryName', isGreaterThanOrEqualTo: query)
+              .limit(page)
+              .get();
+          final lastVisible = skipThese.docs[skipThese.size - 1];
 
-        List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
-        return recipes;
+          QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+              .collection('recipes')
+              .where('creatorId', whereIn: followingList)
+              // .where('visibility', isNotEqualTo: 'private')
+              .where('queryName', isGreaterThanOrEqualTo: query)
+              .startAt([lastVisible])
+              .limit(pageSize)
+              .get();
+
+          List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
+          return recipes;
+        } else {
+          QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+              .collection('recipes')
+              .where('creatorId', whereIn: followingList)
+              // .where('visibility', isNotEqualTo: 'private')
+              .where('queryName', isGreaterThanOrEqualTo: query)
+              .limit(pageSize)
+              .get();
+
+          List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
+          return recipes;
+        }
       } else {
-        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
-            .collection('recipes')
-            .where('visibility', whereIn: ['explore', 'follow'])
-            .where('queryName', isGreaterThanOrEqualTo: query)
-            .limit(pageSize)
-            .get();
+        if (page != 0) {
+          final skipThese = await _firestore
+              .collection('recipes')
+              .where('creatorId', whereIn: followingList)
+              .where('visibility', isNotEqualTo: 'private')
+              .where('queryName', isGreaterThanOrEqualTo: query)
+              .limit(page)
+              .get();
+          final lastVisible = skipThese.docs[skipThese.size - 1];
 
-        List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
-        return recipes;
+          QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+              .collection('recipes')
+              .where('creatorId', whereIn: followingList)
+              .where('visibility', isNotEqualTo: 'private')
+              .where('queryName', isGreaterThanOrEqualTo: query)
+              .startAt([lastVisible])
+              .limit(pageSize)
+              .get();
+
+          List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
+          return recipes;
+        } else {
+          QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+              .collection('recipes')
+              .where('creatorId', whereIn: followingList)
+              .where('visibility', isNotEqualTo: 'private')
+              .where('queryName', isGreaterThanOrEqualTo: query)
+              .limit(pageSize)
+              .get();
+
+          List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
+          return recipes;
+        }
       }
     } else {
       return <Recipe>[];
