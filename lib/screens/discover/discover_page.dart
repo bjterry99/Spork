@@ -27,6 +27,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
   static const _pageSize = 20;
   final PagingController<int, Recipe> _pagingController = PagingController(firstPageKey: 0);
   final PagingController<int, AppUser> _pagingControllerUsers = PagingController(firstPageKey: 0);
+  final PagingController<int, Recipe> _pagingController2 = PagingController(firstPageKey: 0);
+  final PagingController<int, AppUser> _pagingControllerUsers2 = PagingController(firstPageKey: 0);
 
   @override
   void initState() {
@@ -35,6 +37,12 @@ class _DiscoverPageState extends State<DiscoverPage> {
     });
     _pagingControllerUsers.addPageRequestListener((pageKey) {
       _fetchPageUsers(pageKey);
+    });
+    _pagingController2.addPageRequestListener((pageKey) {
+      _fetchPage2(pageKey);
+    });
+    _pagingControllerUsers2.addPageRequestListener((pageKey) {
+      _fetchPageUsers2(pageKey);
     });
     super.initState();
   }
@@ -71,11 +79,45 @@ class _DiscoverPageState extends State<DiscoverPage> {
     }
   }
 
+  Future<void> _fetchPage2(int pageKey) async {
+    try {
+      final newItems = await Provider.of<AppProvider>(context, listen: false)
+          .searchRecipesFollow(_pageSize, controller.text.toLowerCase(), pageKey);
+      final isLastPage = newItems.length < _pageSize;
+      if (isLastPage) {
+        _pagingController2.appendLastPage(newItems);
+      } else {
+        final nextPageKey = pageKey + newItems.length;
+        _pagingController2.appendPage(newItems, nextPageKey);
+      }
+    } catch (error) {
+      _pagingController2.error = error;
+    }
+  }
+
+  Future<void> _fetchPageUsers2(int pageKey) async {
+    try {
+      final newItems = await Provider.of<AppProvider>(context, listen: false)
+          .searchPeopleFollow(_pageSize, controller.text.toLowerCase(), pageKey);
+      final isLastPage = newItems.length < _pageSize;
+      if (isLastPage) {
+        _pagingControllerUsers2.appendLastPage(newItems);
+      } else {
+        final nextPageKey = pageKey + newItems.length;
+        _pagingControllerUsers2.appendPage(newItems, nextPageKey);
+      }
+    } catch (error) {
+      _pagingControllerUsers2.error = error;
+    }
+  }
+
   @override
   void dispose() {
     controller.dispose();
     _pagingController.dispose();
     _pagingControllerUsers.dispose();
+    _pagingController2.dispose();
+    _pagingControllerUsers2.dispose();
     super.dispose();
   }
 
@@ -97,6 +139,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
     }
     _pagingController.refresh();
     _pagingControllerUsers.refresh();
+    _pagingController2.refresh();
+    _pagingControllerUsers2.refresh();
   }
 
   @override
@@ -107,7 +151,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
       } else {
         return isOnFollow
             ? FollowList(
-                pagingController: _pagingController,
+                pagingController: _pagingController2,
+          isOnRecipes: isOnRecipe,
+          pagingControllerUsers: _pagingControllerUsers2,
               )
             : DiscoverList(
                 pagingController: _pagingController,

@@ -61,17 +61,17 @@ class UserCard extends StatelessWidget {
                             }
                             bool isFollowing = ids.contains(user.id);
 
-                            if (inHome) {
+                            if (isFollowing) {
                               return IconButton(
                                 padding: const EdgeInsets.all(5),
                                 splashRadius: 20,
                                 splashColor: CustomColors.secondary,
                                 color: CustomColors.secondary,
                                 onPressed: () async {
-                                  await Provider.of<AppProvider>(context, listen: false).removeFromHome(user.id);
+                                  await Provider.of<AppProvider>(context, listen: false).unfollow(user.id);
                                 },
                                 icon: const Icon(
-                                  Icons.home,
+                                  Icons.group_remove,
                                 ),
                               );
                             } else {
@@ -81,10 +81,10 @@ class UserCard extends StatelessWidget {
                                 splashColor: CustomColors.secondary,
                                 color: CustomColors.secondary,
                                 onPressed: () async {
-                                  await Provider.of<AppProvider>(context, listen: false).inviteToHome(user.id);
+                                  await Provider.of<AppProvider>(context, listen: false).follow(user.id);
                                 },
                                 icon: const Icon(
-                                  Icons.home_outlined,
+                                  Icons.group_add_outlined,
                                 ),
                               );
                             }
@@ -102,31 +102,6 @@ class UserCard extends StatelessWidget {
                           }
                         },
                       ),
-                      user.followers.contains(appUser.id)
-                          ? IconButton(
-                              padding: const EdgeInsets.all(5),
-                              splashRadius: 20,
-                              splashColor: CustomColors.secondary,
-                              color: CustomColors.secondary,
-                              onPressed: () async {
-                                await Provider.of<AppProvider>(context, listen: false).unfollow(user.id);
-                              },
-                              icon: const Icon(
-                                Icons.group_remove,
-                              ),
-                            )
-                          : IconButton(
-                              padding: const EdgeInsets.all(5),
-                              splashRadius: 20,
-                              splashColor: CustomColors.secondary,
-                              color: CustomColors.secondary,
-                              onPressed: () async {
-                                await Provider.of<AppProvider>(context, listen: false).follow(user.id);
-                              },
-                              icon: const Icon(
-                                Icons.group_add_outlined,
-                              ),
-                            ),
                       appUser.homeId != ''
                           ? FutureBuilder<MyHome?>(
                               future: Provider.of<AppProvider>(context, listen: false).fetchHome(appUser.homeId),

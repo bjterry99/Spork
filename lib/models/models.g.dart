@@ -123,6 +123,7 @@ HomeInvite _$HomeInviteFromJson(Map<String, dynamic> json) => HomeInvite(
       id: json['id'] as String,
       inviterId: json['inviterId'] as String,
       receiverId: json['receiverId'] as String,
+      homeId: json['homeId'] as String,
     );
 
 Map<String, dynamic> _$HomeInviteToJson(HomeInvite instance) =>
@@ -130,4 +131,5 @@ Map<String, dynamic> _$HomeInviteToJson(HomeInvite instance) =>
       'id': instance.id,
       'inviterId': instance.inviterId,
       'receiverId': instance.receiverId,
+      'homeId': instance.homeId,
     };

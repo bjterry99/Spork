@@ -362,7 +362,7 @@ class AppProvider extends ChangeNotifier {
         ingredients: recipeIngredients,
         instructions: recipeInstructions,
         queryName: recipeName.toLowerCase(),
-        visibility: 'explore'
+        visibility: 'private'
       );
       await recipeRef.set(recipe.toJson());
 
@@ -534,7 +534,7 @@ class AppProvider extends ChangeNotifier {
       NotificationService.notify('Inviting to Home...');
 
       var inviteRef = _firestore.collection('homeInvites').doc('${_user.id}_$id');
-      HomeInvite invite = HomeInvite(id: '${_user.id}_$id', inviterId: _user.id, receiverId: id);
+      HomeInvite invite = HomeInvite(id: '${_user.id}_$id', inviterId: _user.id, receiverId: id, homeId: _user.homeId);
       await inviteRef.set(invite.toJson());
     } catch (error) {
       NotificationService.notify('Failed to invite to Home.');
@@ -641,6 +641,43 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  Future<List<Recipe>> searchRecipesFollow(int pageSize, String query, int page) async {
+    if (query != '') {
+      if (page != 0) {
+        final skipThese = await _firestore
+            .collection('recipes')
+            .where('visibility', whereIn: ['explore', 'follow'])
+            .where('queryName', isGreaterThanOrEqualTo: query)
+            .limit(page)
+            .get();
+        final lastVisible = skipThese.docs[skipThese.size - 1];
+
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('recipes')
+            .where('visibility', whereIn: ['explore', 'follow'])
+            .where('queryName', isGreaterThanOrEqualTo: query)
+            .startAt([lastVisible])
+            .limit(pageSize)
+            .get();
+
+        List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
+        return recipes;
+      } else {
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('recipes')
+            .where('visibility', whereIn: ['explore', 'follow'])
+            .where('queryName', isGreaterThanOrEqualTo: query)
+            .limit(pageSize)
+            .get();
+
+        List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
+        return recipes;
+      }
+    } else {
+      return <Recipe>[];
+    }
+  }
+
   Future<List<AppUser>> searchPeopleExplore(int pageSize, String query, int page) async {
     if (query != '') {
       if (page != 0) {
@@ -665,6 +702,46 @@ class AppProvider extends ChangeNotifier {
       } else {
         QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
             .collection('users')
+            .where('queryName', isNotEqualTo: _user.queryName)
+            .where('queryName', isGreaterThanOrEqualTo: query)
+            .limit(pageSize)
+            .get();
+
+        List<AppUser> users = snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList();
+        return users;
+      }
+    } else {
+      return <AppUser>[];
+    }
+  }
+
+  Future<List<AppUser>> searchPeopleFollow(int pageSize, String query, int page) async {
+    if (query != '') {
+      if (page != 0) {
+        final skipThese = await _firestore
+            .collection('users')
+            .where('followers', arrayContains: _user.id)
+            .where('queryName', isNotEqualTo: _user.queryName)
+            .where('queryName', isGreaterThanOrEqualTo: query)
+            .limit(page)
+            .get();
+        final lastVisible = skipThese.docs[skipThese.size - 1];
+
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('users')
+            .where('followers', arrayContains: _user.id)
+            .where('queryName', isNotEqualTo: _user.queryName)
+            .where('queryName', isGreaterThanOrEqualTo: query)
+            .startAt([lastVisible])
+            .limit(pageSize)
+            .get();
+
+        List<AppUser> users = snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList();
+        return users;
+      } else {
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('users')
+            .where('followers', arrayContains: _user.id)
             .where('queryName', isNotEqualTo: _user.queryName)
             .where('queryName', isGreaterThanOrEqualTo: query)
             .limit(pageSize)

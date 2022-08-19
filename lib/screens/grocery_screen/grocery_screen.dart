@@ -33,10 +33,12 @@ class _GroceryScreenState extends State<GroceryScreen> {
       if (!isVisible) {
         widget.buttonOn();
         widget.toggleInputOff();
-        setState(() {
-          widget.controller.clear();
-          canSave = false;
-        });
+        if (mounted) {
+          setState(() {
+            widget.controller.clear();
+            canSave = false;
+          });
+        }
       } else {
         widget.buttonOff();
       }
@@ -51,10 +53,10 @@ class _GroceryScreenState extends State<GroceryScreen> {
 
   void saveItem() async {
     widget.toggleInputOff();
-    setState(() {
-      canSave = false;
-      query = '';
-    });
+    // setState(() {
+    //   canSave = false;
+    //   query = '';
+    // });
     if (widget.controller.text != '') {
       await Provider.of<AppProvider>(context, listen: false).addGroceryItem(widget.controller.text);
     }

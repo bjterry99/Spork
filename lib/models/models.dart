@@ -115,11 +115,13 @@ class HomeInvite {
   String id;
   String inviterId;
   String receiverId;
+  String homeId;
 
   HomeInvite({
     required this.id,
     required this.inviterId,
     required this.receiverId,
+    required this.homeId,
   });
 
   factory HomeInvite.fromJson(Map<String, dynamic> json) => _$HomeInviteFromJson(json);
