@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:spork/components/search_bar.dart';
+import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/screens/grocery_screen/grocery_header.dart';
 import 'package:spork/screens/grocery_screen/grocery_list.dart';
@@ -53,19 +53,6 @@ class _GroceryScreenState extends State<GroceryScreen> {
     super.dispose();
   }
 
-  void saveItem() async {
-    widget.toggleInputOff();
-    setState(() {
-      canSave = false;
-      query = '';
-    });
-    if (widget.controller.text != '') {
-      await Provider.of<AppProvider>(context, listen: false).addGroceryItem(widget.controller.text);
-    }
-    widget.controller.clear();
-    controller.clear();
-  }
-
   void search(String value) {
     setState(() {
       query = value;
@@ -74,6 +61,22 @@ class _GroceryScreenState extends State<GroceryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppUser user = Provider.of<AppProvider>(context, listen: false).user;
+
+    void saveItem() async {
+      widget.toggleInputOff();
+      setState(() {
+        canSave = false;
+        query = '';
+      });
+      if (widget.controller.text != '') {
+        Grocery grocery = Grocery(id: '', name: widget.controller.text, mark: false, creatorId: user.id, homeId: user.homeId);
+        await Provider.of<AppProvider>(context, listen: false).addGroceryItem(grocery);
+      }
+      widget.controller.clear();
+      controller.clear();
+    }
+
     return SafeArea(
       child: Scaffold(
         body: Column(
@@ -133,12 +136,12 @@ class _GroceryScreenState extends State<GroceryScreen> {
                       topRight: Radius.circular(15), topLeft: Radius.circular(15)),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black38, spreadRadius: 0, blurRadius: 1),
+                        color: Colors.black38, spreadRadius: 0, blurRadius: 3),
                   ],
                 ),
                 child: Material(
                   color: CustomColors.white,
-                  elevation: 1,
+                  elevation: 3,
                   borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(15),
                     topLeft: Radius.circular(15),

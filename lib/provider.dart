@@ -428,10 +428,10 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> addGroceryItem(String name) async {
+  Future<void> addGroceryItem(Grocery grocery) async {
     try {
       var ref = _firestore.collection('grocery').doc();
-      Grocery grocery = Grocery(id: ref.id, name: name, mark: false, creatorId: _user.id);
+      grocery.id = ref.id;
       await ref.set(grocery.toJson());
     } catch (error) {
       NotificationService.notify('Failed to add item.');

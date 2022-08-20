@@ -20,6 +20,7 @@ class CreateRecipe extends StatefulWidget {
 
 class _CreateRecipeState extends State<CreateRecipe> {
   late String recipeClass;
+  late String visibility;
   late List<String> ingredients;
   late List<String> ingredientAmounts;
   late List<String> instructions;
@@ -227,6 +228,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
   void initState() {
     if (widget.recipe != null) {
       edit = true;
+      visibility = widget.recipe!.visibility;
       recipeClass = widget.recipe!.className;
       ingredients = List<String>.from(widget.recipe!.ingredients);
       ingredientAmounts = List<String>.from(widget.recipe!.ingredientAmounts);
@@ -236,6 +238,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
       recipeName = widget.recipe!.name;
     } else {
       recipeClass = 'Main';
+      visibility = 'follow';
       ingredients = ['', '', '', ''];
       ingredientAmounts = ['', '', '', ''];
       instructions = ['', '', ''];
@@ -248,6 +251,8 @@ class _CreateRecipeState extends State<CreateRecipe> {
 
   @override
   Widget build(BuildContext context) {
+    AppUser user = Provider.of<AppProvider>(context, listen: false).user;
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -661,6 +666,94 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: getInstructionsInput(),
+                ),
+                const Divider(
+                  height: 10,
+                  thickness: 1,
+                  indent: 0,
+                  endIndent: 0,
+                  color: CustomColors.grey3,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(
+                            Icons.mobile_screen_share_rounded,
+                            size: 20,
+                            color: CustomColors.grey4,
+                          ),
+                          SizedBox(
+                            width: 17,
+                          ),
+                          Text(
+                            'Share recipe with...',
+                            style: TextStyle(
+                                color: CustomColors.grey4,
+                                fontWeight: FontWeight.w400,
+                                fontSize: CustomFontSize.primary),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              Radio<String>(
+                                value: 'private',
+                                groupValue: visibility,
+                                activeColor: CustomColors.primary,
+                                onChanged: (String? value) async {
+                                  setState(() {
+                                    visibility = 'private';
+                                  });
+                                },
+                              ),
+                              Text(
+                                user.homeId == '' ? 'Myself' : 'My Home',
+                                style: const TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
+                              ),
+                              const SizedBox(width: 20,),
+                              Radio<String>(
+                                value: 'follow',
+                                groupValue: visibility,
+                                activeColor: CustomColors.primary,
+                                onChanged: (String? value) async {
+                                  setState(() {
+                                    visibility = 'follow';
+                                  });
+                                },
+                              ),
+                              const Text(
+                                'Followers',
+                                style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Radio<String>(
+                                value: 'explore',
+                                groupValue: visibility,
+                                activeColor: CustomColors.primary,
+                                onChanged: (String? value) async {
+                                  setState(() {
+                                    visibility = 'explore';
+                                  });
+                                },
+                              ),
+                              const Text(
+                                'Everyone',
+                                style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
