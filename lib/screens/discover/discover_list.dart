@@ -14,8 +14,13 @@ class DiscoverList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return isOnRecipes ? PagedListView<int, Recipe>(
+    return isOnRecipes ? PagedGridView<int, Recipe>(
       pagingController: pagingController,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        childAspectRatio: 0.6,
+        crossAxisSpacing: 10,
+        crossAxisCount: 2,
+      ),
       builderDelegate: PagedChildBuilderDelegate<Recipe>(
         itemBuilder: (context, item, index) => RecipeCard(item),
         newPageErrorIndicatorBuilder: (_) => const Center(

@@ -58,7 +58,10 @@ class MenuList extends StatelessWidget {
             child: Column(
               children: [
                 if (main.isNotEmpty)
-                  ListView(
+                  GridView.count(
+                    childAspectRatio: 0.6,
+                    crossAxisSpacing: 10,
+                    crossAxisCount: 2,
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     padding: EdgeInsets.only(
@@ -77,13 +80,16 @@ class MenuList extends StatelessWidget {
                     color: CustomColors.grey3,
                   ),
                 if (side.isNotEmpty)
-                  ListView(
+                  GridView.count(
+                    childAspectRatio: 0.6,
+                    crossAxisSpacing: 10,
+                    crossAxisCount: 2,
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     padding: EdgeInsets.only(
                       right: 15,
                       left: 15,
-                      top: side.isEmpty ? 15 : 0,
+                      top: main.isEmpty ? 15 : 0,
                     ),
                     children: side,
                   ),
@@ -96,13 +102,16 @@ class MenuList extends StatelessWidget {
                     color: CustomColors.grey3,
                   ),
                 if (dessert.isNotEmpty)
-                  ListView(
+                  GridView.count(
+                    childAspectRatio: 0.6,
+                    crossAxisSpacing: 10,
+                    crossAxisCount: 2,
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     padding: EdgeInsets.only(
                       right: 15,
                       left: 15,
-                      top: dessert.isEmpty ? 15 : 0,
+                      top: main.isEmpty ? 15 : 0,
                     ),
                     children: dessert,
                   ),
