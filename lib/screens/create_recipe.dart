@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:spork/components/buttons/primary_button.dart';
@@ -27,6 +29,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
   late String cookTime;
   late String prepTime;
   late String recipeName;
+  late String photoUrl;
   bool edit = false;
 
   Widget getIngredientInput() {
@@ -217,10 +220,38 @@ class _CreateRecipeState extends State<CreateRecipe> {
     Navigator.pop(context);
     if (edit) {
       Navigator.pop(context);
-      await Provider.of<AppProvider>(context, listen: false).updateRecipe(widget.recipe!);
+      Recipe recipe = Recipe(
+          id: widget.recipe!.id,
+          name: recipeName,
+          className: recipeClass,
+          cookTime: cookTime,
+          prepTime: prepTime,
+          ingredientAmounts: recipeAmounts,
+          ingredients: recipeIngredients,
+          instructions: recipeInstructions,
+          queryName: recipeName.toLowerCase(),
+          visibility: visibility,
+          menuIds: widget.recipe!.menuIds,
+          savedIds: widget.recipe!.savedIds,
+          creatorId: widget.recipe!.creatorId,
+          photoUrl: photoUrl);
+
+      await Provider.of<AppProvider>(context, listen: false).updateRecipe(recipe);
     } else {
-      await Provider.of<AppProvider>(context, listen: false).createRecipe(
-          recipeName, recipeClass, cookTime, prepTime, recipeAmounts, recipeIngredients, recipeInstructions);
+      Recipe recipe = Recipe(
+          id: '',
+          name: recipeName,
+          className: recipeClass,
+          cookTime: cookTime,
+          prepTime: prepTime,
+          ingredientAmounts: recipeAmounts,
+          ingredients: recipeIngredients,
+          instructions: recipeInstructions,
+          queryName: recipeName.toLowerCase(),
+          visibility: visibility,
+          photoUrl: photoUrl);
+
+      await Provider.of<AppProvider>(context, listen: false).createRecipe(recipe);
     }
   }
 
@@ -236,6 +267,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
       prepTime = widget.recipe!.prepTime;
       cookTime = widget.recipe!.cookTime;
       recipeName = widget.recipe!.name;
+      photoUrl = widget.recipe!.photoUrl;
     } else {
       recipeClass = 'Main';
       visibility = 'follow';
@@ -245,6 +277,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
       cookTime = '0:30';
       prepTime = '0:10';
       recipeName = '';
+      photoUrl = '';
     }
     super.initState();
   }
@@ -252,6 +285,68 @@ class _CreateRecipeState extends State<CreateRecipe> {
   @override
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppProvider>(context, listen: false).user;
+
+    void choosePicture() async {
+      String string64 = await Provider.of<AppProvider>(context, listen: false).choosePicture();
+      setState(() {
+        if (string64 != '') {
+          photoUrl = string64;
+        }
+      });
+    }
+
+    Widget getPhoto() {
+      if (Uri.parse(photoUrl).isAbsolute) {
+        return CachedNetworkImage(
+          imageUrl: photoUrl,
+          imageBuilder: (context, imageProvider) => SizedBox(
+            height: 100,
+            width: 100,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image(
+                image: imageProvider,
+              ),
+            ),
+          ),
+          placeholder: (context, url) => const SizedBox(
+            height: 100,
+            width: 100,
+            child: Icon(
+              Icons.add_photo_alternate_outlined,
+              color: CustomColors.grey4,
+            ),
+          ),
+          errorWidget: (context, url, error) => const SizedBox(
+            height: 100,
+            width: 100,
+            child: Icon(
+              Icons.add_photo_alternate_outlined,
+              color: CustomColors.grey4,
+            ),
+          ),
+        );
+      } else if (photoUrl == '') {
+        return const SizedBox(
+          height: 100,
+          width: 100,
+          child: Icon(
+            Icons.add_photo_alternate_outlined,
+            color: CustomColors.grey4,
+          ),
+        );
+      } else {
+        return SizedBox(
+            height: 100,
+            width: 100,
+            child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.memory(
+                  base64Decode(photoUrl),
+                  fit: BoxFit.contain,
+                )));
+      }
+    }
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
@@ -547,7 +642,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                             }
                           },
                           child: Material(
-                            elevation: 1,
+                            elevation: 3,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                             child: const Padding(
                               padding: EdgeInsets.all(5),
@@ -569,7 +664,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                           });
                         },
                         child: Material(
-                          elevation: 1,
+                          elevation: 3,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                           child: const Padding(
                             padding: EdgeInsets.all(5),
@@ -625,7 +720,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                             }
                           },
                           child: Material(
-                            elevation: 1,
+                            elevation: 3,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                             child: const Padding(
                               padding: EdgeInsets.all(5),
@@ -646,7 +741,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                           });
                         },
                         child: Material(
-                          elevation: 1,
+                          elevation: 3,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                           child: const Padding(
                             padding: EdgeInsets.all(5),
@@ -666,6 +761,52 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: getInstructionsInput(),
+                ),
+                const Divider(
+                  height: 10,
+                  thickness: 1,
+                  indent: 0,
+                  endIndent: 0,
+                  color: CustomColors.grey3,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(
+                            Icons.image_outlined,
+                            size: 20,
+                            color: CustomColors.grey4,
+                          ),
+                          SizedBox(
+                            width: 17,
+                          ),
+                          Text(
+                            'Picture',
+                            style: TextStyle(
+                                color: CustomColors.grey4,
+                                fontWeight: FontWeight.w400,
+                                fontSize: CustomFontSize.primary),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10, bottom: 10, left: 15),
+                        child: GestureDetector(
+                          onTap: choosePicture,
+                          child: Material(
+                            elevation: 3,
+                            color: CustomColors.grey2,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            child: getPhoto(),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
                 const Divider(
                   height: 10,
@@ -715,7 +856,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
                                 user.homeId == '' ? 'Myself' : 'My Home',
                                 style: const TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
                               ),
-                              const SizedBox(width: 20,),
+                              const SizedBox(
+                                width: 20,
+                              ),
                               Radio<String>(
                                 value: 'follow',
                                 groupValue: visibility,
@@ -765,7 +908,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                         width: 15,
                       ),
                       PrimaryButton(
-                        text: 'Create',
+                        text: !edit ? 'Create' : 'Save',
                         action: submit,
                         isActive: true,
                         icon: const Icon(
@@ -784,113 +927,3 @@ class _CreateRecipeState extends State<CreateRecipe> {
     );
   }
 }
-
-// Widget getToolsInput() {
-//   List<Widget> inputs = [];
-//
-//   for (int i = 0; i < numTools; i++) {
-//     inputs.add(
-//       const TextField(
-//         style: TextStyle(
-//             color: CustomColors.black,
-//             fontWeight: FontWeight.w400,
-//             fontSize: CustomFontSize.secondary),
-//         textCapitalization: TextCapitalization.sentences,
-//         cursorColor: CustomColors.primary,
-//         decoration: InputDecoration(
-//           border: InputBorder.none,
-//           focusedBorder: InputBorder.none,
-//           enabledBorder: InputBorder.none,
-//           errorBorder: InputBorder.none,
-//           disabledBorder: InputBorder.none,
-//           hintText: "tool...",
-//         ),
-//       ),
-//     );
-//   }
-//
-//   return Column(
-//     children: inputs,
-//   );
-// }
-
-// Padding(
-//   padding: const EdgeInsets.symmetric(vertical: 10),
-//   child: Row(
-//     children: [
-//       const Icon(
-//         Icons.blender_outlined,
-//         size: 20,
-//         color: CustomColors.grey4,
-//       ),
-//       const SizedBox(
-//         width: 17,
-//       ),
-//       const Text(
-//         'Tools',
-//         style: TextStyle(
-//             color: CustomColors.grey4,
-//             fontWeight: FontWeight.w400,
-//             fontSize: CustomFontSize.primary),
-//       ),
-//       const Spacer(),
-//       GestureDetector(
-//         onTap: () {
-//           if (numTools > 1) {
-//             setState(() {
-//               numTools--;
-//             });
-//           }
-//         },
-//         child: Material(
-//           elevation: 4,
-//           shape: RoundedRectangleBorder(
-//               borderRadius: BorderRadius.circular(40)),
-//           child: const Padding(
-//             padding: EdgeInsets.all(5),
-//             child: Icon(
-//               Icons.remove_rounded,
-//               color: CustomColors.primary,
-//             ),
-//           ),
-//         ),
-//       ),
-//       const SizedBox(
-//         width: 17,
-//       ),
-//       GestureDetector(
-//         onTap: () {
-//           setState(() {
-//             numTools++;
-//           });
-//         },
-//         child: Material(
-//           elevation: 4,
-//           shape: RoundedRectangleBorder(
-//               borderRadius: BorderRadius.circular(40)),
-//           child: const Padding(
-//             padding: EdgeInsets.all(5),
-//             child: Icon(
-//               Icons.add_rounded,
-//               color: CustomColors.primary,
-//             ),
-//           ),
-//         ),
-//       ),
-//       const SizedBox(
-//         width: 17,
-//       ),
-//     ],
-//   ),
-// ),
-// Padding(
-//   padding: const EdgeInsets.symmetric(horizontal: 12),
-//   child: getToolsInput(),
-// ),
-// const Divider(
-//   height: 10,
-//   thickness: 1,
-//   indent: 0,
-//   endIndent: 0,
-//   color: CustomColors.grey3,
-// ),

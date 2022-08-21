@@ -176,7 +176,7 @@ class _DetailScreenState extends State<DetailScreen> {
       ),
       floatingActionButton: isFabVisible
           ? StreamBuilder<List<Recipe>>(
-        stream: Provider.of<AppProvider>(context, listen: false).menuStream,
+        stream: Provider.of<AppProvider>(context, listen: false).menuStream(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final menuItems = snapshot.data;

@@ -23,7 +23,7 @@ class RecipesList extends StatelessWidget {
     }
 
     return StreamBuilder<List<Recipe>>(
-      stream: Provider.of<AppProvider>(context, listen: false).recipeStream,
+      stream: Provider.of<AppProvider>(context, listen: false).recipeStream(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final recipes = snapshot.data;

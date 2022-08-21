@@ -103,15 +103,37 @@ class AppProvider extends ChangeNotifier {
     }));
   }
 
-  Stream<List<Recipe>> recipeStream = _firestore
-      .collection('recipes')
-      .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+  Stream<List<Recipe>> recipeStream() {
+    if (_user.homeId == '') {
+      return _firestore
+          .collection('recipes')
+          .where('savedIds', arrayContains: _user.id)
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+    } else {
+      return _firestore
+          .collection('recipes')
+          .where('savedIds', arrayContains: _user.homeId)
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+    }
+  }
 
-  Stream<List<Recipe>> menuStream = _firestore
-      .collection('menu')
-      .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+  Stream<List<Recipe>> menuStream() {
+    if (_user.homeId == '') {
+      return _firestore
+          .collection('recipes')
+          .where('menuIds', arrayContains: _user.id)
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+    } else {
+      return _firestore
+          .collection('recipes')
+          .where('menuIds', arrayContains: _user.homeId)
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+    }
+  }
 
   Stream<List<Grocery>> groceryStream() {
     if (_user.homeId == '') {
@@ -125,10 +147,6 @@ class AppProvider extends ChangeNotifier {
       .collection('users')
       .snapshots()
       .map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList());
-
-  Stream<QuerySnapshot<Object?>> specificMenuItem(String id) {
-    return _firestore.collection('menu').where('id', isEqualTo: id).snapshots();
-  }
 
   Stream<QuerySnapshot<Object?>> numberFollowing(String id) {
     return _firestore.collection('users').where('followers', arrayContains: id).snapshots();
@@ -150,28 +168,27 @@ class AppProvider extends ChangeNotifier {
     await _auth.signOut();
   }
 
-  Future<void> syncUser() async {
-    var ref = await _firestore.collection('users').doc(_fireUser!.uid).get();
-    _user = AppUser.fromJson(ref.data()!);
-    notifyListeners();
-  }
-
   Future<bool> editProfile(AppUser appUser) async {
     try {
-      bool userName = await userNameExists(appUser.userName);
+      bool userName = await userNameExists(appUser.userName, appUser.id);
       if (!userName) {
         NotificationService.notify('Updating account...');
 
         var userRef = _firestore.collection('users').doc(appUser.id);
+
+        if (appUser.photoUrl != '' && !Uri.parse(appUser.photoUrl).isAbsolute) {
+          appUser.photoUrl = await _uploadPicture(userRef.id, appUser.photoUrl);
+        }
+
         await userRef.set(appUser.toJson());
 
-        NotificationService.notify('Created User');
+        NotificationService.notify('Updated user');
         return true;
       } else {
         NotificationService.notify('Username taken.');
       }
     } catch (error) {
-      NotificationService.notify('Failed to create User.');
+      NotificationService.notify('Failed to update User.');
     }
     return false;
   }
@@ -182,6 +199,11 @@ class AppProvider extends ChangeNotifier {
       await Future.delayed(const Duration(seconds: 2));
       var userRef = _firestore.collection('users').doc(_auth.currentUser!.uid);
       appUser.id = userRef.id;
+
+      if (appUser.photoUrl != '') {
+        appUser.photoUrl = await _uploadPicture(userRef.id, appUser.photoUrl);
+      }
+
       await userRef.set(appUser.toJson());
 
       NotificationService.notify('Created User');
@@ -190,9 +212,11 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> userNameExists(String userName) async {
+  Future<bool> userNameExists(String userName, String? id) async {
+    String testId = id ?? '';
     try {
       final query = await _firestore.collection('users').where('userName', isEqualTo: userName).limit(1).get();
+      if (query.docs.first.id == testId) return false;
       if (query.docs.isNotEmpty) return true;
     } catch (error) {
       NotificationService.notify('Failed to find Username.');
@@ -290,8 +314,13 @@ class AppProvider extends ChangeNotifier {
     NotificationService.notify('Adding to menu...');
 
     try {
-      var menuRef = _firestore.collection('menu').doc(recipe.id);
-      await menuRef.set(recipe.toJson());
+      var ref = _firestore.collection('recipes').doc(recipe.id);
+      if (_user.homeId == '') {
+        recipe.menuIds.add(_user.id);
+      } else {
+        recipe.menuIds.add(_user.homeId);
+      }
+      await ref.update(recipe.toJson());
 
       for (int i = 0; i < recipe.ingredients.length; i++) {
         var ref = _firestore.collection('grocery').doc();
@@ -334,7 +363,17 @@ class AppProvider extends ChangeNotifier {
       for (var item in collection.docs) {
         await _firestore.collection('grocery').doc(item.id).delete();
       }
-      await _firestore.collection('menu').doc(id).delete();
+
+      var ref = _firestore.collection('recipes').doc(id);
+      if (_user.homeId == '') {
+        await ref.update({
+          'menuIds': FieldValue.arrayRemove([_user.id])
+        });
+      } else {
+        await ref.update({
+          'menuIds': FieldValue.arrayRemove([_user.homeId])
+        });
+      }
 
       NotificationService.notify('Removed from menu.');
     } catch (error) {
@@ -346,12 +385,11 @@ class AppProvider extends ChangeNotifier {
     NotificationService.notify('Deleting recipe...');
 
     try {
-      await _firestore.collection('recipes').doc(id).delete();
+      final storageRef = FirebaseStorage.instance.ref();
+      final pictureRef = storageRef.child(id);
+      await pictureRef.delete();
 
-      var menuDoc = await _firestore.collection('menu').doc(id).get();
-      if (menuDoc.exists) {
-        await _firestore.collection('menu').doc(id).delete();
-      }
+      await _firestore.collection('recipes').doc(id).delete();
 
       var collection = await _firestore.collection('grocery').where('recipeId', isEqualTo: id).get();
       for (var item in collection.docs) {
@@ -364,24 +402,23 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> createRecipe(String recipeName, String recipeClass, String cookTime, String prepTime,
-      List<String> recipeAmounts, List<String> recipeIngredients, List<String> recipeInstructions) async {
+  Future<void> createRecipe(Recipe recipe) async {
     NotificationService.notify('Creating recipe...');
 
     try {
       var recipeRef = _firestore.collection('recipes').doc();
-      Recipe recipe = Recipe(
-        id: recipeRef.id,
-        name: recipeName,
-        className: recipeClass,
-        cookTime: cookTime,
-        prepTime: prepTime,
-        ingredientAmounts: recipeAmounts,
-        ingredients: recipeIngredients,
-        instructions: recipeInstructions,
-        queryName: recipeName.toLowerCase(),
-        visibility: 'private'
-      );
+      recipe.id = recipeRef.id;
+      recipe.creatorId = _user.id;
+      if (_user.homeId == '') {
+        recipe.savedIds = [_user.id];
+      } else {
+        recipe.savedIds = [_user.homeId];
+      }
+
+      if (recipe.photoUrl != '' && !Uri.parse(recipe.photoUrl).isAbsolute) {
+        recipe.photoUrl = await _uploadPicture(recipeRef.id, recipe.photoUrl);
+      }
+
       await recipeRef.set(recipe.toJson());
 
       NotificationService.notify('Recipe created.');
@@ -395,13 +432,12 @@ class AppProvider extends ChangeNotifier {
 
     try {
       var recipeRef = _firestore.collection('recipes').doc(recipe.id);
-      await recipeRef.update(recipe.toJson());
 
-      var menuDoc = await _firestore.collection('menu').doc(recipe.id).get();
-      if (menuDoc.exists) {
-        var menuRef = _firestore.collection('menu').doc(recipe.id);
-        await menuRef.update(recipe.toJson());
+      if (recipe.photoUrl != '' && !Uri.parse(recipe.photoUrl).isAbsolute) {
+        recipe.photoUrl = await _uploadPicture(recipeRef.id, recipe.photoUrl);
       }
+
+      await recipeRef.update(recipe.toJson());
 
       NotificationService.notify('Recipe updated.');
     } catch (error) {
@@ -438,10 +474,9 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  bool loader = false; // this variable is only used for this function
-  Future<String> uploadPicture(String id) async {
+  Future<String> choosePicture() async {
     CroppedFile? croppedImage;
-    String url = '';
+    String string64 = '';
     try {
       final ImagePicker picker = ImagePicker();
 
@@ -486,33 +521,38 @@ class AppProvider extends ChangeNotifier {
       }
 
       if (croppedImage != null) {
-        loader = true;
-        notifyListeners();
         NotificationService.notify("Uploading image...");
 
         // converts image to base64
         List<int> imageBytes = await croppedImage.readAsBytes();
-        String base64Image = base64Encode(imageBytes);
+        string64 = base64Encode(imageBytes);
 
-        // upload to storage
-        final storageRef = FirebaseStorage.instance.ref();
-        final imageRef = storageRef.child(id);
-
-        await imageRef.putString(
-          base64Image,
-          format: PutStringFormat.base64,
-          metadata: SettableMetadata(contentType: 'image/jpeg'),
-        );
-
-        url = await imageRef.getDownloadURL();
       } else {
-        NotificationService.notify("Failed to image.");
+        NotificationService.notify("Failed to upload image.");
       }
     } catch (error) {
       NotificationService.notify("Failed to upload.");
     }
-    loader = false;
-    notifyListeners();
+    return string64;
+  }
+
+  Future<String> _uploadPicture(String id, String string64) async {
+    String url = '';
+    try {
+      // upload to storage
+      final storageRef = FirebaseStorage.instance.ref();
+      final imageRef = storageRef.child(id);
+
+      await imageRef.putString(
+        string64,
+        format: PutStringFormat.base64,
+        metadata: SettableMetadata(contentType: 'image/jpeg'),
+      );
+
+      url = await imageRef.getDownloadURL();
+    } catch (error) {
+      NotificationService.notify("Failed to upload.");
+    }
     return url;
   }
 
@@ -870,57 +910,3 @@ class AppProvider extends ChangeNotifier {
   }
 
 }
-
-// Future<DocumentSnapshot<Map<String, dynamic>>> getRecipe(String id) async {
-//   DocumentSnapshot<Map<String, dynamic>> recipe = await _firestore.collection('recipes').doc(id).get();
-//   return recipe;
-// }
-// FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-// future: Provider.of<AppProvider>(context, listen: false)
-//     .getRecipe(item['recipeId']),
-// builder: (context, snapshot) {
-// if (snapshot.hasError) {
-// return const SizedBox();
-// } else if (snapshot.hasData) {
-// var recipe = snapshot.data!.data();
-//
-// return Text(
-// recipe!['name'],
-// style: const TextStyle(
-// color: CustomColors.grey4,
-// fontSize: CustomFontSize.secondary,
-// fontWeight: FontWeight.w300),
-// );
-// }
-// return const SizedBox();
-// },
-// );
-
-// Future<bool> addToGrocery(QueryDocumentSnapshot item) async {
-//   var doc = await _firestore.collection('grocery').doc(item.id).get();
-//   if (doc.exists) {
-//     return false;
-//   } else {
-//     var ref = _firestore.collection('menu').doc(item.id);
-//     await ref.set({
-//       "id": recipe.id,
-//       "name": recipe['name'],
-//       "class": recipe['class'],
-//       "cookTime": recipe['cookTime'],
-//       "ingredient_amounts": recipe['ingredient_amounts'],
-//       "ingredients": recipe['ingredients'],
-//       "instructions": recipe['instructions'],
-//     });
-//     return true;
-//   }
-// }
-//
-// Future<bool> removeFromGrocery(QueryDocumentSnapshot recipe) async {
-//   var doc = await _firestore.collection('menu').doc(recipe.id).get();
-//   if (doc.exists) {
-//     await _firestore.collection('menu').doc(recipe.id).delete();
-//     return true;
-//   } else {
-//     return false;
-//   }
-// }

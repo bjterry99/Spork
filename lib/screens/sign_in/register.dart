@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:provider/provider.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
 import 'package:spork/components/buttons/primary_button.dart';
@@ -21,6 +23,7 @@ class _RegisterState extends State<Register> {
   String name = '';
   String verificationId = '';
   bool enterCode = false;
+  String photoUrl = '';
   TextEditingController codeController = TextEditingController();
 
   String? get handleError {
@@ -72,20 +75,18 @@ class _RegisterState extends State<Register> {
     }
 
     Future<void> submit() async {
-      bool userNameCheck =
-          await Provider.of<AppProvider>(context, listen: false)
-              .userNameExists(userName);
+      bool userNameCheck = await Provider.of<AppProvider>(context, listen: false).userNameExists(userName, null);
       if (userNameCheck) {
         NotificationService.notify('Username already taken.');
         return;
       }
 
-      await Provider.of<AppProvider>(context, listen: false)
-          .verifyPhoneNumber(phone, updateItems);
+      await Provider.of<AppProvider>(context, listen: false).verifyPhoneNumber(phone, updateItems);
     }
 
     Future<void> verify() async {
-      bool verify = await Provider.of<AppProvider>(context, listen: false).sync(null, verificationId, codeController.text);
+      bool verify =
+          await Provider.of<AppProvider>(context, listen: false).sync(null, verificationId, codeController.text);
       if (verify) {
         AppUser appUser = AppUser(
             id: '',
@@ -94,17 +95,26 @@ class _RegisterState extends State<Register> {
             phone: phone,
             followers: <String>[],
             queryName: name.toLowerCase(),
-            photoUrl: '');
+            photoUrl: photoUrl,
+            homeId: '');
         await Provider.of<AppProvider>(context, listen: false).createAccount(appUser);
-        // await Provider.of<AppProvider>(context, listen: false).syncUser();
 
-        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const Home()), (Route<dynamic> route) => false);
+        Navigator.of(context)
+            .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const Home()), (Route<dynamic> route) => false);
       }
     }
 
+    void choosePicture() async {
+      String string64 = await Provider.of<AppProvider>(context, listen: false).choosePicture();
+      setState(() {
+        if (string64 != '') {
+          photoUrl = string64;
+        }
+      });
+    }
+
     return Scaffold(
-      appBar: Provider.of<AppProvider>(context, listen: false)
-          .getZeroAppBar(CustomColors.white),
+      appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -125,16 +135,36 @@ class _RegisterState extends State<Register> {
                   ),
                   const Center(
                     child: Text(
-                      'Create Account',
+                      'Create Profile',
                       style: TextStyle(
-                          fontSize: CustomFontSize.large,
-                          fontWeight: FontWeight.w700,
-                          color: CustomColors.primary),
+                          fontSize: CustomFontSize.large, fontWeight: FontWeight.w700, color: CustomColors.primary),
                     ),
                   ),
                   const SizedBox(
-                    height: 40,
+                    height: 20,
                   ),
+                  if (!enterCode)
+                    Center(
+                      child: GestureDetector(
+                        onTap: choosePicture,
+                        child: CircleAvatar(
+                          radius: 70,
+                          backgroundColor: CustomColors.grey2,
+                          child: photoUrl == ''
+                              ? const Icon(
+                                  Icons.portrait_rounded,
+                                  color: CustomColors.grey4,
+                                  size: 40,
+                                )
+                              : null,
+                          backgroundImage: photoUrl == '' ? null : Image.memory(base64Decode(photoUrl)).image,
+                        ),
+                      ),
+                    ),
+                  if (!enterCode)
+                    const SizedBox(
+                      height: 5,
+                    ),
                   if (!enterCode)
                     TextFormField(
                       keyboardType: TextInputType.name,
@@ -179,9 +209,7 @@ class _RegisterState extends State<Register> {
                           maxLength: 10,
                           keyboardType: TextInputType.phone,
                           style: const TextStyle(
-                              color: CustomColors.black,
-                              fontWeight: FontWeight.w400,
-                              fontSize: CustomFontSize.primary),
+                              color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
                           cursorColor: CustomColors.primary,
                           onChanged: (String? newValue) {
                             setState(() {
@@ -205,9 +233,7 @@ class _RegisterState extends State<Register> {
                           controller: codeController,
                           keyboardType: TextInputType.number,
                           style: const TextStyle(
-                              color: CustomColors.black,
-                              fontWeight: FontWeight.w400,
-                              fontSize: CustomFontSize.primary),
+                              color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
                           cursorColor: CustomColors.primary,
                           decoration: const InputDecoration(
                             labelText: 'enter code',

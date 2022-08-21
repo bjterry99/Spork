@@ -86,7 +86,7 @@ class AppUser {
     required this.phone,
     this.photoUrl = '',
     this.followers = const <String>[],
-    this.homeId = 'null',
+    this.homeId = '',
     this.queryName = '',
   });
 

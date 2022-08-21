@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:spork/home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';

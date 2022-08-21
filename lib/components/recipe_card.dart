@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
@@ -81,11 +80,11 @@ class RecipeCard extends StatelessWidget {
                   }
                 },),
                 const SizedBox(width: 8),
-                StreamBuilder<QuerySnapshot>(
-                  stream: Provider.of<AppProvider>(context, listen: false).specificMenuItem(recipe.id),
+                StreamBuilder<List<Recipe>>(
+                  stream: Provider.of<AppProvider>(context, listen: false).menuStream(),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
-                      final menuItems = snapshot.data?.docs;
+                      final menuItems = snapshot.data;
                       List<String> ids = [];
 
                       for (var item in menuItems!) {

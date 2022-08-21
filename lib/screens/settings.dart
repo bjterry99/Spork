@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -42,9 +43,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
     void signOut() {
       Provider.of<AppProvider>(context, listen: false).signOut;
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const SignIn()),
-          (Route<dynamic> route) => false);
+      Navigator.of(context)
+          .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const SignIn()), (Route<dynamic> route) => false);
     }
 
     void edit() async {
@@ -55,11 +55,21 @@ class _SettingsPageState extends State<SettingsPage> {
           phone: widget.user.phone,
           photoUrl: newPic,
           followers: widget.user.followers,
-          homeId: widget.user.homeId);
+          homeId: widget.user.homeId,
+          queryName: newName.toLowerCase());
       bool edit = await Provider.of<AppProvider>(context, listen: false).editProfile(appUser);
       if (edit) {
         Navigator.pop(context);
       }
+    }
+
+    void choosePicture() async {
+      String string64 = await Provider.of<AppProvider>(context, listen: false).choosePicture();
+      setState(() {
+        if (string64 != '') {
+          newPic = string64;
+        }
+      });
     }
 
     return GestureDetector(
@@ -79,10 +89,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
           title: const Text(
             'Settings',
-            style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: CustomFontSize.primary,
-                color: CustomColors.white),
+            style: TextStyle(fontWeight: FontWeight.w500, fontSize: CustomFontSize.primary, color: CustomColors.white),
           ),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(
@@ -117,7 +124,12 @@ class _SettingsPageState extends State<SettingsPage> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(top: 10, left: 5),
-                            child: ProfileImage(widget.user.photoUrl, 85, 40),
+                            child: Uri.parse(newPic).isAbsolute || newPic == ''
+                                ? ProfileImage(newPic, 85, 40)
+                                : CircleAvatar(
+                                    radius: 45,
+                                    backgroundImage: Image.memory(base64Decode(newPic)).image,
+                                  ),
                           ),
                           const SizedBox(
                             width: 15,
@@ -140,12 +152,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                   },
                                   decoration: const InputDecoration(
                                     enabledBorder: UnderlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: CustomColors.grey3),
+                                      borderSide: BorderSide(color: CustomColors.grey3),
                                     ),
                                     focusedBorder: UnderlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: CustomColors.grey3),
+                                      borderSide: BorderSide(color: CustomColors.grey3),
                                     ),
                                     hintText: "New name...",
                                   ),
@@ -165,12 +175,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                   },
                                   decoration: const InputDecoration(
                                     enabledBorder: UnderlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: CustomColors.grey3),
+                                      borderSide: BorderSide(color: CustomColors.grey3),
                                     ),
                                     focusedBorder: UnderlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: CustomColors.grey3),
+                                      borderSide: BorderSide(color: CustomColors.grey3),
                                     ),
                                     hintText: "New username...",
                                     prefixText: '@',
@@ -186,7 +194,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       Row(
                         children: [
-                          MyTextButton(text: 'New Image', action: () {}),
+                          MyTextButton(text: 'New Image', action: choosePicture),
                           const SizedBox(
                             width: 15,
                           ),
@@ -194,9 +202,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               content: Text(
                                 'SAVE',
                                 style: TextStyle(
-                                    color: validate()
-                                        ? CustomColors.white
-                                        : CustomColors.grey4,
+                                    color: validate() ? CustomColors.white : CustomColors.grey4,
                                     fontSize: CustomFontSize.secondary,
                                     fontWeight: FontWeight.w500),
                               ),
