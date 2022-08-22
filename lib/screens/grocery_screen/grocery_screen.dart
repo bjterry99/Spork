@@ -90,7 +90,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                       elevation: 0,
                       flexibleSpace: GroceryHeader(),
                       floating: true,
-                      toolbarHeight: 60,
+                      toolbarHeight: 61,
                       snap: false,
                       backgroundColor: Colors.transparent,
                     ),

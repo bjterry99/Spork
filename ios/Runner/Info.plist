@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow photo access to upload profile images or recipe pictures.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Spork</string>
 	<key>CFBundleExecutable</key>
