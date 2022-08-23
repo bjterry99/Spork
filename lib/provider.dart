@@ -113,7 +113,7 @@ class AppProvider extends ChangeNotifier {
     } else {
       return _firestore
           .collection('recipes')
-          .where('savedIds', arrayContains: _user.homeId)
+          .where('homeIds', arrayContains: _user.homeId)
           .snapshots()
           .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
     }
@@ -158,6 +158,10 @@ class AppProvider extends ChangeNotifier {
 
   Stream<QuerySnapshot<Object?>> specificHome(String id) {
     return _firestore.collection('homes').where('users', arrayContains: id).snapshots();
+  }
+
+  Stream<QuerySnapshot<Object?>> specificRecipe(String id) {
+    return _firestore.collection('recipes').where('savedIds', arrayContains: _user.id).snapshots();
   }
 
   /// Functions ///
@@ -342,6 +346,62 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> saveRecipe(String id) async {
+    NotificationService.notify('Saving recipe...');
+
+    try {
+      bool isHome = _user.homeId != '';
+      var ref = _firestore.collection('recipes').doc(id);
+      if (isHome) {
+        await ref.update({
+          'savedIds': FieldValue.arrayUnion([_user.id]),
+          'homeIds': FieldValue.arrayUnion([_user.homeId]),
+        });
+      } else {
+        await ref.update({
+          'savedIds': FieldValue.arrayUnion([_user.id]),
+        });
+      }
+    } catch (error) {
+      NotificationService.notify('Failed to add to save recipe.');
+    }
+  }
+
+  Future<void> unsaveRecipe(Recipe recipe) async {
+    NotificationService.notify('Removing recipe...');
+
+    try {
+      var ref = _firestore.collection('recipes').doc(recipe.id);
+
+      bool isHome = _user.homeId != '';
+      bool removeHome = true;
+      if (isHome) {
+        var data = await _firestore.collection('users').where('homeId', isEqualTo: _user.homeId).get();
+        List<String> homeMembers = data.docs.map((e) => e.id).toList();
+
+        for (String id in recipe.savedIds) {
+          if (homeMembers.contains(id)) {
+            removeHome = false;
+          }
+        }
+      }
+
+
+      if (isHome && removeHome) {
+        await ref.update({
+          'savedIds': FieldValue.arrayRemove([_user.id]),
+          'homeIds': FieldValue.arrayRemove([_user.homeId]),
+        });
+      } else {
+        await ref.update({
+          'savedIds': FieldValue.arrayRemove([_user.id]),
+        });
+      }
+    } catch (error) {
+      NotificationService.notify('Failed to add to remove recipe.');
+    }
+  }
+
   Future<void> reportUser(String id) async {
     NotificationService.notify('Reporting user...');
 
@@ -352,6 +412,19 @@ class AppProvider extends ChangeNotifier {
       });
     } catch (error) {
       NotificationService.notify('Failed to report user.');
+    }
+  }
+
+  Future<void> reportRecipe(String id) async {
+    NotificationService.notify('Reporting recipe...');
+
+    try {
+      var ref = _firestore.collection('reportedRecipes').doc(id);
+      await ref.set({
+        'id': id,
+      });
+    } catch (error) {
+      NotificationService.notify('Failed to report recipe.');
     }
   }
 
@@ -409,10 +482,9 @@ class AppProvider extends ChangeNotifier {
       var recipeRef = _firestore.collection('recipes').doc();
       recipe.id = recipeRef.id;
       recipe.creatorId = _user.id;
-      if (_user.homeId == '') {
-        recipe.savedIds = [_user.id];
-      } else {
-        recipe.savedIds = [_user.homeId];
+      recipe.savedIds = [_user.id];
+      if (_user.homeId != '') {
+        recipe.homeIds = [_user.homeId];
       }
 
       if (recipe.photoUrl != '' && !Uri.parse(recipe.photoUrl).isAbsolute) {

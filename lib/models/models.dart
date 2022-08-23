@@ -16,6 +16,7 @@ class Recipe {
   List<String> instructions;
   List<String> menuIds;
   List<String> savedIds;
+  List<String> homeIds;
   String creatorId;
   String queryName;
   String visibility;
@@ -32,6 +33,7 @@ class Recipe {
     this.instructions = const <String>[],
     this.menuIds = const <String>[],
     this.savedIds = const <String>[],
+    this.homeIds = const <String>[],
     this.creatorId = '',
     this.queryName = '',
     this.visibility = 'private',

@@ -234,6 +234,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
           menuIds: widget.recipe!.menuIds,
           savedIds: widget.recipe!.savedIds,
           creatorId: widget.recipe!.creatorId,
+          homeIds: widget.recipe!.homeIds,
           photoUrl: photoUrl);
 
       await Provider.of<AppProvider>(context, listen: false).updateRecipe(recipe);

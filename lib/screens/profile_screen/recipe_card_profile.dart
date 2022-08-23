@@ -9,32 +9,13 @@ import 'package:spork/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:swipeable_page_route/swipeable_page_route.dart';
 
-class RecipeCard extends StatelessWidget {
-  const RecipeCard(this.recipe, {Key? key}) : super(key: key);
+class RecipeCardProfile extends StatelessWidget {
+  const RecipeCardProfile(this.recipe, {Key? key}) : super(key: key);
   final Recipe recipe;
 
   @override
   Widget build(BuildContext context) {
     double imgWidth = MediaQuery.of(context).size.width / 2.2;
-
-    Icon getIcon() {
-      if (recipe.className == 'Side') {
-        return const Icon(
-          Icons.bakery_dining_outlined,
-          color: CustomColors.grey4,
-        );
-      } else if (recipe.className == 'Dessert') {
-        return const Icon(
-          Icons.icecream_outlined,
-          color: CustomColors.grey4,
-        );
-      } else {
-        return const Icon(
-          Icons.dinner_dining_outlined,
-          color: CustomColors.grey4,
-        );
-      }
-    }
 
     return Padding(
       padding: const EdgeInsets.only(

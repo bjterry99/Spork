@@ -32,6 +32,10 @@ Recipe _$RecipeFromJson(Map<String, dynamic> json) => Recipe(
               ?.map((e) => e as String)
               .toList() ??
           const <String>[],
+      homeIds: (json['homeIds'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
       creatorId: json['creatorId'] as String? ?? '',
       queryName: json['queryName'] as String? ?? '',
       visibility: json['visibility'] as String? ?? 'private',
@@ -49,6 +53,7 @@ Map<String, dynamic> _$RecipeToJson(Recipe instance) => <String, dynamic>{
       'instructions': instance.instructions,
       'menuIds': instance.menuIds,
       'savedIds': instance.savedIds,
+      'homeIds': instance.homeIds,
       'creatorId': instance.creatorId,
       'queryName': instance.queryName,
       'visibility': instance.visibility,

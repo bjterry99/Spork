@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:spork/components/user_card.dart';
 import 'package:spork/models/models.dart';
-import 'package:spork/components/recipe_card.dart';
+import 'package:spork/screens/discover/recipe_card_explore.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:spork/theme.dart';
 
@@ -22,7 +22,7 @@ class DiscoverList extends StatelessWidget {
         crossAxisCount: 2,
       ),
       builderDelegate: PagedChildBuilderDelegate<Recipe>(
-        itemBuilder: (context, item, index) => RecipeCard(item),
+        itemBuilder: (context, item, index) => RecipeCardExplore(item),
         newPageErrorIndicatorBuilder: (_) => const Center(
           child: Text(
             'Error encountered',

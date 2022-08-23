@@ -53,10 +53,22 @@ class _DiscoverPageState extends State<DiscoverPage> {
           .searchRecipesExplore(_pageSize, controller.text.toLowerCase(), pageKey);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
-        _pagingController.appendLastPage(newItems);
+        List<Recipe> list = [];
+        for (var recipe in newItems) {
+          if (recipe.creatorId != Provider.of<AppProvider>(context, listen: false).user.id) {
+            list.add(recipe);
+          }
+        }
+        _pagingController.appendLastPage(list);
       } else {
+        List<Recipe> list = [];
+        for (var recipe in newItems) {
+          if (recipe.creatorId != Provider.of<AppProvider>(context, listen: false).user.id) {
+            list.add(recipe);
+          }
+        }
         final nextPageKey = pageKey + newItems.length;
-        _pagingController.appendPage(newItems, nextPageKey);
+        _pagingController.appendPage(list, nextPageKey);
       }
     } catch (error) {
       _pagingController.error = error;

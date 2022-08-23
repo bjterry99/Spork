@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:spork/components/recipe_card.dart';
+import 'package:spork/screens/profile_screen/recipe_card_profile.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/theme.dart';
 import 'package:spork/provider.dart';
@@ -27,9 +27,9 @@ class MenuList extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final recipes = snapshot.data;
-          List<RecipeCard> main = [];
-          List<RecipeCard> side = [];
-          List<RecipeCard> dessert = [];
+          List<RecipeCardProfile> main = [];
+          List<RecipeCardProfile> side = [];
+          List<RecipeCardProfile> dessert = [];
           bool display = false;
 
           for (var recipe in recipes!) {
@@ -45,11 +45,11 @@ class MenuList extends StatelessWidget {
 
             if (display) {
               if (recipe.className == 'Dessert') {
-                dessert.add(RecipeCard(recipe));
+                dessert.add(RecipeCardProfile(recipe));
               } else if (recipe.className == 'Side') {
-                side.add(RecipeCard(recipe));
+                side.add(RecipeCardProfile(recipe));
               } else {
-                main.add(RecipeCard(recipe));
+                main.add(RecipeCardProfile(recipe));
               }
             }
           }
