@@ -1,16 +1,15 @@
-import 'dart:io';
+import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
-import 'package:spork/screens/create_recipe.dart';
-import 'package:spork/screens/details_screen/details_back_bar.dart';
+import 'package:spork/screens/details_screen/details_title_bar.dart';
 import 'package:spork/screens/details_screen/details_header.dart';
 import 'package:spork/screens/details_screen/ingredients.dart';
 import 'package:spork/screens/details_screen/instructions.dart';
 import 'package:spork/theme.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DetailScreen extends StatefulWidget {
   const DetailScreen({required this.recipe, Key? key}) : super(key: key);
@@ -27,6 +26,30 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     double imgWidth = MediaQuery.of(context).size.width / 1;
+    AppUser user = Provider.of<AppProvider>(context).user;
+
+    String getTotalTime(String cookTime, String prepTime) {
+      int hours = int.parse(cookTime.substring(
+          0, cookTime.indexOf(':')));
+      int minutes = int.parse(cookTime.replaceRange(0, hours > 9 ? 3 : 2, ''));
+      Duration cook =  Duration(hours: hours, minutes: minutes);
+
+      hours = int.parse(prepTime.substring(
+          0, prepTime.indexOf(':')));
+      minutes = int.parse(prepTime.replaceRange(0, hours > 9 ? 3 : 2, ''));
+      Duration prep =  Duration(hours: hours, minutes: minutes);
+
+      Duration totalTime = prep + cook;
+
+      String durationString = totalTime.toString();
+      String hoursString = durationString.substring(
+          0, durationString.indexOf(':'));
+      durationString = durationString.replaceRange(0, int.parse(hoursString) > 9 ? 3 : 2, '');
+      String minutesString = durationString.substring(
+          0, durationString.indexOf(':'));
+
+      return hoursString + ':' + minutesString;
+    }
 
     return Scaffold(
       appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
@@ -48,7 +71,7 @@ class _DetailScreenState extends State<DetailScreen> {
             SliverPersistentHeader(
               pinned: true,
               floating: false,
-              delegate: DelegateDetails(widget.recipe),
+              delegate: DelegateDetails(widget.recipe, MediaQuery.of(context).size.width / 1.285),
             ),
           ];
         },
@@ -77,6 +100,86 @@ class _DetailScreenState extends State<DetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
+                    padding: const EdgeInsets.only(left: 25, right: 25),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Total Time:',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: CustomFontSize.primary,
+                                  color: CustomColors.grey4),
+                            ),
+                            const SizedBox(
+                              height: 3,
+                            ),
+                            Text(
+                              getTotalTime(widget.recipe.cookTime, widget.recipe.prepTime),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: CustomFontSize.primary,
+                                  color: CustomColors.grey4),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 20,),
+                        Row(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  "Prep Time:",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: CustomFontSize.primary,
+                                      color: CustomColors.grey4),
+                                ),
+                                SizedBox(
+                                  height: 3,
+                                ),
+                                Text(
+                                  "Cook Time:",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: CustomFontSize.primary,
+                                      color: CustomColors.grey4),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 5,),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.recipe.prepTime,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: CustomFontSize.primary,
+                                      color: CustomColors.grey4),
+                                ),
+                                const SizedBox(
+                                  height: 3,
+                                ),
+                                Text(
+                                  widget.recipe.cookTime,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: CustomFontSize.primary,
+                                      color: CustomColors.grey4),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                  Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: ExpansionPanelList(
                       elevation: 0,
@@ -86,7 +189,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           backgroundColor: Colors.transparent,
                           headerBuilder: (context, isExpanded) {
                             return Card(
-                              elevation: 1,
+                              elevation: 3,
                               color: CustomColors.white,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20)),
@@ -176,149 +279,142 @@ class _DetailScreenState extends State<DetailScreen> {
           ),
         ),
       ),
-      // appBar: AppBar(
-      //   actions: [
-      //     Padding(
-      //       padding: const EdgeInsets.only(right: 15),
-      //       child: Column(
-      //         children: [
-      //           const SizedBox(
-      //             height: 10,
-      //           ),
-      //           GestureDetector(
-      //             onTap: () {
-      //               Navigator.push(
-      //                 context,
-      //                 MaterialPageRoute(
-      //                   builder: (context) => CreateRecipe(recipe: widget.recipe,),
-      //                 ),);
-      //             },
-      //             child: const Icon(
-      //               Icons.edit,
-      //               color: CustomColors.white,
-      //               size: 25,
-      //             ),
-      //           )
-      //         ],
-      //       ),
-      //     ),
-      //   ],
-      //   leading: Column(
-      //     children: [
-      //       const SizedBox(
-      //         height: 10,
-      //       ),
-      //       GestureDetector(
-      //           onTap: () {
-      //             Navigator.pop(context);
-      //           },
-      //           child: Icon(
-      //             Platform.isAndroid
-      //                 ? Icons.arrow_back_rounded
-      //                 : Icons.arrow_back_ios_rounded,
-      //             size: 25,
-      //           )),
-      //     ],
-      //   ),
-      //   systemOverlayStyle: Platform.isIOS ? SystemUiOverlayStyle.light :
-      //   const SystemUiOverlayStyle(
-      //     statusBarColor: CustomColors.primary,
-      //     statusBarIconBrightness: Brightness.light,
-      //   ),
-      //   toolbarHeight: 120,
-      //   centerTitle: false,
-      //   title: Column(
-      //     mainAxisAlignment: MainAxisAlignment.start,
-      //     crossAxisAlignment: CrossAxisAlignment.start,
-      //     children: [
-      //       Text(
-      //         widget.recipe.className == 'Dessert' ? widget.recipe.className : '${widget.recipe.className} Dish',
-      //         style: const TextStyle(
-      //             fontWeight: FontWeight.w400,
-      //             fontSize: CustomFontSize.primary,
-      //             color: CustomColors.white),
-      //       ),
-      //       const SizedBox(
-      //         height: 3,
-      //       ),
-      //       Text(
-      //         "Total Time: ${getTotalTime(widget.recipe.cookTime, widget.recipe.prepTime)}",
-      //         style: const TextStyle(
-      //             fontWeight: FontWeight.w400,
-      //             fontSize: CustomFontSize.primary,
-      //             color: CustomColors.white),
-      //       ),
-      //       const SizedBox(
-      //         height: 3,
-      //       ),
-      //       Text(
-      //         "Prep Time: ${widget.recipe.prepTime}",
-      //         style: const TextStyle(
-      //             fontWeight: FontWeight.w400,
-      //             fontSize: CustomFontSize.secondary,
-      //             color: CustomColors.white),
-      //       ),
-      //       const SizedBox(
-      //         height: 3,
-      //       ),
-      //       Text(
-      //         "Cook Time: ${widget.recipe.cookTime}",
-      //         style: const TextStyle(
-      //             fontWeight: FontWeight.w400,
-      //             fontSize: CustomFontSize.secondary,
-      //             color: CustomColors.white),
-      //       ),
-      //       const SizedBox(
-      //         height: 5,
-      //       ),
-      //     ],
-      //   ),
-      //   shape: const RoundedRectangleBorder(
-      //     borderRadius: BorderRadius.vertical(
-      //       bottom: Radius.circular(20),
-      //     ),
-      //   ),
-      //   elevation: 1,
-      // ),
-      floatingActionButton: isFabVisible
-          ? StreamBuilder<List<Recipe>>(
-        stream: Provider.of<AppProvider>(context, listen: false).menuStream(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final menuItems = snapshot.data;
-            List<String> ids = [];
+      floatingActionButton: AnimatedOpacity(
+        opacity: isFabVisible ? 1 : 0,
+        duration: const Duration(milliseconds: 100),
+        child: FabCircularMenu(
+          fabColor: CustomColors.secondary,
+          fabCloseColor: CustomColors.primary,
+          ringColor: Colors.transparent,
+            fabElevation: 3,
+            ringDiameter: 300,
+            children: <Widget>[
+              if (widget.recipe.creatorId != user.id)
+                StreamBuilder<QuerySnapshot>(
+                  stream: Provider.of<AppProvider>(context, listen: false).specificRecipe(widget.recipe.id),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final recipeItems = snapshot.data;
+                      bool saved = recipeItems!.docs.isNotEmpty;
 
-            for (var item in menuItems!) {
-              ids.add(item.id.toString());
-            }
-            bool onMenu = ids.contains(widget.recipe.id);
-
-            return Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: FloatingActionButton(
-                elevation: 3,
-                backgroundColor: CustomColors.primary,
-                child: Icon(onMenu ? Icons.remove_rounded : Icons.add_rounded, color: CustomColors.white,),
-                onPressed: onMenu ? () async {
-                  await Provider.of<AppProvider>(context, listen: false).removeFromMenu(widget.recipe.id);
-                } : () async {
-            await Provider.of<AppProvider>(context, listen: false).addToMenu(widget.recipe);
-            }
+                      return GestureDetector(
+                        onTap: () async {
+                          if (saved) {
+                            await Provider.of<AppProvider>(context, listen: false).unsaveRecipe(widget.recipe);
+                          } else {
+                            await Provider.of<AppProvider>(context, listen: false).saveRecipe(widget.recipe.id);
+                          }
+                        },
+                        child: Material(
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          color: CustomColors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.all(7),
+                            child: Text(saved ? 'unsave' : 'save'),
+                          ),
+                        ),
+                      );
+                    } else {
+                      return Material(
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        color: CustomColors.white,
+                        child: const Padding(
+                          padding: EdgeInsets.all(7),
+                          child: Text('unsave'),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Material(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  color: CustomColors.white,
+                  child: const Padding(
+                    padding: EdgeInsets.all(7),
+                    child: Icon(Icons.add),
+                  ),
+                ),
               ),
-            );
-          } else {
-            return Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: FloatingActionButton(
-                elevation: 3,
-                backgroundColor: CustomColors.primary,
-                child: const Icon(Icons.add_rounded, color: CustomColors.white,),
-                onPressed: (){},
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Material(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  color: CustomColors.white,
+                  child: const Padding(
+                    padding: EdgeInsets.all(7),
+                    child: Icon(Icons.add),
+                  ),
+                ),
               ),
-            );
-          }
-        },
-      ) : null,
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Material(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  color: CustomColors.white,
+                  child: const Padding(
+                    padding: EdgeInsets.all(7),
+                    child: Icon(Icons.add),
+                  ),
+                ),
+              ),
+            ]
+        ),
+      )
+      // StreamBuilder<List<Recipe>>(
+      //   stream: Provider.of<AppProvider>(context, listen: false).menuStream(),
+      //   builder: (context, snapshot) {
+      //     if (snapshot.hasData) {
+      //       final menuItems = snapshot.data;
+      //       List<String> ids = [];
+      //
+      //       for (var item in menuItems!) {
+      //         ids.add(item.id.toString());
+      //       }
+      //       bool onMenu = ids.contains(widget.recipe.id);
+      //
+      //       return Padding(
+      //         padding: const EdgeInsets.all(15.0),
+      //         child: FloatingActionButton(
+      //           elevation: 3,
+      //           backgroundColor: CustomColors.primary,
+      //           child: Icon(onMenu ? Icons.remove_rounded : Icons.add_rounded, color: CustomColors.white,),
+      //           onPressed: onMenu ? () async {
+      //             await Provider.of<AppProvider>(context, listen: false).removeFromMenu(widget.recipe.id);
+      //           } : () async {
+      //       await Provider.of<AppProvider>(context, listen: false).addToMenu(widget.recipe);
+      //       }
+      //         ),
+      //       );
+      //     } else {
+      //       return Padding(
+      //         padding: const EdgeInsets.all(15.0),
+      //         child: FloatingActionButton(
+      //           elevation: 3,
+      //           backgroundColor: CustomColors.primary,
+      //           child: const Icon(Icons.add_rounded, color: CustomColors.white,),
+      //           onPressed: (){},
+      //         ),
+      //       );
+      //     }
+      //   },
+      // )
     );
   }
 }
