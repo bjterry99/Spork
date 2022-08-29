@@ -36,7 +36,7 @@ class DetailsHeader extends StatelessWidget {
               width: imgWidth,
               decoration: const BoxDecoration(
                   color: CustomColors.grey2,
-                  borderRadius: BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20))),
+                  borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20))),
               child: const Icon(
                 Icons.image_not_supported_outlined,
                 color: CustomColors.grey4,
@@ -47,7 +47,7 @@ class DetailsHeader extends StatelessWidget {
               width: imgWidth,
               decoration: const BoxDecoration(
                   color: CustomColors.grey2,
-                  borderRadius: BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20))),
+                  borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20))),
               child: const Icon(
                 Icons.image_not_supported_outlined,
                 color: CustomColors.grey4,
@@ -58,7 +58,7 @@ class DetailsHeader extends StatelessWidget {
             width: imgWidth,
             decoration: const BoxDecoration(
                 color: CustomColors.grey2,
-                borderRadius: BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20))),
+                borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20))),
             child: const Icon(
               Icons.image_not_supported_outlined,
               color: CustomColors.grey4,

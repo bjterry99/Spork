@@ -122,14 +122,14 @@ class RecipeCardExplore extends StatelessWidget {
                     ),
                     const Spacer(),
                     StreamBuilder<QuerySnapshot>(
-                      stream: Provider.of<AppProvider>(context, listen: false).specificRecipe(recipe.id),
+                      stream: Provider.of<AppProvider>(context, listen: false).savedRecipes(),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           final recipeItems = snapshot.data;
-                          bool saved = recipeItems!.docs.isNotEmpty;
+                          bool saved = recipeItems!.docs.map((e) => e.id).toList().contains(recipe.id);
 
                           return MyTextButton(
-                            text: saved ? 'remove' : 'save',
+                            text: saved ? 'unsave' : 'save',
                             icon: Icons.restaurant_menu_rounded,
                             action: saved
                                 ? () async {

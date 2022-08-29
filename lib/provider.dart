@@ -160,7 +160,7 @@ class AppProvider extends ChangeNotifier {
     return _firestore.collection('homes').where('users', arrayContains: id).snapshots();
   }
 
-  Stream<QuerySnapshot<Object?>> specificRecipe(String id) {
+  Stream<QuerySnapshot<Object?>> savedRecipes() {
     return _firestore.collection('recipes').where('savedIds', arrayContains: _user.id).snapshots();
   }
 
@@ -320,11 +320,14 @@ class AppProvider extends ChangeNotifier {
     try {
       var ref = _firestore.collection('recipes').doc(recipe.id);
       if (_user.homeId == '') {
-        recipe.menuIds.add(_user.id);
+        await ref.update({
+          'menuIds': FieldValue.arrayUnion([_user.id]),
+        });
       } else {
-        recipe.menuIds.add(_user.homeId);
+        await ref.update({
+          'menuIds': FieldValue.arrayUnion([_user.homeId]),
+        });
       }
-      await ref.update(recipe.toJson());
 
       for (int i = 0; i < recipe.ingredients.length; i++) {
         var ref = _firestore.collection('grocery').doc();
@@ -385,7 +388,6 @@ class AppProvider extends ChangeNotifier {
           }
         }
       }
-
 
       if (isHome && removeHome) {
         await ref.update({
@@ -979,6 +981,21 @@ class AppProvider extends ChangeNotifier {
     } else {
       return <AppUser>[];
     }
+  }
+
+  Future<bool> canEdit(Recipe recipe) async {
+    if (recipe.creatorId == _user.id) {
+      return true;
+    }
+    if (_user.homeId != '') {
+      MyHome? myHome = await fetchHome(_user.homeId);
+      if (myHome != null) {
+        if (myHome.users.contains(recipe.creatorId)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
 }
