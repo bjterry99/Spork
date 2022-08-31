@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:spork/components/buttons/primary_button.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
+import 'package:spork/screens/my_home_screen/home_invite_card.dart';
 import 'package:spork/theme.dart';
 
 class NoHome extends StatefulWidget {
@@ -114,6 +115,28 @@ class _NoHomeState extends State<NoHome> {
                     color: CustomColors.grey4,
                     fontWeight: FontWeight.w500,
                   ),
+                ),
+                const SizedBox(height: 10,),
+                StreamBuilder<List<HomeInvite>>(
+                  stream: Provider.of<AppProvider>(context, listen: false).inviteStream(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final items = snapshot.data;
+                      List<Widget> listItems = [];
+
+                      for (var item in items!) {
+                        listItems.add(InviteCard(item));
+                      }
+
+                      return ListView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        children: listItems,
+                      );
+                    } else {
+                      return const SizedBox();
+                    }
+                  },
                 ),
               ],
             ),

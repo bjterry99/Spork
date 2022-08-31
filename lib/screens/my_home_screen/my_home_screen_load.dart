@@ -14,27 +14,33 @@ class MyHomeScreenLoad extends StatelessWidget {
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppProvider>(context).user;
 
-    return FutureBuilder<MyHome?>(
-      future: Provider.of<AppProvider>(context, listen: false).fetchHome(user.homeId),
-      builder: (builder, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasData) {
-            MyHome myHome = snapshot.data!;
-            return MyHomeScreen(myHome: myHome);
-          } else {
-            return const NoHome();
-          }
-        }
-        return Scaffold(
-          appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
-          body: const Center(
-            child: SpinKitRing(
-              color: CustomColors.primary,
-              size: 50.0,
-            ),
-          ),
-        );
-      },
-    );
+    return user.homeId != ''
+        ? FutureBuilder<MyHome?>(
+            future: Provider.of<AppProvider>(context, listen: false)
+                .fetchHome(user.homeId),
+            builder: (builder, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasData) {
+                  MyHome? myHome = snapshot.data;
+                  if (myHome != null) {
+                    return MyHomeScreen(myHome: myHome);
+                  } else {
+                    return const NoHome();
+                  }
+                }
+              }
+              return Scaffold(
+                appBar: Provider.of<AppProvider>(context, listen: false)
+                    .getZeroAppBar(CustomColors.white),
+                body: const Center(
+                  child: SpinKitRing(
+                    color: CustomColors.primary,
+                    size: 50.0,
+                  ),
+                ),
+              );
+            },
+          )
+        : const NoHome();
   }
 }

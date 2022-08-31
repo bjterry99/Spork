@@ -25,7 +25,6 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     double imgWidth = MediaQuery.of(context).size.width / 1;
-    AppUser user = Provider.of<AppProvider>(context).user;
 
     String getTotalTime(String cookTime, String prepTime) {
       int hours = int.parse(cookTime.substring(0, cookTime.indexOf(':')));

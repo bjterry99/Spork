@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:spork/components/buttons/custom_button.dart';
+import 'package:spork/components/user_card.dart';
 import 'package:spork/models/models.dart';
+import 'package:spork/notification_service.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/theme.dart';
 
@@ -28,7 +30,8 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
 
   void editHome() async {
     FocusScope.of(context).unfocus();
-    await Provider.of<AppProvider>(context, listen: false).editHomeName(widget.myHome.id, homeName);
+    await Provider.of<AppProvider>(context, listen: false)
+        .editHomeName(widget.myHome.id, homeName);
     setState(() {
       currentName = homeName;
     });
@@ -55,20 +58,40 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                 ),
           title: const Text(
             'Home',
-            style: TextStyle(fontWeight: FontWeight.w500, fontSize: CustomFontSize.primary, color: CustomColors.white),
+            style: TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: CustomFontSize.primary,
+                color: CustomColors.white),
           ),
           actions: [
-            if (widget.myHome.creatorId == user.id)
-              Padding(
-                  padding: const EdgeInsets.only(right: 15),
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: const Icon(
-                      Icons.delete_outline,
-                      color: CustomColors.white,
-                      size: 25,
-                    ),
-                  )),
+            widget.myHome.creatorId == user.id
+                ? Padding(
+                    padding: const EdgeInsets.only(right: 15),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        Provider.of<AppProvider>(context).deleteHome(widget.myHome.id);
+                      },
+                      child: const Icon(
+                        Icons.delete_outline,
+                        color: CustomColors.white,
+                        size: 25,
+                      ),
+                    ))
+                : Padding(
+                    padding: const EdgeInsets.only(right: 15),
+                    child: GestureDetector(
+                      onTap: () {
+                        NotificationService.notify('Leaving Home...');
+                        Navigator.pop(context);
+                        Provider.of<AppProvider>(context).removeFromHome(user.id);
+                      },
+                      child: const Icon(
+                        Icons.exit_to_app,
+                        color: CustomColors.white,
+                        size: 25,
+                      ),
+                    )),
           ],
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(
@@ -90,7 +113,9 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                             child: TextFormField(
                               initialValue: widget.myHome.name,
                               style: const TextStyle(
-                                  color: CustomColors.black, fontWeight: FontWeight.w500, fontSize: CustomFontSize.big),
+                                  color: CustomColors.black,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: CustomFontSize.big),
                               textCapitalization: TextCapitalization.words,
                               cursorColor: CustomColors.primary,
                               onChanged: (String? newValue) {
@@ -104,10 +129,12 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                                   size: 25,
                                 ),
                                 enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: CustomColors.grey3),
+                                  borderSide:
+                                      BorderSide(color: CustomColors.grey3),
                                 ),
                                 focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: CustomColors.grey3),
+                                  borderSide:
+                                      BorderSide(color: CustomColors.grey3),
                                 ),
                                 hintText: "New Home name...",
                               ),
@@ -117,7 +144,12 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                             Padding(
                               padding: const EdgeInsets.only(left: 15),
                               child: CustomButton(
-                                  content: Icon(Icons.edit, color: homeName != '' ? CustomColors.white : CustomColors.grey4,),
+                                  content: Icon(
+                                    Icons.edit,
+                                    color: homeName != ''
+                                        ? CustomColors.white
+                                        : CustomColors.grey4,
+                                  ),
                                   action: editHome,
                                   isActive: homeName != '',
                                   verticalPadding: 10,
@@ -126,14 +158,16 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                         ],
                       )
                     : Row(
-                      children: [
-                        const Icon(
-                          Icons.home_outlined,
-                          size: 25,
-                          color: CustomColors.grey4,
-                        ),
-                        const SizedBox(width: 10,),
-                        Text(
+                        children: [
+                          const Icon(
+                            Icons.home_outlined,
+                            size: 25,
+                            color: CustomColors.grey4,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
                             widget.myHome.name,
                             style: const TextStyle(
                               fontSize: CustomFontSize.big,
@@ -141,8 +175,41 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                      ],
-                    ),
+                        ],
+                      ),
+                const SizedBox(height: 20,),
+                const Text(
+                  'Household',
+                  style: TextStyle(
+                    fontSize: CustomFontSize.big,
+                    color: CustomColors.grey4,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 10,),
+                StreamBuilder<List<AppUser>>(
+                  stream: Provider.of<AppProvider>(context, listen: false).homeUsers(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final items = snapshot.data;
+                      List<Widget> listItems = [];
+
+                      for (var item in items!) {
+                        if (item.id != user.id) {
+                          listItems.add(UserCard(item));
+                        }
+                      }
+
+                      return ListView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        children: listItems,
+                      );
+                    } else {
+                      return const SizedBox();
+                    }
+                  },
+                ),
               ],
             ),
           ),

@@ -143,6 +143,10 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  Stream<List<HomeInvite>> inviteStream() {
+      return _firestore.collection('homeInvites').where('receiverId', isEqualTo: _user.id).snapshots().map((snapshot) => snapshot.docs.map((doc) => HomeInvite.fromJson(doc.data())).toList());
+  }
+
   Stream<List<AppUser>> userStream = _firestore
       .collection('users')
       .snapshots()
@@ -162,6 +166,10 @@ class AppProvider extends ChangeNotifier {
 
   Stream<QuerySnapshot<Object?>> savedRecipes() {
     return _firestore.collection('recipes').where('savedIds', arrayContains: _user.id).snapshots();
+  }
+
+  Stream<List<AppUser>> homeUsers() {
+    return _firestore.collection('users').where('homeId', isEqualTo: _user.homeId).snapshots().map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList());
   }
 
   /// Functions ///
@@ -538,6 +546,31 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> deleteHome(String id) async {
+    try {
+      NotificationService.notify('Deleting home...');
+
+      await _firestore.collection('homes').doc(id).delete();
+    } catch (error) {
+      NotificationService.notify('Failed to delete home.');
+    }
+  }
+
+  Future<void> acceptHomeInvite(HomeInvite invite) async {
+    try {
+      NotificationService.notify('Joining home...');
+
+      await _firestore.collection('homeInvites').doc(invite.id).delete();
+
+      var ref = _firestore.collection('homes').doc(invite.homeId);
+      await ref.update({
+        "users": FieldValue.arrayUnion([_user.id]),
+      });
+    } catch (error) {
+      NotificationService.notify('Failed to accept invite.');
+    }
+  }
+
   Future<void> addGroceryItem(Grocery grocery) async {
     try {
       var ref = _firestore.collection('grocery').doc();
@@ -684,14 +717,12 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> removeFromHome(String id) async {
     try {
-      NotificationService.notify('Removing from Home...');
-
       var ref = _firestore.collection('homes').doc(_user.homeId);
       await ref.update({
         "users": FieldValue.arrayRemove([id])
       });
     } catch (error) {
-      NotificationService.notify('Failed to invite to Home.');
+      NotificationService.notify('Failed to remove from Home.');
     }
   }
 
@@ -732,6 +763,19 @@ class AppProvider extends ChangeNotifier {
       }
     } catch (error) {
       NotificationService.notify("Failed to find Home.");
+    }
+    return null;
+  }
+
+  Future<AppUser?> fetchUser(String id) async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>>? doc = await _firestore.collection('users').doc(id).get();
+      if (doc.exists) {
+        AppUser appUser = AppUser.fromJson(doc.data()!);
+        return appUser;
+      }
+    } catch (error) {
+      NotificationService.notify("Failed to find user.");
     }
     return null;
   }
