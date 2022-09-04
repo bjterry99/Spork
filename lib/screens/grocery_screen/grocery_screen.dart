@@ -77,6 +77,20 @@ class _GroceryScreenState extends State<GroceryScreen> {
       controller.clear();
     }
 
+    Future<void> saveSearchItem() async {
+      widget.toggleInputOff();
+      setState(() {
+        canSave = false;
+        query = '';
+      });
+      if (controller.text != '') {
+        Grocery grocery = Grocery(id: '', name: controller.text, mark: false, creatorId: user.id, homeId: user.homeId);
+        await Provider.of<AppProvider>(context, listen: false).addGroceryItem(grocery);
+      }
+      widget.controller.clear();
+      controller.clear();
+    }
+
     return SafeArea(
       child: Scaffold(
         body: Column(
@@ -123,6 +137,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                       },
                       child: GroceryList(
                         query: query,
+                        save: saveSearchItem,
                       ),
                     ),
                   ),

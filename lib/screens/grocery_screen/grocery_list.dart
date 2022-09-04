@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:spork/components/buttons/my_text_button.dart';
 import 'package:spork/screens/grocery_screen/grocery_card.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/theme.dart';
@@ -7,8 +8,9 @@ import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
 
 class GroceryList extends StatelessWidget {
-  const GroceryList({required this.query, Key? key}) : super(key: key);
+  const GroceryList({required this.query, required this.save, Key? key}) : super(key: key);
   final String query;
+  final Function save;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +47,29 @@ class GroceryList extends StatelessWidget {
               }
             }
           }
+
+          if (marked.isEmpty && unmarked.isEmpty && query != '') {
+            return Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    "Looks like that item isn't added",
+                    style: TextStyle(
+                      fontSize: CustomFontSize.primary,
+                      fontWeight: FontWeight.w400,
+                      color: CustomColors.grey4,
+                    ),
+                  ),
+                  MyTextButton(text: 'add now', action: () async {
+                    save();
+                  })
+                ],
+              ),
+            );
+          }
+
           return SingleChildScrollView(
             child: Column(
               children: [

@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:spork/components/buttons/custom_button.dart';
+import 'package:spork/components/buttons/info_box_button.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
+import 'package:spork/services/dialog_service.dart';
 import 'package:spork/components/profile_image.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
@@ -41,10 +43,33 @@ class _SettingsPageState extends State<SettingsPage> {
       return false;
     }
 
-    void signOut() {
-      Provider.of<AppProvider>(context, listen: false).signOut;
-      Navigator.of(context)
-          .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const SignIn()), (Route<dynamic> route) => false);
+    void signOut() async {
+      bool? answer = await DialogService.dialogBox(
+        context: context,
+        title: 'Logout?',
+        actions: [
+          InfoBoxButton(
+            action: () {
+              Navigator.of(context).pop(false);
+            },
+            text: 'Cancel',
+            isPrimary: true,
+          ),
+          InfoBoxButton(
+            action: () {
+              Navigator.of(context).pop(true);
+            },
+            text: 'Confirm',
+            isPrimary: true,
+          ),
+        ],
+      );
+      bool checkForNullAnswer = answer ?? false;
+      if (checkForNullAnswer) {
+        Provider.of<AppProvider>(context, listen: false).signOut;
+        Navigator.of(context)
+            .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const SignIn()), (Route<dynamic> route) => false);
+      }
     }
 
     void edit() async {
@@ -259,7 +284,59 @@ class _SettingsPageState extends State<SettingsPage> {
                         color: CustomColors.grey3,
                       ),
                       InkWell(
-                        onTap: () {},
+                        onTap: () async {
+                          bool? answer = await DialogService.dialogBox(
+                            context: context,
+                            title: 'Delete Account?',
+                            actions: [
+                              InfoBoxButton(
+                                action: () {
+                                  Navigator.of(context).pop(false);
+                                },
+                                text: 'Cancel',
+                                isPrimary: true,
+                              ),
+                              InfoBoxButton(
+                                action: () {
+                                  Navigator.of(context).pop(true);
+                                },
+                                text: 'Confirm',
+                                isPrimary: false,
+                              ),
+                            ],
+                          );
+                          bool checkForNullAnswer = answer ?? false;
+                          if (checkForNullAnswer) {
+                            answer = await DialogService.dialogBox(
+                                context: context,
+                                title: 'Are you sure?',
+                                body: const Text(
+                                  'This action is irreversible.',
+                                  style: InfoBoxTextStyle.body,
+                                ),
+                                actions: [
+                                  InfoBoxButton(
+                                    action: () {
+                                      Navigator.of(context).pop(false);
+                                    },
+                                    text: 'Cancel',
+                                    isPrimary: true,
+                                  ),
+                                  InfoBoxButton(
+                                    action: () {
+                                      Navigator.of(context).pop(true);
+                                    },
+                                    text: 'Delete',
+                                    isPrimary: false,
+                                  ),
+                                ]);
+                            checkForNullAnswer = answer ?? false;
+                            if (checkForNullAnswer) {
+                              // await DeleteAccountCommand(ref.read).run();
+                              Navigator.pop(context);
+                            }
+                          }
+                        },
                         splashColor: CustomColors.secondary,
                         borderRadius: BorderRadius.circular(20),
                         child: Padding(

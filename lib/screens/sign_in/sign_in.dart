@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:spork/components/buttons/ghost_button.dart';
 import 'package:spork/components/buttons/primary_button.dart';
 import 'package:spork/home.dart';
-import 'package:spork/notification_service.dart';
+import 'package:spork/services/notification_service.dart';
 import 'package:spork/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:spork/screens/sign_in/register.dart';

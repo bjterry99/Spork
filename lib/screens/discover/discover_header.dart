@@ -35,7 +35,7 @@ class DiscoverHeader extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                child: MySwitcher(change: change, isOnFollow: isOnFollow, iconLeft: Icons.public, iconRight: Icons.group,),
+                child: MySwitcher(change: change, isOnFollow: isOnFollow, iconLeft: Icons.public, iconRight: Icons.group),
               )
             ],
           ),

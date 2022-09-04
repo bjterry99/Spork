@@ -25,6 +25,7 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     double imgWidth = MediaQuery.of(context).size.width / 1;
+    AppUser user = Provider.of<AppProvider>(context).user;
 
     String getTotalTime(String cookTime, String prepTime) {
       int hours = int.parse(cookTime.substring(0, cookTime.indexOf(':')));
@@ -263,6 +264,51 @@ class _DetailScreenState extends State<DetailScreen> {
                                     ),
                                   ),
                                   Instructions(widget.recipe.instructions),
+                                  const SizedBox(height: 20,),
+                                  if (user.id != widget.recipe.creatorId)
+                                  FutureBuilder<AppUser?>(
+                                    future: Provider.of<AppProvider>(context, listen: false).fetchUser(widget.recipe.creatorId),
+                                    builder: (builder, snapshot) {
+                                      if (snapshot.hasData) {
+                                        AppUser? appUser = snapshot.data;
+                                        if (appUser != null) {
+                                          return Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  const Icon(Icons.person_outline_rounded, color: CustomColors.grey4, size: 20,),
+                                                  const SizedBox(width: 5,),
+                                                  Text(
+                                                    appUser.name,
+                                                    softWrap: true,
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.fade,
+                                                    style: const TextStyle(color: CustomColors.grey4, fontSize: CustomFontSize.primary),
+                                                  ),
+                                                ],
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(left: 24),
+                                                child: Text(
+                                                  '@${appUser.userName}',
+                                                  softWrap: true,
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.fade,
+                                                  style: const TextStyle(color: CustomColors.grey4, fontSize: CustomFontSize.secondary),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        } else {
+                                          return const SizedBox();
+                                        }
+                                      } else {
+                                        return const SizedBox();
+                                      }
+                                    },
+                                  ),
                                 ],
                               ),
                             ),

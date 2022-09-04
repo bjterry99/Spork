@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:spork/models/models.dart';
-import 'package:spork/notification_service.dart';
+import 'package:spork/services/notification_service.dart';
 import 'package:spork/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -350,8 +350,6 @@ class AppProvider extends ChangeNotifier {
             homeId: _user.homeId,);
         await ref.set(grocery.toJson());
       }
-
-      NotificationService.notify('Added to menu.');
     } catch (error) {
       NotificationService.notify('Failed to add to menu.');
     }
@@ -457,29 +455,28 @@ class AppProvider extends ChangeNotifier {
           'menuIds': FieldValue.arrayRemove([_user.homeId])
         });
       }
-
-      NotificationService.notify('Removed from menu.');
     } catch (error) {
       NotificationService.notify('Failed to remove from menu.');
     }
   }
 
-  Future<void> deleteRecipe(String id) async {
+  Future<void> deleteRecipe(Recipe recipe) async {
     NotificationService.notify('Deleting recipe...');
 
     try {
       final storageRef = FirebaseStorage.instance.ref();
-      final pictureRef = storageRef.child(id);
-      await pictureRef.delete();
 
-      await _firestore.collection('recipes').doc(id).delete();
+      if (recipe.photoUrl != '') {
+        final pictureRef = storageRef.child(recipe.id);
+        await pictureRef.delete();
+      }
 
-      var collection = await _firestore.collection('grocery').where('recipeId', isEqualTo: id).get();
+      await _firestore.collection('recipes').doc(recipe.id).delete();
+
+      var collection = await _firestore.collection('grocery').where('recipeId', isEqualTo: recipe.id).get();
       for (var item in collection.docs) {
         await _firestore.collection('grocery').doc(item.id).delete();
       }
-
-      NotificationService.notify('Recipe deleted.');
     } catch (error) {
       NotificationService.notify('Failed to delete recipe.');
     }
@@ -502,8 +499,6 @@ class AppProvider extends ChangeNotifier {
       }
 
       await recipeRef.set(recipe.toJson());
-
-      NotificationService.notify('Recipe created.');
     } catch (error) {
       NotificationService.notify('Failed to create recipe.');
     }
@@ -520,8 +515,6 @@ class AppProvider extends ChangeNotifier {
       }
 
       await recipeRef.update(recipe.toJson());
-
-      NotificationService.notify('Recipe updated.');
     } catch (error) {
       NotificationService.notify('Failed to update recipe.');
     }
@@ -775,7 +768,7 @@ class AppProvider extends ChangeNotifier {
         return appUser;
       }
     } catch (error) {
-      NotificationService.notify("Failed to find user.");
+      // NotificationService.notify("Failed to find user.");
     }
     return null;
   }
@@ -822,128 +815,132 @@ class AppProvider extends ChangeNotifier {
       final following = await _firestore.collection('users').where('followers', arrayContains: _user.id).get();
       List<String> followingList = following.docs.map((e) => e.id).toList();
 
-      if (followingList.length <= 10) {
-        if (page != 0) {
-          final skipThese = await _firestore
-              .collection('recipes')
-              .where('creatorId', whereIn: followingList)
-              .where('queryName', isGreaterThanOrEqualTo: query)
-              .limit(page)
-              .get();
-          final lastVisible = skipThese.docs[skipThese.size - 1];
-
-          QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
-              .collection('recipes')
-              .where('creatorId', whereIn: followingList)
-              .where('queryName', isGreaterThanOrEqualTo: query)
-              .startAt([lastVisible])
-              .get();
-          List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
-
-          List<Recipe> sortedRecipes = [];
-          for (var recipe in recipes) {
-            if (recipe.visibility != 'private') {
-              sortedRecipes.add(recipe);
-              if (sortedRecipes.length == pageSize) {
-                return sortedRecipes;
-              }
-            }
-          }
-
-          return sortedRecipes;
-        } else {
-          QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
-              .collection('recipes')
-              .where('creatorId', whereIn: followingList)
-              .where('queryName', isGreaterThanOrEqualTo: query)
-              .get();
-          List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
-
-          List<Recipe> sortedRecipes = [];
-          for (var recipe in recipes) {
-            if (recipe.visibility != 'private') {
-              sortedRecipes.add(recipe);
-              if (sortedRecipes.length == pageSize) {
-                return sortedRecipes;
-              }
-            }
-          }
-
-          return sortedRecipes;
-        }
-      } else {
-        if (page != 0) {
-          final skipThese = await _firestore
-              .collection('recipes')
-              .where('creatorId', whereIn: followingList)
-              .where('queryName', isGreaterThanOrEqualTo: query)
-              .limit(page)
-              .get();
-          final lastVisible = skipThese.docs[skipThese.size - 1];
-
-          List<Recipe> recipes = [];
-          for (int i=0; i < followingList.length; i=i+10) {
-            List<String> someFollowing = [];
-            if (followingList.skip(i).length > 10) {
-              someFollowing.addAll(followingList.sublist(i, i + 10));
-            } else {
-              someFollowing.addAll(followingList.skip(i));
-            }
+      if (followingList.length != 0) {
+        if (followingList.length <= 10) {
+          if (page != 0) {
+            final skipThese = await _firestore
+                .collection('recipes')
+                .where('creatorId', whereIn: followingList)
+                .where('queryName', isGreaterThanOrEqualTo: query)
+                .limit(page)
+                .get();
+            final lastVisible = skipThese.docs[skipThese.size - 1];
 
             QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
                 .collection('recipes')
                 .where('creatorId', whereIn: followingList)
-                .where('visibility', isNotEqualTo: 'private')
                 .where('queryName', isGreaterThanOrEqualTo: query)
                 .startAt([lastVisible])
                 .get();
+            List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
 
-            recipes.addAll(snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
-          }
-
-          List<Recipe> sortedRecipes = [];
-          for (var recipe in recipes) {
-            if (recipe.visibility != 'private') {
-              sortedRecipes.add(recipe);
-              if (sortedRecipes.length == pageSize) {
-                return sortedRecipes;
+            List<Recipe> sortedRecipes = [];
+            for (var recipe in recipes) {
+              if (recipe.visibility != 'private') {
+                sortedRecipes.add(recipe);
+                if (sortedRecipes.length == pageSize) {
+                  return sortedRecipes;
+                }
               }
             }
-          }
 
-          return sortedRecipes;
-        } else {
-          List<Recipe> recipes = [];
-
-          for (int i=0; i < followingList.length; i=i+10) {
-            List<String> someFollowing = [];
-            if (followingList.skip(i).length > 10) {
-              someFollowing.addAll(followingList.sublist(i, i + 10));
-            } else {
-              someFollowing.addAll(followingList.skip(i));
-            }
-
+            return sortedRecipes;
+          } else {
             QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
                 .collection('recipes')
-                .where('creatorId', whereIn: someFollowing)
+                .where('creatorId', whereIn: followingList)
                 .where('queryName', isGreaterThanOrEqualTo: query)
                 .get();
+            List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
 
-            recipes.addAll(snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
-          }
-
-          List<Recipe> sortedRecipes = [];
-          for (var recipe in recipes) {
-            if (recipe.visibility != 'private') {
-              sortedRecipes.add(recipe);
-              if (sortedRecipes.length == pageSize) {
-                return sortedRecipes;
+            List<Recipe> sortedRecipes = [];
+            for (var recipe in recipes) {
+              if (recipe.visibility != 'private') {
+                sortedRecipes.add(recipe);
+                if (sortedRecipes.length == pageSize) {
+                  return sortedRecipes;
+                }
               }
             }
-          }
 
-          return sortedRecipes;
+            return sortedRecipes;
+          }
+        } else {
+          if (page != 0) {
+            final skipThese = await _firestore
+                .collection('recipes')
+                .where('creatorId', whereIn: followingList)
+                .where('queryName', isGreaterThanOrEqualTo: query)
+                .limit(page)
+                .get();
+            final lastVisible = skipThese.docs[skipThese.size - 1];
+
+            List<Recipe> recipes = [];
+            for (int i=0; i < followingList.length; i=i+10) {
+              List<String> someFollowing = [];
+              if (followingList.skip(i).length > 10) {
+                someFollowing.addAll(followingList.sublist(i, i + 10));
+              } else {
+                someFollowing.addAll(followingList.skip(i));
+              }
+
+              QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+                  .collection('recipes')
+                  .where('creatorId', whereIn: followingList)
+                  .where('visibility', isNotEqualTo: 'private')
+                  .where('queryName', isGreaterThanOrEqualTo: query)
+                  .startAt([lastVisible])
+                  .get();
+
+              recipes.addAll(snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+            }
+
+            List<Recipe> sortedRecipes = [];
+            for (var recipe in recipes) {
+              if (recipe.visibility != 'private') {
+                sortedRecipes.add(recipe);
+                if (sortedRecipes.length == pageSize) {
+                  return sortedRecipes;
+                }
+              }
+            }
+
+            return sortedRecipes;
+          } else {
+            List<Recipe> recipes = [];
+
+            for (int i=0; i < followingList.length; i=i+10) {
+              List<String> someFollowing = [];
+              if (followingList.skip(i).length > 10) {
+                someFollowing.addAll(followingList.sublist(i, i + 10));
+              } else {
+                someFollowing.addAll(followingList.skip(i));
+              }
+
+              QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+                  .collection('recipes')
+                  .where('creatorId', whereIn: someFollowing)
+                  .where('queryName', isGreaterThanOrEqualTo: query)
+                  .get();
+
+              recipes.addAll(snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+            }
+
+            List<Recipe> sortedRecipes = [];
+            for (var recipe in recipes) {
+              if (recipe.visibility != 'private') {
+                sortedRecipes.add(recipe);
+                if (sortedRecipes.length == pageSize) {
+                  return sortedRecipes;
+                }
+              }
+            }
+
+            return sortedRecipes;
+          }
         }
+      } else {
+        return <Recipe>[];
       }
     } else {
       return <Recipe>[];

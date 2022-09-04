@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:spork/components/buttons/custom_button.dart';
 import 'package:spork/components/user_card.dart';
 import 'package:spork/models/models.dart';
-import 'package:spork/notification_service.dart';
+import 'package:spork/services/notification_service.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/theme.dart';
 
@@ -70,7 +70,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                     child: GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
-                        Provider.of<AppProvider>(context).deleteHome(widget.myHome.id);
+                        Provider.of<AppProvider>(context, listen: false).deleteHome(widget.myHome.id);
                       },
                       child: const Icon(
                         Icons.delete_outline,

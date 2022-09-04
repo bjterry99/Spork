@@ -17,7 +17,7 @@ class FollowList extends StatelessWidget {
     return isOnRecipes ? PagedGridView<int, Recipe>(
       pagingController: pagingController,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        childAspectRatio: 0.6,
+        childAspectRatio: 0.55,
         crossAxisSpacing: 10,
         crossAxisCount: 2,
       ),

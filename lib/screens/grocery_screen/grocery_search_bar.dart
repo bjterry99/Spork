@@ -12,7 +12,7 @@ class DelegateGrocery extends SliverPersistentHeaderDelegate {
     return Align(
       child: Padding(
         padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
-        child: SearchBar(search: search, text: "I'm looking for...", controller: controller,),
+        child: SearchBar(search: search, text: "Search grocery list...", controller: controller,),
       ),
     );
   }

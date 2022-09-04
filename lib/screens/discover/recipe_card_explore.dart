@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:spork/components/buttons/info_box_button.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
+import 'package:spork/services/dialog_service.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/screens/details_screen/detail_screen.dart';
@@ -100,6 +102,30 @@ class RecipeCardExplore extends StatelessWidget {
                   style: const TextStyle(color: CustomColors.black, fontSize: CustomFontSize.primary),
                 ),
               ),
+              FutureBuilder<AppUser?>(
+                future: Provider.of<AppProvider>(context, listen: false).fetchUser(recipe.creatorId),
+                builder: (builder, snapshot) {
+                  if (snapshot.hasData) {
+                    AppUser? appUser = snapshot.data;
+                    if (appUser != null) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 5, left: 5, top: 3),
+                        child: Text(
+                          appUser.name,
+                          softWrap: true,
+                          maxLines: 1,
+                          overflow: TextOverflow.fade,
+                          style: const TextStyle(color: CustomColors.grey4, fontSize: CustomFontSize.secondary),
+                        ),
+                      );
+                    } else {
+                      return const SizedBox();
+                    }
+                  } else {
+                    return const SizedBox();
+                  }
+                },
+              ),
               const Spacer(),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -108,7 +134,28 @@ class RecipeCardExplore extends StatelessWidget {
                   children: [
                     InkWell(
                       onTap: () async {
-                        await Provider.of<AppProvider>(context, listen: false).reportRecipe(recipe.id);
+                        bool? answer = await DialogService.dialogBox(
+                          context: context,
+                          title: 'Report Recipe?',
+                          actions: [
+                            InfoBoxButton(
+                              action: () {
+                                Navigator.of(context).pop(false);
+                              },
+                              text: 'Cancel',
+                              isPrimary: true,
+                            ),
+                            InfoBoxButton(
+                              action: () {
+                                Navigator.of(context).pop(true);
+                              },
+                              text: 'Confirm',
+                              isPrimary: false,
+                            ),
+                          ],
+                        );
+                        bool checkForNullAnswer = answer ?? false;
+                        if (checkForNullAnswer) await Provider.of<AppProvider>(context, listen: false).reportRecipe(recipe.id);
                       },
                       borderRadius: BorderRadius.circular(10),
                       child: const Padding(

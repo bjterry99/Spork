@@ -115,23 +115,22 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
         appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
-        floatingActionButton: isFabVisible && _currentIndex != 2
-            ? Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: FloatingActionButton.extended(
-                  elevation: 3,
-                  backgroundColor: CustomColors.primary,
-                  icon: Icon(
-                    _currentIndex == 0 ? Icons.restaurant_menu_rounded : Icons.shopping_cart_rounded,
-                    color: CustomColors.white,
-                    size: 30,
+        floatingActionButton: _currentIndex != 2
+            ? AnimatedOpacity(
+                opacity: isFabVisible ? 1 : 0,
+                duration: const Duration(milliseconds: 100),
+                child: Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: FloatingActionButton(
+                    elevation: 3,
+                    backgroundColor: CustomColors.primary,
+                    child: Icon(
+                      _currentIndex == 0 ? Icons.restaurant_menu_rounded : Icons.shopping_cart_rounded,
+                      color: CustomColors.white,
+                      size: 30,
+                    ),
+                    onPressed: buttonAction,
                   ),
-                  label: Text(
-                    _currentIndex == 0 ? 'Create' : 'Add',
-                    style: const TextStyle(
-                        color: CustomColors.white, fontWeight: FontWeight.w500, fontSize: CustomFontSize.big),
-                  ),
-                  onPressed: buttonAction,
                 ),
               )
             : null,

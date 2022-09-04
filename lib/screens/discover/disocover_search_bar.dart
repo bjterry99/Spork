@@ -17,7 +17,7 @@ class DelegateDiscover extends SliverPersistentHeaderDelegate {
         padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
         child: Column(
           children: [
-            SearchBar(search: search, text: "I'm looking for...", controller: controller,),
+            SearchBar(search: search, text: "Search for recipes or people...", controller: controller,),
             if (controller.text != '')
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),

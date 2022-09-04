@@ -58,19 +58,29 @@ class ProfileHeader extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          user.name,
-                          style: const TextStyle(
-                              color: CustomColors.grey4,
-                              fontSize: CustomFontSize.big,
-                              fontWeight: FontWeight.w500),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width/1.6,
+                          child: Text(
+                            user.name,
+                            overflow: TextOverflow.fade,
+                            softWrap: false,
+                            style: const TextStyle(
+                                color: CustomColors.grey4,
+                                fontSize: CustomFontSize.big,
+                                fontWeight: FontWeight.w500),
+                          ),
                         ),
-                        Text(
-                          '@${user.userName}',
-                          style: const TextStyle(
-                              color: CustomColors.grey4,
-                              fontSize: CustomFontSize.secondary,
-                              fontWeight: FontWeight.w400),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width/1.6,
+                          child: Text(
+                            '@${user.userName}',
+                            overflow: TextOverflow.fade,
+                            softWrap: false,
+                            style: const TextStyle(
+                                color: CustomColors.grey4,
+                                fontSize: CustomFontSize.secondary,
+                                fontWeight: FontWeight.w400),
+                          ),
                         ),
                         const SizedBox(
                           height: 10,
@@ -175,9 +185,28 @@ class ProfileHeader extends StatelessWidget {
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: MySwitcher(change: change, isOnFollow: isOnRecipe, iconRight: Icons.restaurant_menu_rounded, iconLeft: Icons.menu_book_rounded,)
+                Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: MySwitcher(change: change, isOnFollow: isOnRecipe, iconRight: Icons.restaurant_menu_rounded, iconLeft: Icons.menu_book_rounded)
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: IconButton(onPressed: () {
+                        if (Platform.isIOS) {
+                          Navigator.of(context).push(SwipeablePageRoute(
+                              builder: (BuildContext context) => SettingsPage(user: user,),
+                              canOnlySwipeFromEdge: true
+                          ));
+                        } else {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (BuildContext context) => SettingsPage(user: user,),
+                          ));
+                        }
+                      }, icon: const Icon(Icons.settings, color: CustomColors.grey4,)),
+                    ),
+                  ],
                 )
               ],
             ),

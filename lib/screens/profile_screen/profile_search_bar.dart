@@ -4,15 +4,16 @@ import 'package:spork/components/search_bar.dart';
 class DelegateProfile extends SliverPersistentHeaderDelegate {
   final Function search;
   final TextEditingController controller;
+  final bool page;
 
-  DelegateProfile(this.search, this.controller);
+  DelegateProfile(this.search, this.controller, this.page);
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Align(
       child: Padding(
         padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
-        child: SearchBar(search: search, text: "I'm hungry for...", controller: controller,),
+        child: SearchBar(search: search, text: page ? 'Search recipes...' : 'Search menu...', controller: controller,),
       ),
     );
   }

@@ -74,7 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SliverPersistentHeader(
                 pinned: true,
                 floating: false,
-                delegate: DelegateProfile(search, controller),
+                delegate: DelegateProfile(search, controller, isOnRecipe),
               ),
             ];
           },

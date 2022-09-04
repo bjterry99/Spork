@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:spork/components/buttons/info_box_button.dart';
+import 'package:spork/services/dialog_service.dart';
 import 'package:spork/components/profile_image.dart';
 import 'package:spork/models/models.dart';
-import 'package:spork/notification_service.dart';
+import 'package:spork/services/notification_service.dart';
 import 'package:spork/theme.dart';
 import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
@@ -37,15 +39,25 @@ class UserCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    user.name,
-                    style: const TextStyle(
-                        color: CustomColors.grey4, fontSize: CustomFontSize.primary, fontWeight: FontWeight.w500),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width/1.8,
+                    child: Text(
+                      user.name,
+                      softWrap: false,
+                      overflow: TextOverflow.fade,
+                      style: const TextStyle(
+                          color: CustomColors.grey4, fontSize: CustomFontSize.primary, fontWeight: FontWeight.w500),
+                    ),
                   ),
-                  Text(
-                    '@${user.userName}',
-                    style: const TextStyle(
-                        color: CustomColors.grey4, fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w400),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width/1.8,
+                    child: Text(
+                      '@${user.userName}',
+                      softWrap: false,
+                      overflow: TextOverflow.fade,
+                      style: const TextStyle(
+                          color: CustomColors.grey4, fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w400),
+                    ),
                   ),
                   Row(
                     children: [
@@ -131,9 +143,32 @@ class UserCard extends StatelessWidget {
                                                 splashColor: CustomColors.secondary,
                                                 color: CustomColors.secondary,
                                                 onPressed: () async {
-                                                  NotificationService.notify('Uninviting to Home...');
-                                                  await Provider.of<AppProvider>(context, listen: false)
-                                                      .removeInviteToHome('${appUser.id}_${user.id}');
+                                                  bool? answer = await DialogService.dialogBox(
+                                                    context: context,
+                                                    title: 'Unsend Invite?',
+                                                    actions: [
+                                                      InfoBoxButton(
+                                                        action: () {
+                                                          Navigator.of(context).pop(false);
+                                                        },
+                                                        text: 'Cancel',
+                                                        isPrimary: true,
+                                                      ),
+                                                      InfoBoxButton(
+                                                        action: () {
+                                                          Navigator.of(context).pop(true);
+                                                        },
+                                                        text: 'Confirm',
+                                                        isPrimary: true,
+                                                      ),
+                                                    ],
+                                                  );
+                                                  bool checkForNullAnswer = answer ?? false;
+                                                  if (checkForNullAnswer) {
+                                                    NotificationService.notify('Uninviting to Home...');
+                                                    await Provider.of<AppProvider>(context, listen: false)
+                                                        .removeInviteToHome('${appUser.id}_${user.id}');
+                                                  }
                                                 },
                                                 icon: const Icon(
                                                   Icons.home,
@@ -160,8 +195,35 @@ class UserCard extends StatelessWidget {
                                                         splashColor: CustomColors.secondary,
                                                         color: CustomColors.secondary,
                                                         onPressed: () async {
-                                                          await Provider.of<AppProvider>(context, listen: false)
+                                                          bool? answer = await DialogService.dialogBox(
+                                                            context: context,
+                                                            title: 'Remove ${user.name} from Home?',
+                                                            body: const Text(
+                                                              'You may lose access to their recipes.',
+                                                              style: InfoBoxTextStyle.body,
+                                                            ),
+                                                            actions: [
+                                                              InfoBoxButton(
+                                                                action: () {
+                                                                  Navigator.of(context).pop(false);
+                                                                },
+                                                                text: 'Cancel',
+                                                                isPrimary: true,
+                                                              ),
+                                                              InfoBoxButton(
+                                                                action: () {
+                                                                  Navigator.of(context).pop(true);
+                                                                },
+                                                                text: 'Confirm',
+                                                                isPrimary: true,
+                                                              ),
+                                                            ],
+                                                          );
+                                                          bool checkForNullAnswer = answer ?? false;
+                                                          if (checkForNullAnswer) {
+                                                            await Provider.of<AppProvider>(context, listen: false)
                                                               .removeFromHome(user.id);
+                                                          }
                                                         },
                                                         icon: const Icon(
                                                           Icons.home,
@@ -174,8 +236,35 @@ class UserCard extends StatelessWidget {
                                                         splashColor: CustomColors.secondary,
                                                         color: CustomColors.secondary,
                                                         onPressed: () async {
-                                                          await Provider.of<AppProvider>(context, listen: false)
+                                                          bool? answer = await DialogService.dialogBox(
+                                                            context: context,
+                                                            title: 'Invite to Home?',
+                                                            body: Text(
+                                                              '${user.name} will have full access to your recipes, menu, and grocery list if they accept the invite.',
+                                                              style: InfoBoxTextStyle.body,
+                                                            ),
+                                                            actions: [
+                                                              InfoBoxButton(
+                                                                action: () {
+                                                                  Navigator.of(context).pop(false);
+                                                                },
+                                                                text: 'Cancel',
+                                                                isPrimary: true,
+                                                              ),
+                                                              InfoBoxButton(
+                                                                action: () {
+                                                                  Navigator.of(context).pop(true);
+                                                                },
+                                                                text: 'Confirm',
+                                                                isPrimary: true,
+                                                              ),
+                                                            ],
+                                                          );
+                                                          bool checkForNullAnswer = answer ?? false;
+                                                          if (checkForNullAnswer) {
+                                                            await Provider.of<AppProvider>(context, listen: false)
                                                               .inviteToHome(user.id);
+                                                          }
                                                         },
                                                         icon: const Icon(
                                                           Icons.home_outlined,
@@ -229,7 +318,30 @@ class UserCard extends StatelessWidget {
                         splashColor: CustomColors.secondary,
                         color: CustomColors.secondary,
                         onPressed: () async {
-                          await Provider.of<AppProvider>(context, listen: false).reportUser(user.id);
+                          bool? answer = await DialogService.dialogBox(
+                            context: context,
+                            title: 'Report ${user.name}?',
+                            actions: [
+                              InfoBoxButton(
+                                action: () {
+                                  Navigator.of(context).pop(false);
+                                },
+                                text: 'Cancel',
+                                isPrimary: true,
+                              ),
+                              InfoBoxButton(
+                                action: () {
+                                  Navigator.of(context).pop(true);
+                                },
+                                text: 'Confirm',
+                                isPrimary: false,
+                              ),
+                            ],
+                          );
+                          bool checkForNullAnswer = answer ?? false;
+                          if (checkForNullAnswer) {
+                            await Provider.of<AppProvider>(context, listen: false).reportUser(user.id);
+                          }
                         },
                         icon: const Icon(
                           Icons.report_gmailerrorred_rounded,

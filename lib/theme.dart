@@ -35,3 +35,14 @@ class CustomFontSize {
   static const large = 30.0;
   static const big = 25.0;
 }
+
+class InfoBoxTextStyle {
+  static const title = TextStyle(
+      color: CustomColors.black, fontSize: CustomFontSize.primary, fontWeight: FontWeight.w700);
+  static const body = TextStyle(
+      color: CustomColors.grey4, fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w400);
+  static const buttonPrimary = TextStyle(
+      color: CustomColors.primary, fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w700);
+  static const buttonRed = TextStyle(
+      color: CustomColors.danger, fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w700);
+}

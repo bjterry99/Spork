@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:spork/home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'package:spork/notification_service.dart';
+import 'package:spork/services/notification_service.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/screens/sign_in/sign_in.dart';
 import 'package:spork/theme.dart';

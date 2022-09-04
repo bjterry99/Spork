@@ -1,5 +1,7 @@
 import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/material.dart';
+import 'package:spork/components/buttons/info_box_button.dart';
+import 'package:spork/services/dialog_service.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/screens/create_recipe.dart';
@@ -33,7 +35,28 @@ class DetailsActionButton extends StatelessWidget {
             if (recipe.creatorId != user.id)
               GestureDetector(
                 onTap: () async {
-                  await Provider.of<AppProvider>(context, listen: false).reportRecipe(recipe.id);
+                  bool? answer = await DialogService.dialogBox(
+                    context: context,
+                    title: 'Report Recipe?',
+                    actions: [
+                      InfoBoxButton(
+                        action: () {
+                          Navigator.of(context).pop(false);
+                        },
+                        text: 'Cancel',
+                        isPrimary: true,
+                      ),
+                      InfoBoxButton(
+                        action: () {
+                          Navigator.of(context).pop(true);
+                        },
+                        text: 'Confirm',
+                        isPrimary: false,
+                      ),
+                    ],
+                  );
+                  bool checkForNullAnswer = answer ?? false;
+                  if (checkForNullAnswer) await Provider.of<AppProvider>(context, listen: false).reportRecipe(recipe.id);
                 },
                 child: Material(
                   elevation: 3,

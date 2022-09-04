@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:spork/components/buttons/info_box_button.dart';
 import 'package:spork/components/buttons/primary_button.dart';
 import 'package:spork/components/buttons/secondary_button.dart';
+import 'package:spork/services/dialog_service.dart';
 import 'package:spork/models/models.dart';
-import 'package:spork/notification_service.dart';
+import 'package:spork/services/notification_service.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/theme.dart';
 import 'package:duration_picker/duration_picker.dart';
@@ -169,9 +171,36 @@ class _CreateRecipeState extends State<CreateRecipe> {
   }
 
   void delete() async {
-    Navigator.pop(context);
-    Navigator.pop(context);
-    await Provider.of<AppProvider>(context, listen: false).deleteRecipe(widget.recipe!.id);
+    bool? answer = await DialogService.dialogBox(
+      context: context,
+      title: 'Delete Recipe?',
+      body: const Text(
+        'This cannot be undone.',
+        style: InfoBoxTextStyle.body,
+      ),
+      actions: [
+        InfoBoxButton(
+          action: () {
+            Navigator.of(context).pop(false);
+          },
+          text: 'Cancel',
+          isPrimary: true,
+        ),
+        InfoBoxButton(
+          action: () {
+            Navigator.of(context).pop(true);
+          },
+          text: 'Confirm',
+          isPrimary: false,
+        ),
+      ],
+    );
+    bool checkForNullAnswer = answer ?? false;
+    if (checkForNullAnswer) {
+      Navigator.pop(context);
+      Navigator.pop(context);
+      await Provider.of<AppProvider>(context, listen: false).deleteRecipe(widget.recipe!);
+    }
   }
 
   void submit() async {

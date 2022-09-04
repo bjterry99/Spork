@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:spork/components/buttons/ghost_button.dart';
+import 'package:spork/components/buttons/info_box_button.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
+import 'package:spork/services/dialog_service.dart';
 import 'package:spork/components/profile_image.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/theme.dart';
@@ -84,19 +86,50 @@ class InviteCard extends StatelessWidget {
                             const SizedBox(height: 3,),
                             Padding(
                               padding: const EdgeInsets.only(left: 30),
-                              child: Text(
-                                appUser.name,
-                                overflow: TextOverflow.fade,
-                                style: const TextStyle(
-                                    color: CustomColors.grey4, fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w400),
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width/1.6,
+                                child: Text(
+                                  appUser.name,
+                                  overflow: TextOverflow.fade,
+                                  softWrap: false,
+                                  style: const TextStyle(
+                                      color: CustomColors.grey4, fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w400),
+                                ),
                               ),
                             ),
                             Row(
                               children: [
                                 const SizedBox(width: 24,),
-                                MyTextButton(text: 'accept', action: (){
-                                  Provider.of<AppProvider>(context, listen: false)
+                                MyTextButton(text: 'accept', action: () async {
+                                  bool? answer = await DialogService.dialogBox(
+                                    context: context,
+                                    title: 'Join Home?',
+                                    body: const Text(
+                                      'All household members will have full access to your recipes, menu, and grocery list.',
+                                      style: InfoBoxTextStyle.body,
+                                    ),
+                                    actions: [
+                                      InfoBoxButton(
+                                        action: () {
+                                          Navigator.of(context).pop(false);
+                                        },
+                                        text: 'Cancel',
+                                        isPrimary: true,
+                                      ),
+                                      InfoBoxButton(
+                                        action: () {
+                                          Navigator.of(context).pop(true);
+                                        },
+                                        text: 'Confirm',
+                                        isPrimary: true,
+                                      ),
+                                    ],
+                                  );
+                                  bool checkForNullAnswer = answer ?? false;
+                                  if (checkForNullAnswer) {
+                                    Provider.of<AppProvider>(context, listen: false)
                                       .acceptHomeInvite(invite);
+                                  }
                                 }),
                                 SizedBox(width: spacing,),
                                 GhostButton(text: 'reject', action: (){
