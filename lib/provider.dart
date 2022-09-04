@@ -815,7 +815,7 @@ class AppProvider extends ChangeNotifier {
       final following = await _firestore.collection('users').where('followers', arrayContains: _user.id).get();
       List<String> followingList = following.docs.map((e) => e.id).toList();
 
-      if (followingList.length != 0) {
+      if (followingList.isNotEmpty) {
         if (followingList.length <= 10) {
           if (page != 0) {
             final skipThese = await _firestore
