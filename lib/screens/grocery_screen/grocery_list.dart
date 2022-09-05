@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
+import 'package:spork/components/spork_spinner.dart';
 import 'package:spork/screens/grocery_screen/grocery_card.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/theme.dart';
@@ -105,12 +105,7 @@ class GroceryList extends StatelessWidget {
             ),
           );
         } else {
-          return const Center(
-            child: SpinKitRing(
-              color: CustomColors.primary,
-              size: 50.0,
-            ),
-          );
+          return const SporkSpinner();
         }
       },
     );

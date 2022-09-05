@@ -178,6 +178,13 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> signOut() async {
     await _auth.signOut();
+    _user = AppUser(
+      id: '',
+      name: '',
+      userName: '',
+      photoUrl: '',
+      phone: '',
+    );
   }
 
   Future<bool> editProfile(AppUser appUser) async {
@@ -234,6 +241,12 @@ class AppProvider extends ChangeNotifier {
       NotificationService.notify('Failed to find Username.');
     }
     return false;
+  }
+
+  Future<void> syncUser() async {
+    await Future.delayed(const Duration(seconds: 1));
+    var userData = await _firestore.collection('users').where('id', isEqualTo: _fireUser!.uid).get();
+    _user = AppUser.fromJson(userData.docs.first.data());
   }
 
   Future<bool> sync(fire_auth.PhoneAuthCredential? credential, String? verifyId, String? code) async {
@@ -479,6 +492,31 @@ class AppProvider extends ChangeNotifier {
       }
     } catch (error) {
       NotificationService.notify('Failed to delete recipe.');
+    }
+  }
+
+  Future<void> deleteUser() async {
+    NotificationService.notify('Deleting account...');
+
+    try {
+      final storageRef = FirebaseStorage.instance.ref();
+
+      if (_user.photoUrl != '') {
+        final pictureRef = storageRef.child(_user.id);
+        await pictureRef.delete();
+      }
+
+      await _firestore.collection('users').doc(_user.id).delete();
+
+      _user = AppUser(
+        id: '',
+        name: '',
+        userName: '',
+        photoUrl: '',
+        phone: '',
+      );
+    } catch (error) {
+      NotificationService.notify('Failed to delete account.');
     }
   }
 

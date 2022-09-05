@@ -67,8 +67,8 @@ class _SettingsPageState extends State<SettingsPage> {
       bool checkForNullAnswer = answer ?? false;
       if (checkForNullAnswer) {
         Provider.of<AppProvider>(context, listen: false).signOut;
-        Navigator.of(context)
-            .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const SignIn()), (Route<dynamic> route) => false);
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const SignIn()), (Route<dynamic> route) => false);
       }
     }
 
@@ -332,8 +332,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                 ]);
                             checkForNullAnswer = answer ?? false;
                             if (checkForNullAnswer) {
-                              // await DeleteAccountCommand(ref.read).run();
-                              Navigator.pop(context);
+                              Provider.of<AppProvider>(context, listen: false).deleteUser();
+                              Navigator.of(context).pushAndRemoveUntil(
+                                  MaterialPageRoute(builder: (context) => const SignIn()),
+                                  (Route<dynamic> route) => false);
                             }
                           }
                         },

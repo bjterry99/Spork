@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:spork/components/buttons/custom_button.dart';
+import 'package:spork/components/buttons/info_box_button.dart';
 import 'package:spork/components/user_card.dart';
 import 'package:spork/models/models.dart';
+import 'package:spork/services/dialog_service.dart';
 import 'package:spork/services/notification_service.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/theme.dart';
@@ -68,9 +70,36 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                 ? Padding(
                     padding: const EdgeInsets.only(right: 15),
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                        Provider.of<AppProvider>(context, listen: false).deleteHome(widget.myHome.id);
+                      onTap: () async {
+                        bool? answer = await DialogService.dialogBox(
+                          context: context,
+                          title: 'Delete Home?',
+                          body: const Text(
+                            "You may lose access to other household member's recipes.",
+                            style: InfoBoxTextStyle.body,
+                          ),
+                          actions: [
+                            InfoBoxButton(
+                              action: () {
+                                Navigator.of(context).pop(false);
+                              },
+                              text: 'Cancel',
+                              isPrimary: true,
+                            ),
+                            InfoBoxButton(
+                              action: () {
+                                Navigator.of(context).pop(true);
+                              },
+                              text: 'Confirm',
+                              isPrimary: false,
+                            ),
+                          ],
+                        );
+                        bool checkForNullAnswer = answer ?? false;
+                        if (checkForNullAnswer) {
+                          Navigator.pop(context);
+                          Provider.of<AppProvider>(context, listen: false).deleteHome(widget.myHome.id);
+                        }
                       },
                       child: const Icon(
                         Icons.delete_outline,
@@ -81,10 +110,37 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                 : Padding(
                     padding: const EdgeInsets.only(right: 15),
                     child: GestureDetector(
-                      onTap: () {
-                        NotificationService.notify('Leaving Home...');
-                        Navigator.pop(context);
-                        Provider.of<AppProvider>(context).removeFromHome(user.id);
+                      onTap: () async {
+                        bool? answer = await DialogService.dialogBox(
+                          context: context,
+                          title: 'Leave Home?',
+                          body: const Text(
+                            "You may lose access to other household member's recipes.",
+                            style: InfoBoxTextStyle.body,
+                          ),
+                          actions: [
+                            InfoBoxButton(
+                              action: () {
+                                Navigator.of(context).pop(false);
+                              },
+                              text: 'Cancel',
+                              isPrimary: true,
+                            ),
+                            InfoBoxButton(
+                              action: () {
+                                Navigator.of(context).pop(true);
+                              },
+                              text: 'Confirm',
+                              isPrimary: false,
+                            ),
+                          ],
+                        );
+                        bool checkForNullAnswer = answer ?? false;
+                        if (checkForNullAnswer) {
+                          NotificationService.notify('Leaving Home...');
+                          Navigator.pop(context);
+                          Provider.of<AppProvider>(context).removeFromHome(user.id);
+                        }
                       },
                       child: const Icon(
                         Icons.exit_to_app,

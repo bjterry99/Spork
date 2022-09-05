@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:spork/components/spork_spinner.dart';
 import 'package:spork/components/user_card.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/screens/discover/recipe_card_explore.dart';
@@ -37,18 +37,8 @@ class FollowList extends StatelessWidget {
             TextStyle(color: CustomColors.grey3, fontWeight: FontWeight.w600, fontSize: CustomFontSize.secondary),
           ),
         ),
-        firstPageProgressIndicatorBuilder: (_) => const Center(
-          child: SpinKitRing(
-            color: CustomColors.primary,
-            size: 50.0,
-          ),
-        ),
-        newPageProgressIndicatorBuilder: (_) => const Center(
-          child: SpinKitRing(
-            color: CustomColors.primary,
-            size: 50.0,
-          ),
-        ),
+        firstPageProgressIndicatorBuilder: (_) => const SporkSpinner(),
+        newPageProgressIndicatorBuilder: (_) => const SporkSpinner(),
       ),
     ) : PagedListView<int, AppUser>(
       pagingController: pagingControllerUsers,
@@ -68,18 +58,8 @@ class FollowList extends StatelessWidget {
             TextStyle(color: CustomColors.grey3, fontWeight: FontWeight.w600, fontSize: CustomFontSize.secondary),
           ),
         ),
-        firstPageProgressIndicatorBuilder: (_) => const Center(
-          child: SpinKitRing(
-            color: CustomColors.primary,
-            size: 50.0,
-          ),
-        ),
-        newPageProgressIndicatorBuilder: (_) => const Center(
-          child: SpinKitRing(
-            color: CustomColors.primary,
-            size: 50.0,
-          ),
-        ),
+        firstPageProgressIndicatorBuilder: (_) => const SporkSpinner(),
+        newPageProgressIndicatorBuilder: (_) => const SporkSpinner(),
       ),
     );
   }

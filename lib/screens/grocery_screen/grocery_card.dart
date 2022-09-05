@@ -20,6 +20,7 @@ class GroceryCard extends StatelessWidget {
         onDismissed: (DismissDirection direction) async {
           await Provider.of<AppProvider>(context, listen: false).deleteGroceryItem(item.id);
         },
+        direction: DismissDirection.startToEnd,
         key: Key(item.id),
         child: Card(
           elevation: 3,

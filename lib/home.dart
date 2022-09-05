@@ -17,8 +17,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  int _currentIndex = 0;
-  final PageController controller = PageController(initialPage: 0);
+  int _currentIndex = 2;
+  final PageController controller = PageController(initialPage: 2);
   bool isFabVisible = true;
   bool isInputVisible = false;
   TextEditingController textController = TextEditingController();
@@ -84,10 +84,6 @@ class _HomeState extends State<Home> {
     AppUser user = Provider.of<AppProvider>(context).user;
 
     final List<Widget> _children = [
-      ProfileScreen(
-        buttonOff: toggleButtonOff,
-        buttonOn: toggleButtonOn,
-      ),
       GroceryScreen(
         buttonOn: toggleButtonOn,
         buttonOff: toggleButtonOff,
@@ -97,10 +93,14 @@ class _HomeState extends State<Home> {
         myFocusNode: myFocusNode,
       ),
       DiscoverPage(buttonOn: toggleButtonOn, buttonOff: toggleButtonOff),
+      ProfileScreen(
+        buttonOff: toggleButtonOff,
+        buttonOn: toggleButtonOn,
+      ),
     ];
 
     void buttonAction() {
-      if (_currentIndex == 1) {
+      if (_currentIndex == 0) {
         toggleInputOn();
         myFocusNode.requestFocus();
       } else {
@@ -115,17 +115,17 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
         appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
-        floatingActionButton: _currentIndex != 2
+        floatingActionButton: _currentIndex != 1
             ? AnimatedOpacity(
                 opacity: isFabVisible ? 1 : 0,
-                duration: const Duration(milliseconds: 100),
+                duration: const Duration(milliseconds: 150),
                 child: Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: FloatingActionButton(
                     elevation: 3,
                     backgroundColor: CustomColors.primary,
                     child: Icon(
-                      _currentIndex == 0 ? Icons.restaurant_menu_rounded : Icons.shopping_cart_rounded,
+                      _currentIndex == 2 ? Icons.restaurant_menu_rounded : Icons.shopping_cart_rounded,
                       color: CustomColors.white,
                       size: 30,
                     ),
@@ -154,20 +154,20 @@ class _HomeState extends State<Home> {
                 topRight: Radius.circular(20.0),
               ),
               child: BottomNavigationBar(
-                elevation: 1,
+                elevation: 3,
                 onTap: onTappedBar,
                 currentIndex: _currentIndex,
                 selectedItemColor: CustomColors.white,
                 backgroundColor: CustomColors.primary,
                 items: [
+                  const BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_rounded), label: 'Grocery'),
+                  const BottomNavigationBarItem(icon: Icon(Icons.public), label: 'Discover'),
                   BottomNavigationBarItem(
                       icon: Padding(
                         padding: const EdgeInsets.only(bottom: 3),
                         child: ProfileImage(user.photoUrl, 25, 20),
                       ),
                       label: user.name),
-                  const BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_rounded), label: 'Grocery'),
-                  const BottomNavigationBarItem(icon: Icon(Icons.public), label: 'Discover'),
                 ],
               ),
             )));

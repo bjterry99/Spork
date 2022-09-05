@@ -99,6 +99,8 @@ class _RegisterState extends State<Register> {
             homeId: '');
         await Provider.of<AppProvider>(context, listen: false).createAccount(appUser);
 
+        await Provider.of<AppProvider>(context, listen: false).syncUser();
+
         Navigator.of(context)
             .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const Home()), (Route<dynamic> route) => false);
       }

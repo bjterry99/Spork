@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:spork/components/buttons/ghost_button.dart';
 import 'package:spork/components/buttons/info_box_button.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
+import 'package:spork/components/spork_spinner.dart';
 import 'package:spork/services/dialog_service.dart';
 import 'package:spork/components/profile_image.dart';
 import 'package:spork/models/models.dart';
@@ -150,12 +150,7 @@ class InviteCard extends StatelessWidget {
             }
           }
         }
-        return const Center(
-          child: SpinKitRing(
-            color: CustomColors.primary,
-            size: 50.0,
-          ),
-        );
+        return const SporkSpinner();
       },
     );
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:spork/components/spork_spinner.dart';
 import 'package:spork/screens/profile_screen/recipe_card_profile.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/theme.dart';
@@ -119,12 +119,7 @@ class MenuList extends StatelessWidget {
             ),
           );
         } else {
-          return const Center(
-            child: SpinKitRing(
-              color: CustomColors.primary,
-              size: 50.0,
-            ),
-          );
+          return const SporkSpinner();
         }
       },
     );

@@ -143,3 +143,52 @@ exports.home_OnUpdate = functions.firestore.document("homes/{homeId}")
     functions.logger.log(error);
   }
 });
+
+exports.user_OnDelete = functions.firestore.document("users/{userId}")
+    .onDelete(async (snap, context) => {
+    try {
+      const userId = context.params.userId;
+      const db = admin.firestore();
+
+      const user = snap.data();
+      const homeId = user["homeId"];
+
+      if (homeId != '') {
+        var homeRef = db.collection('homes').doc(homeId);
+        var home = await homeRef.get();
+        var homeCreator = home.data()['creatorId'];
+
+        if (homeCreator == userId) {
+          await homeRef.delete();
+        } else {
+          await homeRef.update({
+            users: FieldValue.arrayRemove(userId),
+          });
+        }
+      }
+
+      var recipeIds = [];
+      const recipesCollection = db.collection("recipes")
+        .where("creatorId", "==", userId);
+      const recipesSnap = await recipesCollection.get();
+      recipesSnap.forEach(async (recipe) => {
+        recipeIds.push(recipe.id);
+      });
+      recipeIds.forEach(async (id) => {
+         await db.collection('recipes').doc(id).delete();
+      });
+
+      var groceryIds = [];
+      const groceryCollection = db.collection("grocery")
+        .where("creatorId", "==", userId);
+      const grocerySnap = await groceryCollection.get();
+      grocerySnap.forEach(async (grocery) => {
+        groceryIds.push(grocery.id);
+      });
+      groceryIds.forEach(async (id) => {
+         await db.collection('grocery').doc(id).delete();
+      });
+  } catch (error) {
+    functions.logger.log(error);
+  }
+});

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:spork/components/spork_spinner.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
@@ -32,12 +32,7 @@ class MyHomeScreenLoad extends StatelessWidget {
               return Scaffold(
                 appBar: Provider.of<AppProvider>(context, listen: false)
                     .getZeroAppBar(CustomColors.white),
-                body: const Center(
-                  child: SpinKitRing(
-                    color: CustomColors.primary,
-                    size: 50.0,
-                  ),
-                ),
+                body: const SporkSpinner(),
               );
             },
           )

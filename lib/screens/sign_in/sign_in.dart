@@ -47,6 +47,8 @@ class _SignInState extends State<SignIn> {
       bool verify = await Provider.of<AppProvider>(context, listen: false).sync(null, verificationId, codeController.text);
 
       if (verify) {
+        await Provider.of<AppProvider>(context, listen: false).syncUser();
+
         Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const Home()), (Route<dynamic> route) => false);
       }
     }
