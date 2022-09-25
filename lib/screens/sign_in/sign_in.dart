@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:spork/components/buttons/ghost_button.dart';
 import 'package:spork/components/buttons/primary_button.dart';
@@ -70,13 +71,21 @@ class _SignInState extends State<SignIn> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Center(
-                  child: Text(
-                    'Spork',
-                    style: TextStyle(
-                        fontSize: 50,
-                        fontWeight: FontWeight.w700,
-                        color: CustomColors.primary
+                Center(
+                  child: Material(
+                    elevation: 3,
+                    color: CustomColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: SvgPicture.asset(
+                        "assets/spork.svg",
+                        height: 100,
+                        width: 100,
+                        color: CustomColors.white,
+                      ),
                     ),
                   ),
                 ),

@@ -73,6 +73,12 @@ class _SettingsPageState extends State<SettingsPage> {
     }
 
     void edit() async {
+      if (Platform.isAndroid) {
+        HapticFeedback.heavyImpact();
+      } else {
+        HapticFeedback.lightImpact();
+      }
+
       AppUser appUser = AppUser(
           id: widget.user.id,
           name: newName,

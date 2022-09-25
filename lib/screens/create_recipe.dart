@@ -246,6 +246,12 @@ class _CreateRecipeState extends State<CreateRecipe> {
       }
     }
 
+    if (Platform.isAndroid) {
+      HapticFeedback.heavyImpact();
+    } else {
+      HapticFeedback.lightImpact();
+    }
+
     Navigator.pop(context);
     if (edit) {
       Navigator.pop(context);

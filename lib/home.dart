@@ -136,6 +136,7 @@ class _HomeState extends State<Home> {
             : null,
         body: SafeArea(
           child: PageView(
+            physics: const ClampingScrollPhysics(),
             controller: controller,
             onPageChanged: _changePage,
             children: _children,

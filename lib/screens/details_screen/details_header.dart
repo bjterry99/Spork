@@ -67,16 +67,31 @@ class DetailsHeader extends StatelessWidget {
           Positioned(
             child: GestureDetector(
               onTap: () => Navigator.pop(context),
-              child: Material(
+              child: Platform.isAndroid ? Material(
                 elevation: 3,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
                 color: CustomColors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(7),
-                  child: Icon(Platform.isAndroid ? Icons.arrow_back : Icons.arrow_back_ios),
+                child: const Padding(
+                  padding: EdgeInsets.all(7),
+                  child: Icon(Icons.arrow_back),
                 ),
+              ) : Stack(
+                children: [
+                  Material(
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    color: CustomColors.white,
+                    child: const SizedBox(height: 38, width: 38,)
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 6.5, left: 11),
+                    child: Icon(Icons.arrow_back_ios),
+                  ),
+                ],
               ),
             ),
             top: 10,

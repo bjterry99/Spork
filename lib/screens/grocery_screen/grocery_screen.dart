@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:spork/components/spork_spinner.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/screens/grocery_screen/grocery_header.dart';
@@ -104,7 +105,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                       elevation: 0,
                       flexibleSpace: GroceryHeader(),
                       floating: true,
-                      toolbarHeight: 62,
+                      toolbarHeight: 63,
                       snap: false,
                       backgroundColor: Colors.transparent,
                     ),

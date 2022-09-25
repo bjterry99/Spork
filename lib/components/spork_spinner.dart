@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:spork/theme.dart';
 
 class SporkSpinner extends StatefulWidget {
@@ -37,9 +38,14 @@ class _SporkSpinnerState extends State<SporkSpinner> with SingleTickerProviderSt
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(100),
           ),
-          child: const Padding(
-            padding: EdgeInsets.all(5.0),
-            child: Icon(Icons.add, size: 60, color: CustomColors.white,),
+          child: Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: SvgPicture.asset(
+              "assets/spork.svg",
+              height: 50,
+              width: 50,
+              color: CustomColors.white,
+            ),
           ),
         ),
       ),

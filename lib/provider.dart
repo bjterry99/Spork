@@ -11,6 +11,7 @@ import 'package:spork/models/models.dart';
 import 'package:spork/services/notification_service.dart';
 import 'package:spork/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 final _firestore = FirebaseFirestore.instance;
 
@@ -335,8 +336,26 @@ class AppProvider extends ChangeNotifier {
 
   // User Stuff //
 
+  Future<void> openUrl(String url) async {
+    try {
+      if (url.startsWith('http:')) {
+        url = 'https${url.substring(4)}';
+      }
+      await launchUrl(
+          url.trim().substring(0, 8) == 'https://' ? Uri.parse(url) : Uri.parse('https://$url'));
+    } catch (error) {
+      throw Exception('Failed to open url');
+    }
+  }
+
   Future<void> addToMenu(Recipe recipe) async {
     NotificationService.notify('Adding to menu...');
+
+    if (Platform.isAndroid) {
+      HapticFeedback.heavyImpact();
+    } else {
+      HapticFeedback.lightImpact();
+    }
 
     try {
       var ref = _firestore.collection('recipes').doc(recipe.id);
@@ -606,6 +625,13 @@ class AppProvider extends ChangeNotifier {
     try {
       var ref = _firestore.collection('grocery').doc();
       grocery.id = ref.id;
+
+      if (Platform.isAndroid) {
+        HapticFeedback.heavyImpact();
+      } else {
+        HapticFeedback.lightImpact();
+      }
+
       await ref.set(grocery.toJson());
     } catch (error) {
       NotificationService.notify('Failed to add item.');
@@ -696,6 +722,12 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> createHome(MyHome home) async {
     try {
+      if (Platform.isAndroid) {
+        HapticFeedback.heavyImpact();
+      } else {
+        HapticFeedback.lightImpact();
+      }
+
       NotificationService.notify('Creating Home...');
 
       var homeRef = _firestore.collection('homes').doc();
@@ -729,6 +761,12 @@ class AppProvider extends ChangeNotifier {
     try {
       NotificationService.notify('Inviting to Home...');
 
+      if (Platform.isAndroid) {
+        HapticFeedback.heavyImpact();
+      } else {
+        HapticFeedback.lightImpact();
+      }
+
       var inviteRef = _firestore.collection('homeInvites').doc('${_user.id}_$id');
       HomeInvite invite = HomeInvite(id: '${_user.id}_$id', inviterId: _user.id, receiverId: id, homeId: _user.homeId);
       await inviteRef.set(invite.toJson());
@@ -760,6 +798,12 @@ class AppProvider extends ChangeNotifier {
   Future<void> follow(String id) async {
     try {
       NotificationService.notify('Following...');
+
+      if (Platform.isAndroid) {
+        HapticFeedback.heavyImpact();
+      } else {
+        HapticFeedback.lightImpact();
+      }
 
       var ref = _firestore.collection('users').doc(id);
       await ref.update({
