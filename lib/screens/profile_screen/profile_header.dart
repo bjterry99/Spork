@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:spork/components/my_switcher.dart';
 import 'package:spork/components/profile_image.dart';
@@ -9,7 +8,6 @@ import 'package:spork/screens/my_home_screen/my_home_screen_load.dart';
 import 'package:spork/screens/settings.dart';
 import 'package:spork/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:swipeable_page_route/swipeable_page_route.dart';
 
 class ProfileHeader extends StatelessWidget {
   const ProfileHeader({required this.isOnRecipe, required this.change, Key? key}) : super(key: key);
@@ -19,7 +17,6 @@ class ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppProvider>(context).user;
-    double numberSpacing = MediaQuery.of(context).size.width/18;
 
     return Material(
         color: CustomColors.white,
@@ -39,16 +36,9 @@ class ProfileHeader extends StatelessWidget {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        if (Platform.isIOS) {
-                          Navigator.of(context).push(SwipeablePageRoute(
-                              builder: (BuildContext context) => SettingsPage(user: user,),
-                              canOnlySwipeFromEdge: true
-                          ));
-                        } else {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (BuildContext context) => SettingsPage(user: user,),
-                          ));
-                        }
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) => SettingsPage(user: user,),
+                        ));
                       },
                         child: ProfileImage(user.photoUrl, 90, 60)),
                     const SizedBox(
@@ -85,101 +75,93 @@ class ProfileHeader extends StatelessWidget {
                         const SizedBox(
                           height: 10,
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Column(
-                              children: [
-                                const Text(
-                                  'Followers',
-                                  style: TextStyle(
-                                      color: CustomColors.grey4,
-                                      fontSize: CustomFontSize.secondary,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                                Text(
-                                  user.followers.length.toString(),
-                                  style: const TextStyle(
-                                      color: CustomColors.grey4,
-                                      fontSize: CustomFontSize.secondary,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              width: numberSpacing,
-                            ),
-                            Column(
-                              children: [
-                                const Text(
-                                  'Following',
-                                  style: TextStyle(
-                                      color: CustomColors.grey4,
-                                      fontSize: CustomFontSize.secondary,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                                StreamBuilder<QuerySnapshot>(
-                                  stream: Provider.of<AppProvider>(context, listen: false).numberFollowing(user.id),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      final menuItems = snapshot.data?.docs;
-
-                                      return Text(
-                                        menuItems!.length.toString(),
-                                        style: const TextStyle(
-                                            color: CustomColors.grey4,
-                                            fontSize: CustomFontSize.secondary,
-                                            fontWeight: FontWeight.w600),
-                                      );
-                                    } else {
-                                      return const Text(
-                                        '0',
-                                        style: TextStyle(
-                                            color: CustomColors.grey4,
-                                            fontSize: CustomFontSize.secondary,
-                                            fontWeight: FontWeight.w600),
-                                      );
-                                    }
-                                  },
-                                )
-                              ],
-                            ),
-                            SizedBox(
-                              width: numberSpacing,
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                if (Platform.isIOS) {
-                                  Navigator.of(context).push(SwipeablePageRoute(
-                                      builder: (BuildContext context) => const MyHomeScreenLoad(),
-                                      canOnlySwipeFromEdge: true
-                                  ));
-                                } else {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (BuildContext context) => const MyHomeScreenLoad(),
-                                  ));
-                                }
-                              },
-                              child: Column(
-                                children: const [
-                                  Text(
-                                    'My',
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width - 90 - 25 - 15,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Column(
+                                children: [
+                                  const Text(
+                                    'Followers',
                                     style: TextStyle(
                                         color: CustomColors.grey4,
                                         fontSize: CustomFontSize.secondary,
-                                        fontWeight: FontWeight.w600),
+                                        fontWeight: FontWeight.w400),
                                   ),
                                   Text(
-                                    'Home',
-                                    style: TextStyle(
+                                    user.followers.length.toString(),
+                                    style: const TextStyle(
                                         color: CustomColors.grey4,
                                         fontSize: CustomFontSize.secondary,
                                         fontWeight: FontWeight.w600),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
+                              const Spacer(),
+                              Column(
+                                children: [
+                                  const Text(
+                                    'Following',
+                                    style: TextStyle(
+                                        color: CustomColors.grey4,
+                                        fontSize: CustomFontSize.secondary,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                  StreamBuilder<QuerySnapshot>(
+                                    stream: Provider.of<AppProvider>(context, listen: false).numberFollowing(user.id),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        final menuItems = snapshot.data?.docs;
+
+                                        return Text(
+                                          menuItems!.length.toString(),
+                                          style: const TextStyle(
+                                              color: CustomColors.grey4,
+                                              fontSize: CustomFontSize.secondary,
+                                              fontWeight: FontWeight.w600),
+                                        );
+                                      } else {
+                                        return const Text(
+                                          '0',
+                                          style: TextStyle(
+                                              color: CustomColors.grey4,
+                                              fontSize: CustomFontSize.secondary,
+                                              fontWeight: FontWeight.w600),
+                                        );
+                                      }
+                                    },
+                                  )
+                                ],
+                              ),
+                              const Spacer(),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (BuildContext context) => const MyHomeScreenLoad(),
+                                  ));
+                                },
+                                child: Column(
+                                  children: const [
+                                    Text(
+                                      'My',
+                                      style: TextStyle(
+                                          color: CustomColors.grey4,
+                                          fontSize: CustomFontSize.secondary,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    Text(
+                                      'Home',
+                                      style: TextStyle(
+                                          color: CustomColors.grey4,
+                                          fontSize: CustomFontSize.secondary,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         )
                       ],
                     ),
@@ -194,16 +176,9 @@ class ProfileHeader extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
                       child: IconButton(onPressed: () {
-                        if (Platform.isIOS) {
-                          Navigator.of(context).push(SwipeablePageRoute(
-                              builder: (BuildContext context) => SettingsPage(user: user,),
-                              canOnlySwipeFromEdge: true
-                          ));
-                        } else {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (BuildContext context) => SettingsPage(user: user,),
-                          ));
-                        }
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) => SettingsPage(user: user,),
+                        ));
                       }, icon: const Icon(Icons.settings, color: CustomColors.grey4,)),
                     ),
                   ],

@@ -434,7 +434,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   initialValue: recipeName,
                   style: const TextStyle(
                       color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
-                  textCapitalization: TextCapitalization.words,
+                  textCapitalization: TextCapitalization.sentences,
                   cursorColor: CustomColors.primary,
                   onChanged: (String? newValue) {
                     setState(() {

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:spork/components/buttons/ghost_button.dart';
@@ -9,7 +8,6 @@ import 'package:spork/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:spork/screens/sign_in/register.dart';
 import 'package:spork/theme.dart';
-import 'package:swipeable_page_route/swipeable_page_route.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
@@ -142,16 +140,9 @@ class _SignInState extends State<SignIn> {
                   child: Row(
                     children: [
                       GhostButton(text: 'register', action: (){
-                        if (Platform.isIOS) {
-                          Navigator.of(context).push(SwipeablePageRoute(
-                              builder: (BuildContext context) => const Register(),
-                              canOnlySwipeFromEdge: true
-                          ));
-                        } else {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (BuildContext context) => const Register(),
-                          ));
-                        }
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) => const Register(),
+                        ));
                       }),
                       const Spacer(),
                       !enterCode

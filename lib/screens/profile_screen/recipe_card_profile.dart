@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
@@ -7,7 +6,6 @@ import 'package:spork/provider.dart';
 import 'package:spork/screens/details_screen/detail_screen.dart';
 import 'package:spork/theme.dart';
 import 'package:provider/provider.dart';
-import 'package:swipeable_page_route/swipeable_page_route.dart';
 
 class RecipeCardProfile extends StatelessWidget {
   const RecipeCardProfile(this.recipe, {Key? key}) : super(key: key);
@@ -23,14 +21,9 @@ class RecipeCardProfile extends StatelessWidget {
       ),
       child: GestureDetector(
         onTap: () {
-          if (Platform.isIOS) {
-            Navigator.of(context).push(SwipeablePageRoute(
-                builder: (BuildContext context) => DetailScreen(recipe: recipe), canOnlySwipeFromEdge: true));
-          } else {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (BuildContext context) => DetailScreen(recipe: recipe),
-            ));
-          }
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (BuildContext context) => DetailScreen(recipe: recipe),
+          ));
         },
         child: Material(
           elevation: 3,
