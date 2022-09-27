@@ -534,6 +534,10 @@ class AppProvider extends ChangeNotifier {
         photoUrl: '',
         phone: '',
       );
+
+      if (_fireUser != null) {
+        await _fireUser!.delete();
+      }
     } catch (error) {
       NotificationService.notify('Failed to delete account.');
     }
