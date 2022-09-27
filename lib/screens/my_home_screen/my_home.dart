@@ -139,7 +139,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                         if (checkForNullAnswer) {
                           NotificationService.notify('Leaving Home...');
                           Navigator.pop(context);
-                          Provider.of<AppProvider>(context).removeFromHome(user.id);
+                          Provider.of<AppProvider>(context, listen: false).removeFromHome(user.id);
                         }
                       },
                       child: const Icon(
