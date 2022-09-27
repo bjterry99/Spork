@@ -26,6 +26,7 @@ class CustomColors {
   static const danger = Color(0xffD40000);
   static const pureWhite = Colors.white;
   static const pureBlack = Colors.black;
+  static const linkBlue = Color(0xff007BFF);
 }
 
 class CustomFontSize {
