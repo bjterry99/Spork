@@ -9,6 +9,7 @@
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Allow photo access to upload profile images or recipe pictures.</string>
 		<key>CFBundleDisplayName</key>
+		<string>Spork</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
