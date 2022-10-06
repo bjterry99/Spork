@@ -52,19 +52,19 @@ class _SignInState extends State<SignIn> {
       }
     }
 
-    return Scaffold(
-      appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              FocusScope.of(context).unfocus();
-            },
-            onPanDown: (_) {
-              FocusScope.of(context).unfocus();
-            },
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      onPanDown: (_) {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
