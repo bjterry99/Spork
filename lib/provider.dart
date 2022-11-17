@@ -12,6 +12,7 @@ import 'package:spork/services/notification_service.dart';
 import 'package:spork/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:async/async.dart' show StreamGroup;
 
 final _firestore = FirebaseFirestore.instance;
 
@@ -120,6 +121,30 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  Stream<List<Recipe>> userRecipeStream(AppUser thisUser) {
+    if (thisUser.homeId == _user.homeId) {
+      return _firestore
+          .collection('recipes')
+          .where('creatorId', isEqualTo: thisUser.id)
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+    } else if (thisUser.followers.contains(_user.id)) {
+      return _firestore
+          .collection('recipes')
+          .where('creatorId', isEqualTo: thisUser.id)
+          .where('visibility', whereIn: ['follow', 'explore'])
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+    } else {
+      return _firestore
+          .collection('recipes')
+          .where('creatorId', isEqualTo: thisUser.id)
+          .where('visibility', isEqualTo: 'explore')
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+    }
+  }
+
   Stream<List<Recipe>> menuStream() {
     if (_user.homeId == '') {
       return _firestore
@@ -138,14 +163,28 @@ class AppProvider extends ChangeNotifier {
 
   Stream<List<Grocery>> groceryStream() {
     if (_user.homeId == '') {
-      return _firestore.collection('grocery').where('creatorId', isEqualTo: _user.id).snapshots().map((snapshot) => snapshot.docs.map((doc) => Grocery.fromJson(doc.data())).toList());
+      return _firestore
+          .collection('grocery')
+          .where('creatorId', isEqualTo: _user.id)
+          .orderBy('createDate')
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((doc) => Grocery.fromJson(doc.data())).toList());
     } else {
-      return _firestore.collection('grocery').where('homeId', isEqualTo: _user.homeId).snapshots().map((snapshot) => snapshot.docs.map((doc) => Grocery.fromJson(doc.data())).toList());
+      return _firestore
+          .collection('grocery')
+          .where('homeId', isEqualTo: _user.homeId)
+          .orderBy('createDate')
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((doc) => Grocery.fromJson(doc.data())).toList());
     }
   }
 
   Stream<List<HomeInvite>> inviteStream() {
-      return _firestore.collection('homeInvites').where('receiverId', isEqualTo: _user.id).snapshots().map((snapshot) => snapshot.docs.map((doc) => HomeInvite.fromJson(doc.data())).toList());
+    return _firestore
+        .collection('homeInvites')
+        .where('receiverId', isEqualTo: _user.id)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => HomeInvite.fromJson(doc.data())).toList());
   }
 
   Stream<List<AppUser>> userStream = _firestore
@@ -165,12 +204,59 @@ class AppProvider extends ChangeNotifier {
     return _firestore.collection('homes').where('users', arrayContains: id).snapshots();
   }
 
+  Stream<DocumentSnapshot<Map<String, dynamic>>> recipe(String id) {
+    return _firestore.collection('recipes').doc(id).snapshots();
+  }
+
   Stream<QuerySnapshot<Object?>> savedRecipes() {
     return _firestore.collection('recipes').where('savedIds', arrayContains: _user.id).snapshots();
   }
 
   Stream<List<AppUser>> homeUsers() {
-    return _firestore.collection('users').where('homeId', isEqualTo: _user.homeId).snapshots().map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList());
+    return _firestore
+        .collection('users')
+        .where('homeId', isEqualTo: _user.homeId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList());
+  }
+
+  Stream<List<AppUser>> followingUsers(String id) {
+    return _firestore
+        .collection('users')
+        .where('followers', arrayContains: id)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList());
+  }
+
+  Stream<List<AppUser>> followersUsers(AppUser thisUser) {
+    if (thisUser.followers.length < 11) {
+      return _firestore
+          .collection('users')
+          .where('id', whereIn: thisUser.followers)
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList());
+    } else {
+      int numberStreams = (thisUser.followers.length / 10).ceil();
+      int remainder = thisUser.followers.length % 10;
+      List<Stream<List<AppUser>>> listStreams = [];
+      for (int i = 0; i < numberStreams; i++) {
+        if (i != numberStreams - 1) {
+          listStreams.add(_firestore
+              .collection('users')
+              .where('id', whereIn: thisUser.followers.sublist(i * 10, (i * 10) + 10))
+              .snapshots()
+              .map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList()));
+        } else {
+          listStreams.add(_firestore
+              .collection('users')
+              .where('id', whereIn: thisUser.followers.sublist(i * 10, (i * 10) + remainder))
+              .snapshots()
+              .map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList()));
+        }
+      }
+      var group = StreamGroup.merge(listStreams);
+      return group;
+    }
   }
 
   /// Functions ///
@@ -341,8 +427,7 @@ class AppProvider extends ChangeNotifier {
       if (url.startsWith('http:')) {
         url = 'https${url.substring(4)}';
       }
-      await launchUrl(
-          url.trim().substring(0, 8) == 'https://' ? Uri.parse(url) : Uri.parse('https://$url'));
+      await launchUrl(url.trim().substring(0, 8) == 'https://' ? Uri.parse(url) : Uri.parse('https://$url'));
     } catch (error) {
       throw Exception('Failed to open url');
     }
@@ -372,14 +457,17 @@ class AppProvider extends ChangeNotifier {
       for (int i = 0; i < recipe.ingredients.length; i++) {
         var ref = _firestore.collection('grocery').doc();
         Grocery grocery = Grocery(
-            id: ref.id,
-            name: recipe.ingredients[i],
-            amount: recipe.ingredientAmounts[i],
-            recipeId: recipe.id,
-            recipeName: recipe.name,
-            mark: false,
-            creatorId: _user.id,
-            homeId: _user.homeId,);
+          id: ref.id,
+          name: recipe.ingredients[i],
+          amount: recipe.ingredientAmounts[i],
+          recipeId: recipe.id,
+          recipeName: recipe.name,
+          mark: false,
+          creatorId: _user.id,
+          creatorName: _user.name,
+          createDate: DateTime.now(),
+          homeId: _user.homeId,
+        );
         await ref.set(grocery.toJson());
       }
     } catch (error) {
@@ -492,6 +580,16 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> deleteImage(String id) async {
+    try {
+      final storageRef = FirebaseStorage.instance.ref();
+      final pictureRef = storageRef.child(id);
+      await pictureRef.delete();
+    } catch (error) {
+      NotificationService.notify('Failed to delete image.');
+    }
+  }
+
   Future<void> deleteRecipe(Recipe recipe) async {
     NotificationService.notify('Deleting recipe...');
 
@@ -581,6 +679,40 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> writeNote(String note, String recipeId) async {
+    try {
+      final recipeDoc = await _firestore.collection('recipes').doc(recipeId).get();
+      if (recipeDoc.exists) {
+        final recipe = Recipe.fromJson(recipeDoc.data()!);
+
+        List<String> notes = List<String>.from(recipe.notes);
+        notes.add(note);
+        recipe.notes = notes;
+        List<String> notesCreators = List<String>.from(recipe.notesCreators);
+        notesCreators.add(_user.id);
+        recipe.notesCreators = notesCreators;
+        var recipeRef = _firestore.collection('recipes').doc(recipe.id);
+        await recipeRef.update(recipe.toJson());
+      } else {
+        NotificationService.notify('Failed to write note.');
+      }
+    } catch (error) {
+      NotificationService.notify('Failed to write note.');
+    }
+  }
+
+  Future<void> deleteNote(int location, Recipe recipe) async {
+    try {
+      recipe.notes.removeAt(location);
+      recipe.notesCreators.removeAt(location);
+
+      var recipeRef = _firestore.collection('recipes').doc(recipe.id);
+      await recipeRef.update(recipe.toJson());
+    } catch (error) {
+      NotificationService.notify('Failed to delete note.');
+    }
+  }
+
   Future<void> markGroceryItem(bool value, String id) async {
     try {
       var ref = _firestore.collection('grocery').doc(id);
@@ -595,6 +727,26 @@ class AppProvider extends ChangeNotifier {
   Future<void> deleteGroceryItem(String id) async {
     try {
       await _firestore.collection('grocery').doc(id).delete();
+    } catch (error) {
+      NotificationService.notify('Failed to delete item.');
+    }
+  }
+
+  Future<void> deleteAllGroceryItem() async {
+    try {
+      if (_user.homeId == '') {
+        var docs =
+            await _firestore.collection('grocery').where('creatorId', isEqualTo: _user.id).get().asStream().toList();
+        for (var doc in docs[0].docs) {
+          await _firestore.collection('grocery').doc(doc.id).delete();
+        }
+      } else {
+        var docs =
+            await _firestore.collection('grocery').where('homeId', isEqualTo: _user.homeId).get().asStream().toList();
+        for (var doc in docs[0].docs) {
+          await _firestore.collection('grocery').doc(doc.id).delete();
+        }
+      }
     } catch (error) {
       NotificationService.notify('Failed to delete item.');
     }
@@ -694,7 +846,6 @@ class AppProvider extends ChangeNotifier {
         // converts image to base64
         List<int> imageBytes = await croppedImage.readAsBytes();
         string64 = base64Encode(imageBytes);
-
       } else {
         NotificationService.notify("Failed to upload image.");
       }
@@ -916,8 +1067,7 @@ class AppProvider extends ChangeNotifier {
                 .collection('recipes')
                 .where('creatorId', whereIn: followingList)
                 .where('queryName', isGreaterThanOrEqualTo: query)
-                .startAt([lastVisible])
-                .get();
+                .startAt([lastVisible]).get();
             List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
 
             List<Recipe> sortedRecipes = [];
@@ -962,7 +1112,7 @@ class AppProvider extends ChangeNotifier {
             final lastVisible = skipThese.docs[skipThese.size - 1];
 
             List<Recipe> recipes = [];
-            for (int i=0; i < followingList.length; i=i+10) {
+            for (int i = 0; i < followingList.length; i = i + 10) {
               List<String> someFollowing = [];
               if (followingList.skip(i).length > 10) {
                 someFollowing.addAll(followingList.sublist(i, i + 10));
@@ -975,8 +1125,7 @@ class AppProvider extends ChangeNotifier {
                   .where('creatorId', whereIn: followingList)
                   .where('visibility', isNotEqualTo: 'private')
                   .where('queryName', isGreaterThanOrEqualTo: query)
-                  .startAt([lastVisible])
-                  .get();
+                  .startAt([lastVisible]).get();
 
               recipes.addAll(snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
             }
@@ -995,7 +1144,7 @@ class AppProvider extends ChangeNotifier {
           } else {
             List<Recipe> recipes = [];
 
-            for (int i=0; i < followingList.length; i=i+10) {
+            for (int i = 0; i < followingList.length; i = i + 10) {
               List<String> someFollowing = [];
               if (followingList.skip(i).length > 10) {
                 someFollowing.addAll(followingList.sublist(i, i + 10));
@@ -1124,5 +1273,4 @@ class AppProvider extends ChangeNotifier {
     }
     return false;
   }
-
 }

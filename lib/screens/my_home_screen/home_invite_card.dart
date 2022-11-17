@@ -3,9 +3,9 @@ import 'package:spork/components/buttons/ghost_button.dart';
 import 'package:spork/components/buttons/info_box_button.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
 import 'package:spork/components/spork_spinner.dart';
+import 'package:spork/models/models.dart';
 import 'package:spork/services/dialog_service.dart';
 import 'package:spork/components/profile_image.dart';
-import 'package:spork/models/models.dart';
 import 'package:spork/theme.dart';
 import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
@@ -39,7 +39,8 @@ class InviteCard extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
-                    child: Row(
+                    child:
+                    Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ProfileImage(appUser.photoUrl, 80, 40),
@@ -87,7 +88,7 @@ class InviteCard extends StatelessWidget {
                             Padding(
                               padding: const EdgeInsets.only(left: 30),
                               child: SizedBox(
-                                width: MediaQuery.of(context).size.width/1.6,
+                                width: MediaQuery.of(context).size.width/2,
                                 child: Text(
                                   appUser.name,
                                   overflow: TextOverflow.fade,

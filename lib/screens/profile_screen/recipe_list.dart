@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spork/components/spork_spinner.dart';
-import 'package:spork/screens/profile_screen/recipe_card_profile.dart';
 import 'package:spork/models/models.dart';
+import 'package:spork/screens/profile_screen/recipe_card_profile.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/theme.dart';
 import 'package:provider/provider.dart';
@@ -56,6 +56,18 @@ class RecipesList extends StatelessWidget {
           return SingleChildScrollView(
             child: Column(
               children: [
+                if (recipes.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 40),
+                    child: Text(
+                      'Recipes you save from the Discover page or recipes you create using the recipes button will appear here.',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: CustomFontSize.secondary,
+                          color: CustomColors.grey3
+                      ),
+                    ),
+                  ),
                 if (main.isNotEmpty)
                   GridView.count(
                     childAspectRatio: 0.6,

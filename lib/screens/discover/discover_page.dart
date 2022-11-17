@@ -1,6 +1,6 @@
+import 'dart:io';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
@@ -59,6 +59,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
             list.add(recipe);
           }
         }
+        list.sort((b, a) => a.savedIds.length.compareTo(b.savedIds.length));
         _pagingController.appendLastPage(list);
       } else {
         List<Recipe> list = [];
@@ -67,6 +68,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
             list.add(recipe);
           }
         }
+        list.sort((b, a) => a.savedIds.length.compareTo(b.savedIds.length));
         final nextPageKey = pageKey + newItems.length;
         _pagingController.appendPage(list, nextPageKey);
       }
@@ -80,6 +82,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       final newItems = await Provider.of<AppProvider>(context, listen: false)
           .searchPeopleExplore(_pageSize, controller.text.toLowerCase(), pageKey);
       final isLastPage = newItems.length < _pageSize;
+      newItems.sort((b, a) => a.followers.length.compareTo(b.followers.length));
       if (isLastPage) {
         _pagingControllerUsers.appendLastPage(newItems);
       } else {
@@ -96,6 +99,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       final newItems = await Provider.of<AppProvider>(context, listen: false)
           .searchRecipesFollow(_pageSize, controller.text.toLowerCase(), pageKey);
       final isLastPage = newItems.length < _pageSize;
+      newItems.sort((b, a) => a.savedIds.length.compareTo(b.savedIds.length));
       if (isLastPage) {
         _pagingController2.appendLastPage(newItems);
       } else {
@@ -112,6 +116,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       final newItems = await Provider.of<AppProvider>(context, listen: false)
           .searchPeopleFollow(_pageSize, controller.text.toLowerCase(), pageKey);
       final isLastPage = newItems.length < _pageSize;
+      newItems.sort((b, a) => a.followers.length.compareTo(b.followers.length));
       if (isLastPage) {
         _pagingControllerUsers2.appendLastPage(newItems);
       } else {
@@ -177,47 +182,47 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
     return Scaffold(
       appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
-      body: NestedScrollView(
-        floatHeaderSlivers: true,
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            SliverAppBar(
-              elevation: 0,
-              flexibleSpace: DiscoverHeader(
-                change: change,
-                isOnFollow: isOnFollow,
-              ),
-              floating: true,
-              toolbarHeight: 110,
-              snap: false,
-              backgroundColor: Colors.transparent,
-            ),
-            SliverPersistentHeader(
-              pinned: true,
-              floating: false,
-              delegate: DelegateDiscover(updateSearch, controller, isOnRecipe, changeSearch),
-            ),
-          ];
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          if (Platform.isAndroid) {
+            FocusScope.of(context).unfocus();
+          }
         },
-        body: GestureDetector(
-          onTap: () {
-            FocusScope.of(context).unfocus();
+        child: NestedScrollView(
+          floatHeaderSlivers: true,
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverAppBar(
+                elevation: 0,
+                flexibleSpace: DiscoverHeader(
+                  change: change,
+                  isOnFollow: isOnFollow,
+                ),
+                floating: true,
+                toolbarHeight: 110,
+                snap: false,
+                backgroundColor: Colors.transparent,
+              ),
+              SliverPersistentHeader(
+                pinned: true,
+                floating: false,
+                delegate: DelegateDiscover(updateSearch, controller, isOnRecipe, changeSearch),
+              ),
+            ];
           },
-          onPanDown: (_) {
-            FocusScope.of(context).unfocus();
-          },
-          child: NotificationListener<UserScrollNotification>(
-            onNotification: (not) {
-              if (not.direction == ScrollDirection.forward) {
-                widget.buttonOn();
-              } else if (not.direction == ScrollDirection.reverse) {
-                widget.buttonOff();
-              }
-
-              return true;
+          body: PageTransitionSwitcher(
+            reverse: true,
+            transitionBuilder: (child, animation, secondaryAnimation) {
+              return SharedAxisTransition(
+                animation: animation,
+                secondaryAnimation: secondaryAnimation,
+                transitionType: SharedAxisTransitionType.horizontal,
+                child: child,
+              );
             },
             child: PageTransitionSwitcher(
-              reverse: true,
+              reverse: isOnFollow,
               transitionBuilder: (child, animation, secondaryAnimation) {
                 return SharedAxisTransition(
                   animation: animation,
@@ -226,39 +231,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   child: child,
                 );
               },
-              child: GestureDetector(
-                onTap: () {
-                  FocusScope.of(context).unfocus();
-                },
-                onPanDown: (_) {
-                  FocusScope.of(context).unfocus();
-                },
-                child: NotificationListener<UserScrollNotification>(
-                  onNotification: (not) {
-                    if (not.direction == ScrollDirection.forward) {
-                      widget.buttonOn();
-                    } else if (not.direction == ScrollDirection.reverse) {
-                      widget.buttonOff();
-                    }
-
-                    return true;
-                  },
-                  child: PageTransitionSwitcher(
-                    reverse: isOnFollow,
-                    transitionBuilder: (child, animation, secondaryAnimation) {
-                      return SharedAxisTransition(
-                        animation: animation,
-                        secondaryAnimation: secondaryAnimation,
-                        transitionType: SharedAxisTransitionType.horizontal,
-                        child: child,
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: getList(),
-                    ),
-                  ),
-                ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: getList(),
               ),
             ),
           ),

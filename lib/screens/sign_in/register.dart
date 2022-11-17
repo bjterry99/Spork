@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
@@ -126,10 +126,9 @@ class _RegisterState extends State<Register> {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        FocusScope.of(context).unfocus();
-      },
-      onPanDown: (_) {
-        FocusScope.of(context).unfocus();
+        if (Platform.isAndroid) {
+          FocusScope.of(context).unfocus();
+        }
       },
       child: Scaffold(
         appBar: Provider.of<AppProvider>(context, listen: false)
@@ -138,6 +137,7 @@ class _RegisterState extends State<Register> {
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: SingleChildScrollView(
+              keyboardDismissBehavior: Platform.isIOS ? ScrollViewKeyboardDismissBehavior.onDrag : ScrollViewKeyboardDismissBehavior.manual,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -183,6 +183,7 @@ class _RegisterState extends State<Register> {
                   if (!enterCode)
                     TextFormField(
                       keyboardType: TextInputType.name,
+                      textCapitalization: TextCapitalization.sentences,
                       decoration: InputDecoration(
                         errorText: nameError,
                         labelText: 'Name',

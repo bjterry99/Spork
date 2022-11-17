@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:spork/models/models.dart';
@@ -11,7 +12,15 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:provider/provider.dart';
 
 class GroceryScreen extends StatefulWidget {
-  const GroceryScreen({required this.buttonOn, required this.buttonOff, required this.isInputVisible, required this.toggleInputOff, required this.controller, required this.myFocusNode, Key? key}) : super(key: key);
+  const GroceryScreen(
+      {required this.buttonOn,
+      required this.buttonOff,
+      required this.isInputVisible,
+      required this.toggleInputOff,
+      required this.controller,
+      required this.myFocusNode,
+      Key? key})
+      : super(key: key);
   final Function buttonOn;
   final Function buttonOff;
   final bool isInputVisible;
@@ -70,7 +79,14 @@ class _GroceryScreenState extends State<GroceryScreen> {
         query = '';
       });
       if (widget.controller.text != '') {
-        Grocery grocery = Grocery(id: '', name: widget.controller.text, mark: false, creatorId: user.id, homeId: user.homeId);
+        Grocery grocery = Grocery(
+            id: '',
+            name: widget.controller.text,
+            mark: false,
+            createDate: DateTime.now(),
+            creatorId: user.id,
+            homeId: user.homeId,
+            creatorName: user.name);
         await Provider.of<AppProvider>(context, listen: false).addGroceryItem(grocery);
       }
       widget.controller.clear();
@@ -84,7 +100,14 @@ class _GroceryScreenState extends State<GroceryScreen> {
         query = '';
       });
       if (controller.text != '') {
-        Grocery grocery = Grocery(id: '', name: controller.text, mark: false, creatorId: user.id, homeId: user.homeId);
+        Grocery grocery = Grocery(
+            id: '',
+            name: controller.text,
+            mark: false,
+            creatorId: user.id,
+            createDate: DateTime.now(),
+            homeId: user.homeId,
+            creatorName: user.name);
         await Provider.of<AppProvider>(context, listen: false).addGroceryItem(grocery);
       }
       widget.controller.clear();
@@ -119,16 +142,19 @@ class _GroceryScreenState extends State<GroceryScreen> {
                   padding: const EdgeInsets.only(top: 10),
                   child: GestureDetector(
                     onTap: () {
-                      FocusScope.of(context).unfocus();
-                      widget.toggleInputOff();
-                    },
-                    onPanDown: (_) {
-                      FocusScope.of(context).unfocus();
+                      if (Platform.isAndroid) {
+                        FocusScope.of(context).unfocus();
+                        widget.toggleInputOff();
+                      }
                     },
                     child: NotificationListener<UserScrollNotification>(
                       onNotification: (not) {
                         if (not.direction == ScrollDirection.forward) {
                           widget.buttonOn();
+                          if (Platform.isIOS) {
+                            FocusScope.of(context).unfocus();
+                            widget.toggleInputOff();
+                          }
                         } else if (not.direction == ScrollDirection.reverse) {
                           widget.buttonOff();
                         }
@@ -147,11 +173,9 @@ class _GroceryScreenState extends State<GroceryScreen> {
             if (widget.isInputVisible)
               Container(
                 decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(15), topLeft: Radius.circular(15)),
+                  borderRadius: BorderRadius.only(topRight: Radius.circular(15), topLeft: Radius.circular(15)),
                   boxShadow: [
-                    BoxShadow(
-                        color: Colors.black38, spreadRadius: 0, blurRadius: 3),
+                    BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 3),
                   ],
                 ),
                 child: Material(
@@ -168,7 +192,6 @@ class _GroceryScreenState extends State<GroceryScreen> {
                       children: [
                         Expanded(
                           child: TextFormField(
-                            // autofocus: true,
                             focusNode: widget.myFocusNode,
                             controller: widget.controller,
                             keyboardType: TextInputType.multiline,
@@ -207,9 +230,11 @@ class _GroceryScreenState extends State<GroceryScreen> {
                         if (canSave)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 7),
-                            child: MyTextButton(text: 'Save', action: (){
-                              saveItem();
-                            }),
+                            child: MyTextButton(
+                                text: 'Save',
+                                action: () {
+                                  saveItem();
+                                }),
                           ),
                       ],
                     ),

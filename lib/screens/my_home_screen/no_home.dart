@@ -29,10 +29,9 @@ class _NoHomeState extends State<NoHome> {
 
     return GestureDetector(
       onTap: () {
-        FocusScope.of(context).unfocus();
-      },
-      onPanDown: (_) {
-        FocusScope.of(context).unfocus();
+        if (Platform.isAndroid) {
+          FocusScope.of(context).unfocus();
+        }
       },
       child: Scaffold(
         appBar: AppBar(
@@ -54,91 +53,117 @@ class _NoHomeState extends State<NoHome> {
           elevation: 3,
         ),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Create Home',
-                  style: TextStyle(
-                    fontSize: CustomFontSize.big,
-                    color: CustomColors.grey4,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                TextFormField(
-                  style: const TextStyle(
-                      color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
-                  textCapitalization: TextCapitalization.words,
-                  cursorColor: CustomColors.primary,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      homeName = newValue!;
-                    });
-                  },
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    errorBorder: InputBorder.none,
-                    disabledBorder: InputBorder.none,
-                    icon: Icon(
-                      Icons.short_text_rounded,
-                      size: 20,
-                    ),
-                    hintText: "Home name...",
-                  ),
-                ),
-                Center(
-                  child: PrimaryButton(
-                    text: 'Create',
-                    action: submit,
-                    isActive: homeName != '',
-                    icon: Icon(
-                      Icons.home_outlined,
-                      color: homeName != '' ? CustomColors.white : CustomColors.grey4,
+          child: SingleChildScrollView(
+            keyboardDismissBehavior:
+                Platform.isIOS ? ScrollViewKeyboardDismissBehavior.onDrag : ScrollViewKeyboardDismissBehavior.manual,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Create Home',
+                    style: TextStyle(
+                      fontSize: CustomFontSize.big,
+                      color: CustomColors.grey4,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                ),
-                const Divider(
-                  height: 50,
-                  thickness: 1,
-                  indent: 0,
-                  endIndent: 0,
-                  color: CustomColors.grey3,
-                ),
-                const Text(
-                  'Home Invites',
-                  style: TextStyle(
-                    fontSize: CustomFontSize.big,
-                    color: CustomColors.grey4,
-                    fontWeight: FontWeight.w500,
+                  TextFormField(
+                    style: const TextStyle(
+                        color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
+                    textCapitalization: TextCapitalization.words,
+                    cursorColor: CustomColors.primary,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        homeName = newValue!;
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      icon: Icon(
+                        Icons.short_text_rounded,
+                        size: 20,
+                      ),
+                      hintText: "Home name...",
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10,),
-                StreamBuilder<List<HomeInvite>>(
-                  stream: Provider.of<AppProvider>(context, listen: false).inviteStream(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      final items = snapshot.data;
-                      List<Widget> listItems = [];
+                  Center(
+                    child: PrimaryButton(
+                      text: 'Create',
+                      action: submit,
+                      isActive: homeName != '',
+                      icon: Icon(
+                        Icons.home_outlined,
+                        color: homeName != '' ? CustomColors.white : CustomColors.grey4,
+                      ),
+                    ),
+                  ),
+                  const Divider(
+                    height: 50,
+                    thickness: 1,
+                    indent: 0,
+                    endIndent: 0,
+                    color: CustomColors.grey3,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  StreamBuilder<List<HomeInvite>>(
+                    stream: Provider.of<AppProvider>(context, listen: false).inviteStream(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final items = snapshot.data;
+                        List<Widget> listItems = [];
 
-                      for (var item in items!) {
-                        listItems.add(InviteCard(item));
+                        for (var item in items!) {
+                          listItems.add(InviteCard(item));
+                        }
+
+                        if (listItems.isNotEmpty) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Home Invites',
+                                style: TextStyle(
+                                  fontSize: CustomFontSize.big,
+                                  color: CustomColors.grey4,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 15,),
+                              ListView(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                children: listItems,
+                              ),
+                            ],
+                          );
+                        } else {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            child: Text(
+                              'Create and invite household members to your home to share your recipe book and grocery list with them.',
+                              style: TextStyle(
+                                fontSize: CustomFontSize.secondary,
+                                color: CustomColors.grey3,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          );
+                        }
+                      } else {
+                        return const SizedBox();
                       }
-
-                      return ListView(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        children: listItems,
-                      );
-                    } else {
-                      return const SizedBox();
-                    }
-                  },
-                ),
-              ],
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),

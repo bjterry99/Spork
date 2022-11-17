@@ -6,8 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:spork/components/buttons/info_box_button.dart';
 import 'package:spork/components/buttons/primary_button.dart';
 import 'package:spork/components/buttons/secondary_button.dart';
-import 'package:spork/services/dialog_service.dart';
 import 'package:spork/models/models.dart';
+import 'package:spork/services/dialog_service.dart';
 import 'package:spork/services/notification_service.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/theme.dart';
@@ -32,6 +32,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
   late String prepTime;
   late String recipeName;
   late String photoUrl;
+  late String url;
   bool edit = false;
 
   Widget getIngredientInput() {
@@ -40,6 +41,30 @@ class _CreateRecipeState extends State<CreateRecipe> {
     for (int i = 0; i < ingredients.length; i++) {
       inputs.add(Row(
         children: [
+          Expanded(
+            child: TextFormField(
+              initialValue: ingredientAmounts[i],
+              style: const TextStyle(
+                  color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.secondary),
+              cursorColor: CustomColors.primary,
+              onChanged: (String? newValue) {
+                setState(() {
+                  ingredientAmounts[i] = newValue!;
+                });
+              },
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                hintText: "amount...",
+              ),
+            ),
+          ),
+          const SizedBox(
+            width: 15,
+          ),
           Expanded(
             child: TextFormField(
               initialValue: ingredients[i],
@@ -59,30 +84,6 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 errorBorder: InputBorder.none,
                 disabledBorder: InputBorder.none,
                 hintText: "ingredient...",
-              ),
-            ),
-          ),
-          const SizedBox(
-            width: 15,
-          ),
-          Expanded(
-            child: TextFormField(
-              initialValue: ingredientAmounts[i],
-              style: const TextStyle(
-                  color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.secondary),
-              cursorColor: CustomColors.primary,
-              onChanged: (String? newValue) {
-                setState(() {
-                  ingredientAmounts[i] = newValue!;
-                });
-              },
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                hintText: "amount...",
               ),
             ),
           ),
@@ -149,7 +150,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
   }
 
   bool verifyInstructions() {
-    bool verify = false;
+    bool verify = url.isNotEmpty;
     for (String instruction in instructions) {
       if (instruction != '') {
         verify = true;
@@ -226,7 +227,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
     }
     verify = verifyInstructions();
     if (!verify) {
-      NotificationService.notify('Recipe must have instructions.');
+      NotificationService.notify('Recipe must have instructions or a link.');
       return;
     }
 
@@ -270,6 +271,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
           savedIds: widget.recipe!.savedIds,
           creatorId: widget.recipe!.creatorId,
           homeIds: widget.recipe!.homeIds,
+          url: url,
+          notes: widget.recipe!.notes,
+          notesCreators: widget.recipe!.notesCreators,
           photoUrl: photoUrl);
 
       await Provider.of<AppProvider>(context, listen: false).updateRecipe(recipe);
@@ -285,6 +289,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
           instructions: recipeInstructions,
           queryName: recipeName.toLowerCase(),
           visibility: visibility,
+          url: url,
           photoUrl: photoUrl);
 
       await Provider.of<AppProvider>(context, listen: false).createRecipe(recipe);
@@ -304,6 +309,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
       cookTime = widget.recipe!.cookTime;
       recipeName = widget.recipe!.name;
       photoUrl = widget.recipe!.photoUrl;
+      url = widget.recipe!.url;
     } else {
       recipeClass = 'Main';
       visibility = 'follow';
@@ -314,6 +320,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
       prepTime = '0:10';
       recipeName = '';
       photoUrl = '';
+      url = '';
     }
     super.initState();
   }
@@ -387,10 +394,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        FocusScope.of(context).unfocus();
-      },
-      onPanDown: (_) {
-        FocusScope.of(context).unfocus();
+        if (Platform.isAndroid) {
+          FocusScope.of(context).unfocus();
+        }
       },
       child: Scaffold(
         appBar: AppBar(
@@ -426,6 +432,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
           elevation: 3,
         ),
         body: SingleChildScrollView(
+          keyboardDismissBehavior: Platform.isIOS ? ScrollViewKeyboardDismissBehavior.onDrag : ScrollViewKeyboardDismissBehavior.manual,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
             child: Column(
@@ -728,6 +735,37 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   endIndent: 0,
                   color: CustomColors.grey3,
                 ),
+                TextFormField(
+                  initialValue: url,
+                  keyboardType: TextInputType.url,
+                  style: const TextStyle(
+                      color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
+                  cursorColor: CustomColors.primary,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      url = newValue!;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    icon: Icon(
+                      Icons.link_outlined,
+                      size: 20,
+                    ),
+                    hintText: "Recipe link...",
+                  ),
+                ),
+                const Divider(
+                  height: 10,
+                  thickness: 1,
+                  indent: 0,
+                  endIndent: 0,
+                  color: CustomColors.grey3,
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Row(
@@ -833,11 +871,36 @@ class _CreateRecipeState extends State<CreateRecipe> {
                         padding: const EdgeInsets.only(top: 10, bottom: 10, left: 15),
                         child: GestureDetector(
                           onTap: choosePicture,
-                          child: Material(
-                            elevation: 3,
-                            color: CustomColors.grey2,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                            child: getPhoto(),
+                          child: Stack(
+                            children: [
+                              Material(
+                                elevation: 3,
+                                color: CustomColors.grey2,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                child: getPhoto(),
+                              ),
+                              if (photoUrl != '')
+                              Positioned(
+                                top: 10,
+                                left: 70,
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    if (Uri.parse(photoUrl).isAbsolute && widget.recipe != null) {
+                                      await Provider.of<AppProvider>(context, listen: false).deleteImage(widget.recipe!.id);
+                                    }
+                                    setState(() {
+                                      photoUrl = '';
+                                    });
+                                  },
+                                  child: Material(
+                                    elevation: 3,
+                                    color: CustomColors.white,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                                    child: const Icon(Icons.close, color: CustomColors.grey4,),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       )

@@ -6,10 +6,10 @@ class NotificationService {
 
   static void notify(String message) {
     final snackBar = SnackBar(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
       behavior: SnackBarBehavior.floating,
       backgroundColor: CustomColors.grey4,
-      elevation: 6,
+      elevation: 3,
       content: Text(message,
       style: const TextStyle(color: CustomColors.white, fontWeight: FontWeight.w400, fontSize: CustomFontSize.secondary),),
       duration: const Duration(seconds: 2),

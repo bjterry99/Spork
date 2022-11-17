@@ -29,57 +29,21 @@ class DelegateDiscover extends SliverPersistentHeaderDelegate {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        const Text(
-                          'recipes',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: CustomFontSize.secondary,
-                            color: CustomColors.secondary,
-                          ),
-                        ),
-                        if (isOnRecipe)
-                        Positioned(
-                          top: 19,
-                          left: 4.5,
-                          child: Container(
-                            height: 2.5,
-                            width: 40,
-                            decoration: BoxDecoration(
-                              color: CustomColors.secondary,
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'recipes',
+                      style: TextStyle(
+                        fontWeight: !isOnRecipe ? FontWeight.w400 : FontWeight.w800,
+                        fontSize: CustomFontSize.secondary,
+                        color: CustomColors.secondary,
+                      ),
                     ),
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        const Text(
-                          'people',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: CustomFontSize.secondary,
-                            color: CustomColors.secondary,
-                          ),
-                        ),
-                        if (!isOnRecipe)
-                          Positioned(
-                            top: 19,
-                            left: 3,
-                            child: Container(
-                              height: 2.5,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                color: CustomColors.secondary,
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                            ),
-                          ),
-                      ],
+                    Text(
+                      'people',
+                      style: TextStyle(
+                        fontWeight: isOnRecipe ? FontWeight.w400 : FontWeight.w800,
+                        fontSize: CustomFontSize.secondary,
+                        color: CustomColors.secondary,
+                      ),
                     )
                   ],
                 ),

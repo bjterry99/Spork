@@ -1,8 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:spork/components/spork_spinner.dart';
 import 'package:spork/components/user_card.dart';
 import 'package:spork/models/models.dart';
-import 'package:spork/screens/discover/recipe_card_explore.dart';
+import 'package:spork/components/recipe_card_explore.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:spork/theme.dart';
 
@@ -15,6 +16,7 @@ class FollowList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return isOnRecipes ? PagedGridView<int, Recipe>(
+      keyboardDismissBehavior: Platform.isIOS ? ScrollViewKeyboardDismissBehavior.onDrag : ScrollViewKeyboardDismissBehavior.manual,
       pagingController: pagingController,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         childAspectRatio: 0.55,
@@ -42,6 +44,7 @@ class FollowList extends StatelessWidget {
       ),
     ) : PagedListView<int, AppUser>(
       pagingController: pagingControllerUsers,
+      keyboardDismissBehavior: Platform.isIOS ? ScrollViewKeyboardDismissBehavior.onDrag : ScrollViewKeyboardDismissBehavior.manual,
       builderDelegate: PagedChildBuilderDelegate<AppUser>(
         itemBuilder: (context, item, index) => UserCard(item),
         newPageErrorIndicatorBuilder: (_) => const Center(

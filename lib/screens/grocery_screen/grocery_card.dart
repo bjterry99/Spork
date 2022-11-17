@@ -10,6 +10,8 @@ class GroceryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppUser user = Provider.of<AppProvider>(context).user;
+
     return Padding(
       padding: const EdgeInsets.only(
         left: 0,
@@ -81,6 +83,24 @@ class GroceryCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (item.creatorId != user.id && item.creatorName != '')
+                Padding(
+                  padding: const EdgeInsets.only(left: 57),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.person, color: CustomColors.grey4, size: 15,),
+                      const SizedBox(width: 5,),
+                      Text(
+                        item.creatorName,
+                        style: const TextStyle(
+                            color: CustomColors.grey4,
+                            fontSize: CustomFontSize.secondary,
+                            fontWeight: FontWeight.w300),
+                      ),
+                    ],
+                  ),
+                ),
               SizedBox(height: item.recipeId != '' ? 15 : 5,)
             ],
           ),

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:spork/components/recipe_card_explore.dart';
 import 'package:spork/components/spork_spinner.dart';
 import 'package:spork/models/models.dart';
-import 'package:spork/screens/profile_screen/recipe_card_profile.dart';
-import 'package:spork/theme.dart';
 import 'package:spork/provider.dart';
+import 'package:spork/theme.dart';
 import 'package:provider/provider.dart';
 
-class MenuList extends StatelessWidget {
-  const MenuList({required this.query, Key? key}) : super(key: key);
+class UserRecipesList extends StatelessWidget {
+  const UserRecipesList({required this.query, required this.user, Key? key}) : super(key: key);
   final String query;
+  final AppUser user;
 
   @override
   Widget build(BuildContext context) {
@@ -23,21 +24,21 @@ class MenuList extends StatelessWidget {
     }
 
     return StreamBuilder<List<Recipe>>(
-      stream: Provider.of<AppProvider>(context, listen: false).menuStream(),
+      stream: Provider.of<AppProvider>(context, listen: false).userRecipeStream(user),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final recipes = snapshot.data;
-          List<RecipeCardProfile> main = [];
-          List<RecipeCardProfile> side = [];
-          List<RecipeCardProfile> dessert = [];
+          List<RecipeCardExplore> main = [];
+          List<RecipeCardExplore> side = [];
+          List<RecipeCardExplore> dessert = [];
           bool display = false;
 
           for (var recipe in recipes!) {
             if (recipe.name.toLowerCase().contains(query.toLowerCase())) {
               display = true;
-            } else if (recipe.className.toLowerCase().contains(query.toLowerCase())){
+            } else if (recipe.className.toLowerCase().contains(query.toLowerCase())) {
               display = true;
-            } else if (checkIngredients(recipe)){
+            } else if (checkIngredients(recipe)) {
               display = true;
             } else {
               display = false;
@@ -45,33 +46,32 @@ class MenuList extends StatelessWidget {
 
             if (display) {
               if (recipe.className == 'Dessert') {
-                dessert.add(RecipeCardProfile(recipe));
+                dessert.add(RecipeCardExplore(recipe));
               } else if (recipe.className == 'Side') {
-                side.add(RecipeCardProfile(recipe));
+                side.add(RecipeCardExplore(recipe));
               } else {
-                main.add(RecipeCardProfile(recipe));
+                main.add(RecipeCardExplore(recipe));
               }
             }
           }
           return SingleChildScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
             child: Column(
               children: [
                 if (recipes.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 40),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
                     child: Text(
-                      'Recipes you add to your menu will appear here.',
-                      style: TextStyle(
+                      '${user.name} has not created any recipes.',
+                      style: const TextStyle(
                           fontWeight: FontWeight.w400,
                           fontSize: CustomFontSize.secondary,
-                          color: CustomColors.grey3
+                          color: CustomColors.grey4
                       ),
                     ),
                   ),
                 if (main.isNotEmpty)
                   GridView.count(
-                    childAspectRatio: 0.6,
+                    childAspectRatio: 0.55,
                     crossAxisSpacing: 10,
                     crossAxisCount: 2,
                     physics: const NeverScrollableScrollPhysics(),
@@ -93,7 +93,7 @@ class MenuList extends StatelessWidget {
                   ),
                 if (side.isNotEmpty)
                   GridView.count(
-                    childAspectRatio: 0.6,
+                    childAspectRatio: 0.55,
                     crossAxisSpacing: 10,
                     crossAxisCount: 2,
                     physics: const NeverScrollableScrollPhysics(),
@@ -115,7 +115,7 @@ class MenuList extends StatelessWidget {
                   ),
                 if (dessert.isNotEmpty)
                   GridView.count(
-                    childAspectRatio: 0.6,
+                    childAspectRatio: 0.55,
                     crossAxisSpacing: 10,
                     crossAxisCount: 2,
                     physics: const NeverScrollableScrollPhysics(),

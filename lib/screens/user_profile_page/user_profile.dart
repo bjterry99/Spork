@@ -1,0 +1,90 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:spork/models/models.dart';
+import 'package:spork/screens/user_profile_page/user_header.dart';
+import 'package:spork/screens/user_profile_page/user_recipe_list.dart';
+import 'package:spork/screens/user_profile_page/user_search_bar.dart';
+import 'package:spork/theme.dart';
+import 'package:spork/provider.dart';
+import 'package:provider/provider.dart';
+
+class UserProfileScreen extends StatefulWidget {
+  const UserProfileScreen({required this.user, Key? key}) : super(key: key);
+  final AppUser user;
+
+  @override
+  State<UserProfileScreen> createState() => _UserProfileScreenState();
+}
+
+class _UserProfileScreenState extends State<UserProfileScreen> {
+  String query = '';
+  final TextEditingController controller = TextEditingController();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  void search(String text) {
+    setState(() {
+      query = text;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
+      body: NestedScrollView(
+        floatHeaderSlivers: true,
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          return <Widget>[
+            SliverAppBar(
+              elevation: 0,
+              flexibleSpace: UserProfileHeader(user: widget.user,),
+              floating: true,
+              toolbarHeight: 125,
+              snap: false,
+              automaticallyImplyLeading: false,
+              backgroundColor: CustomColors.white,
+              systemOverlayStyle: Platform.isAndroid ? const SystemUiOverlayStyle(
+                statusBarColor: CustomColors.white,
+                statusBarIconBrightness: Brightness.dark,
+              ) : null,
+            ),
+            SliverPersistentHeader(
+              pinned: true,
+              floating: false,
+              delegate: UserDelegateProfile(search, controller),
+            ),
+          ];
+        },
+        body: Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: GestureDetector(
+            onTap: () {
+              if (Platform.isAndroid) {
+                FocusScope.of(context).unfocus();
+              }
+            },
+            child: NotificationListener<UserScrollNotification>(
+              onNotification: (not) {
+                if (not.direction == ScrollDirection.forward) {
+                  if (Platform.isIOS) {
+                    FocusScope.of(context).unfocus();
+                  }
+                }
+
+                return true;
+              },
+              child: UserRecipesList(query: query, user: widget.user,),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

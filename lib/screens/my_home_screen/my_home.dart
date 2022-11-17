@@ -32,8 +32,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
 
   void editHome() async {
     FocusScope.of(context).unfocus();
-    await Provider.of<AppProvider>(context, listen: false)
-        .editHomeName(widget.myHome.id, homeName);
+    await Provider.of<AppProvider>(context, listen: false).editHomeName(widget.myHome.id, homeName);
     setState(() {
       currentName = homeName;
     });
@@ -45,10 +44,9 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
 
     return GestureDetector(
       onTap: () {
-        FocusScope.of(context).unfocus();
-      },
-      onPanDown: (_) {
-        FocusScope.of(context).unfocus();
+        if (Platform.isAndroid) {
+          FocusScope.of(context).unfocus();
+        }
       },
       child: Scaffold(
         appBar: AppBar(
@@ -60,10 +58,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                 ),
           title: const Text(
             'Home',
-            style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: CustomFontSize.primary,
-                color: CustomColors.white),
+            style: TextStyle(fontWeight: FontWeight.w500, fontSize: CustomFontSize.primary, color: CustomColors.white),
           ),
           actions: [
             widget.myHome.creatorId == user.id
@@ -157,116 +152,156 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
           elevation: 3,
         ),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                widget.myHome.creatorId == user.id
-                    ? Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              initialValue: widget.myHome.name,
-                              style: const TextStyle(
-                                  color: CustomColors.black,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: CustomFontSize.big),
-                              textCapitalization: TextCapitalization.words,
-                              cursorColor: CustomColors.primary,
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  homeName = newValue!;
-                                });
-                              },
-                              decoration: const InputDecoration(
-                                icon: Icon(
-                                  Icons.home_outlined,
-                                  size: 25,
+          child: SingleChildScrollView(
+            keyboardDismissBehavior:
+                Platform.isIOS ? ScrollViewKeyboardDismissBehavior.onDrag : ScrollViewKeyboardDismissBehavior.manual,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  widget.myHome.creatorId == user.id
+                      ? Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                initialValue: widget.myHome.name,
+                                style: const TextStyle(
+                                    color: CustomColors.black,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: CustomFontSize.big),
+                                textCapitalization: TextCapitalization.words,
+                                cursorColor: CustomColors.primary,
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    homeName = newValue!;
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                  icon: Icon(
+                                    Icons.home_outlined,
+                                    size: 25,
+                                  ),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: CustomColors.grey3),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: CustomColors.grey3),
+                                  ),
+                                  hintText: "New Home name...",
                                 ),
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: CustomColors.grey3),
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: CustomColors.grey3),
-                                ),
-                                hintText: "New Home name...",
                               ),
                             ),
-                          ),
-                          if (currentName != homeName)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 15),
-                              child: CustomButton(
-                                  content: Icon(
-                                    Icons.edit,
-                                    color: homeName != ''
-                                        ? CustomColors.white
-                                        : CustomColors.grey4,
-                                  ),
-                                  action: editHome,
-                                  isActive: homeName != '',
-                                  verticalPadding: 10,
-                                  horizontalPadding: 10),
-                            ),
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          const Icon(
-                            Icons.home_outlined,
-                            size: 25,
-                            color: CustomColors.grey4,
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            widget.myHome.name,
-                            style: const TextStyle(
-                              fontSize: CustomFontSize.big,
+                            if (currentName != homeName)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 15),
+                                child: CustomButton(
+                                    content: Icon(
+                                      Icons.edit,
+                                      color: homeName != '' ? CustomColors.white : CustomColors.grey4,
+                                    ),
+                                    action: editHome,
+                                    isActive: homeName != '',
+                                    verticalPadding: 10,
+                                    horizontalPadding: 10),
+                              ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            const Icon(
+                              Icons.home_outlined,
+                              size: 25,
                               color: CustomColors.grey4,
-                              fontWeight: FontWeight.w500,
                             ),
-                          ),
-                        ],
-                      ),
-                const SizedBox(height: 20,),
-                const Text(
-                  'Household',
-                  style: TextStyle(
-                    fontSize: CustomFontSize.big,
-                    color: CustomColors.grey4,
-                    fontWeight: FontWeight.w500,
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              widget.myHome.name,
+                              style: const TextStyle(
+                                fontSize: CustomFontSize.big,
+                                color: CustomColors.grey4,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                  const SizedBox(
+                    height: 20,
                   ),
-                ),
-                const SizedBox(height: 10,),
-                StreamBuilder<List<AppUser>>(
-                  stream: Provider.of<AppProvider>(context, listen: false).homeUsers(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      final items = snapshot.data;
-                      List<Widget> listItems = [];
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  StreamBuilder<List<AppUser>>(
+                    stream: Provider.of<AppProvider>(context, listen: false).homeUsers(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final items = snapshot.data;
+                        List<Widget> listItems = [];
 
-                      for (var item in items!) {
-                        if (item.id != user.id) {
-                          listItems.add(UserCard(item));
+                        for (var item in items!) {
+                          if (item.id != user.id) {
+                            listItems.add(UserCard(item));
+                          }
                         }
-                      }
 
-                      return ListView(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        children: listItems,
-                      );
-                    } else {
-                      return const SizedBox();
-                    }
-                  },
-                ),
-              ],
+                        if (listItems.isNotEmpty) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Household',
+                                style: TextStyle(
+                                  fontSize: CustomFontSize.big,
+                                  color: CustomColors.grey4,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              ListView(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                children: listItems,
+                              ),
+                            ],
+                          );
+                        } else {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  'Invite household members to your home to share your recipe book and grocery list.',
+                                  style: TextStyle(
+                                    fontSize: CustomFontSize.secondary,
+                                    color: CustomColors.grey3,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                SizedBox(height: 10,),
+                                Text(
+                                  'Search for people on the Discover page.',
+                                  style: TextStyle(
+                                    fontSize: CustomFontSize.secondary,
+                                    color: CustomColors.grey3,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      } else {
+                        return const SizedBox();
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),

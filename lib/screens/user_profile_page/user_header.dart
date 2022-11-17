@@ -1,24 +1,20 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:spork/components/my_switcher.dart';
 import 'package:spork/components/profile_image.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
 import 'package:spork/screens/following_followers.dart';
-import 'package:spork/screens/my_home_screen/my_home_screen_load.dart';
-import 'package:spork/screens/settings.dart';
 import 'package:spork/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({required this.isOnRecipe, required this.change, Key? key}) : super(key: key);
-  final Function change;
-  final bool isOnRecipe;
+class UserProfileHeader extends StatelessWidget {
+  const UserProfileHeader({required this.user, Key? key}) : super(key: key);
+  final AppUser user;
 
   @override
   Widget build(BuildContext context) {
-    AppUser user = Provider.of<AppProvider>(context).user;
-
     return Material(
         color: CustomColors.white,
         borderRadius:
@@ -35,13 +31,12 @@ class ProfileHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) => SettingsPage(user: user,),
-                        ));
-                      },
-                        child: ProfileImage(user.photoUrl, 90, 60)),
+                    InkWell(
+                      onTap: () => Navigator.pop(context),
+                      child: Platform.isAndroid ? const Icon(Icons.arrow_back) : const Icon(Icons.arrow_back_ios),
+                    ),
+                    const SizedBox(width: 10,),
+                    Hero(tag: user.id, child: ProfileImage(user.photoUrl, 90, 60)),
                     const SizedBox(
                       width: 10,
                     ),
@@ -50,7 +45,7 @@ class ProfileHeader extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         SizedBox(
-                          width: MediaQuery.of(context).size.width/1.6,
+                          width: MediaQuery.of(context).size.width/1.9,
                           child: Text(
                             user.name,
                             overflow: TextOverflow.fade,
@@ -62,7 +57,7 @@ class ProfileHeader extends StatelessWidget {
                           ),
                         ),
                         SizedBox(
-                          width: MediaQuery.of(context).size.width/1.6,
+                          width: MediaQuery.of(context).size.width/1.9,
                           child: Text(
                             '@${user.userName}',
                             overflow: TextOverflow.fade,
@@ -77,7 +72,7 @@ class ProfileHeader extends StatelessWidget {
                           height: 10,
                         ),
                         SizedBox(
-                          width: MediaQuery.of(context).size.width - 90 - 25 - 15,
+                          width: MediaQuery.of(context).size.width - 90 - 25 - 15 - 40,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -152,56 +147,15 @@ class ProfileHeader extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              const SizedBox(width: 25,),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (BuildContext context) => const MyHomeScreenLoad(),
-                                  ));
-                                },
-                                child: Column(
-                                  children: const [
-                                    Text(
-                                      'My',
-                                      style: TextStyle(
-                                          color: CustomColors.grey4,
-                                          fontSize: CustomFontSize.secondary,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                    Text(
-                                      'Home',
-                                      style: TextStyle(
-                                          color: CustomColors.grey4,
-                                          fontSize: CustomFontSize.secondary,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                  ],
-                                ),
-                              ),
                               const Spacer(),
                             ],
                           ),
-                        )
+                        ),
+                        const SizedBox(height: 10,),
                       ],
                     ),
                   ],
                 ),
-                Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: MySwitcher(change: change, isOnFollow: isOnRecipe, iconRight: Icons.restaurant_menu_rounded, iconLeft: Icons.menu_book_rounded)
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: IconButton(onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) => SettingsPage(user: user,),
-                        ));
-                      }, icon: const Icon(Icons.settings, color: CustomColors.grey4,)),
-                    ),
-                  ],
-                )
               ],
             ),
           ),

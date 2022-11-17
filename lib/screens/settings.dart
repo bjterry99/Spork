@@ -5,9 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:spork/components/buttons/custom_button.dart';
 import 'package:spork/components/buttons/info_box_button.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
+import 'package:spork/models/models.dart';
 import 'package:spork/services/dialog_service.dart';
 import 'package:spork/components/profile_image.dart';
-import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
 import 'package:spork/screens/sign_in/sign_in.dart';
@@ -41,6 +41,34 @@ class _SettingsPageState extends State<SettingsPage> {
       if (newUserName != widget.user.userName) return true;
       if (newPic != widget.user.photoUrl) return true;
       return false;
+    }
+
+    void clearGrocery() async {
+      bool? answer = await DialogService.dialogBox(
+        context: context,
+        title: 'Clear Grocery List?',
+        body: const Text('This cannot be undone.', style: InfoBoxTextStyle.body),
+        actions: [
+          InfoBoxButton(
+            action: () {
+              Navigator.of(context).pop(false);
+            },
+            text: 'Cancel',
+            isPrimary: true,
+          ),
+          InfoBoxButton(
+            action: () {
+              Navigator.of(context).pop(true);
+            },
+            text: 'Confirm',
+            isPrimary: true,
+          ),
+        ],
+      );
+      bool checkForNullAnswer = answer ?? false;
+      if (checkForNullAnswer) {
+        await Provider.of<AppProvider>(context, listen: false).deleteAllGroceryItem();
+      }
     }
 
     void signOut() async {
@@ -105,10 +133,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return GestureDetector(
       onTap: () {
-        FocusScope.of(context).unfocus();
-      },
-      onPanDown: (_) {
-        FocusScope.of(context).unfocus();
+        if (Platform.isAndroid) {
+          FocusScope.of(context).unfocus();
+        }
       },
       child: Scaffold(
         appBar: AppBar(
@@ -131,6 +158,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         body: SafeArea(
           child: SingleChildScrollView(
+            keyboardDismissBehavior: Platform.isIOS ? ScrollViewKeyboardDismissBehavior.onDrag : ScrollViewKeyboardDismissBehavior.manual,
             child: Padding(
               padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
               child: Column(
@@ -247,6 +275,40 @@ class _SettingsPageState extends State<SettingsPage> {
                             width: 10,
                           )
                         ],
+                      ),
+                      const Divider(
+                        height: 25,
+                        thickness: 1,
+                        indent: 0,
+                        endIndent: 0,
+                        color: CustomColors.grey3,
+                      ),
+                      InkWell(
+                        onTap: clearGrocery,
+                        splashColor: CustomColors.secondary,
+                        borderRadius: BorderRadius.circular(20),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: const [
+                              Icon(
+                                Icons.delete_sweep_outlined,
+                                color: CustomColors.grey4,
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                'Clear Grocery List',
+                                style: TextStyle(
+                                  fontSize: CustomFontSize.primary,
+                                  color: CustomColors.grey4,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       ),
                       const Divider(
                         height: 25,

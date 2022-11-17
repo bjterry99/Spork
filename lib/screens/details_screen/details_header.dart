@@ -1,12 +1,12 @@
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:spork/theme.dart';
 
 class DetailsHeader extends StatelessWidget {
-  const DetailsHeader({required this.url, Key? key}) : super(key: key);
+  const DetailsHeader({required this.url, required this.id, Key? key}) : super(key: key);
   final String url;
+  final String id;
 
   @override
   Widget build(BuildContext context) {
@@ -19,19 +19,43 @@ class DetailsHeader extends StatelessWidget {
       elevation: 3,
       child: Stack(
         children: [
-          url != '' ? CachedNetworkImage(
-            imageUrl: url,
-            imageBuilder: (context, imageProvider) => SizedBox(
-              height: imgWidth,
-              width: imgWidth,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20)),
-                child: Image(
-                  image: imageProvider,
+          Hero(
+            tag: id,
+            child: url != '' ? CachedNetworkImage(
+              imageUrl: url,
+              imageBuilder: (context, imageProvider) => SizedBox(
+                height: imgWidth,
+                width: imgWidth,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20)),
+                  child: Image(
+                    image: imageProvider,
+                  ),
                 ),
               ),
-            ),
-            placeholder: (context, url) => Container(
+              placeholder: (context, url) => Container(
+                height: imgWidth,
+                width: imgWidth,
+                decoration: const BoxDecoration(
+                    color: CustomColors.grey2,
+                    borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20))),
+                child: const Icon(
+                  Icons.image_not_supported_outlined,
+                  color: CustomColors.grey4,
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                height: imgWidth,
+                width: imgWidth,
+                decoration: const BoxDecoration(
+                    color: CustomColors.grey2,
+                    borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20))),
+                child: const Icon(
+                  Icons.image_not_supported_outlined,
+                  color: CustomColors.grey4,
+                ),
+              ),
+            ) : Container(
               height: imgWidth,
               width: imgWidth,
               decoration: const BoxDecoration(
@@ -41,27 +65,6 @@ class DetailsHeader extends StatelessWidget {
                 Icons.image_not_supported_outlined,
                 color: CustomColors.grey4,
               ),
-            ),
-            errorWidget: (context, url, error) => Container(
-              height: imgWidth,
-              width: imgWidth,
-              decoration: const BoxDecoration(
-                  color: CustomColors.grey2,
-                  borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20))),
-              child: const Icon(
-                Icons.image_not_supported_outlined,
-                color: CustomColors.grey4,
-              ),
-            ),
-          ) : Container(
-            height: imgWidth,
-            width: imgWidth,
-            decoration: const BoxDecoration(
-                color: CustomColors.grey2,
-                borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20))),
-            child: const Icon(
-              Icons.image_not_supported_outlined,
-              color: CustomColors.grey4,
             ),
           ),
           Positioned(

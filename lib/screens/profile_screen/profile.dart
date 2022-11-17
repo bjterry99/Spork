@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -82,15 +83,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.only(top: 10),
             child: GestureDetector(
               onTap: () {
-                FocusScope.of(context).unfocus();
-              },
-              onPanDown: (_) {
-                FocusScope.of(context).unfocus();
+                if (Platform.isAndroid) {
+                  FocusScope.of(context).unfocus();
+                }
               },
               child: NotificationListener<UserScrollNotification>(
                 onNotification: (not) {
                   if (not.direction == ScrollDirection.forward) {
                     widget.buttonOn();
+                    if (Platform.isIOS) {
+                      FocusScope.of(context).unfocus();
+                    }
                   } else if (not.direction == ScrollDirection.reverse) {
                     widget.buttonOff();
                   }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
 import 'package:spork/components/spork_spinner.dart';
-import 'package:spork/screens/grocery_screen/grocery_card.dart';
 import 'package:spork/models/models.dart';
+import 'package:spork/screens/grocery_screen/grocery_card.dart';
 import 'package:spork/theme.dart';
 import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
@@ -73,6 +73,18 @@ class GroceryList extends StatelessWidget {
           return SingleChildScrollView(
             child: Column(
               children: [
+                if (items.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 80),
+                    child: Text(
+                      'Add items to your grocery list using the grocery cart button or by by adding recipes to your menu.',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: CustomFontSize.secondary,
+                        color: CustomColors.grey3
+                      ),
+                    ),
+                  ),
                 ListView(
                   physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
