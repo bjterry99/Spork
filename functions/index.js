@@ -145,10 +145,10 @@ exports.home_OnUpdate = functions.firestore.document("homes/{homeId}")
             var recipe = await recipeRef.get();
             const savedIds = recipe.data()["savedIds"];
 
-            var removeHome = false;
+            var removeHome = true;
             savedIds.forEach((savedId) => {
               if (afterFamily.includes(savedId)) {
-                removeHome = true;
+                removeHome = false;
               }
             });
 
