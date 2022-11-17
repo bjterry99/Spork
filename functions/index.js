@@ -31,6 +31,27 @@ exports.home_OnCreate = functions.firestore.document("homes/{homeId}")
   }
 });
 
+exports.grocery_OnCreate = functions.firestore.document("grocery/{groceryId}")
+    .onCreate(async (snap, context) => {
+    try {
+      const db = admin.firestore();
+      const now = firestore.Timestamp.now();
+
+      const grocery = snap.data();
+      const time = grocery['createDate'] ?? '';
+
+      if (time == '') {
+        var groceryRef = db.collection("grocery").doc(grocery.id);
+
+        await groceryRef.update({
+          createDate: now,
+        });
+      }
+  } catch (error) {
+    functions.logger.log(error);
+  }
+});
+
 exports.home_OnDelete = functions.firestore.document("homes/{homeId}")
     .onDelete(async (snap, context) => {
     try {
