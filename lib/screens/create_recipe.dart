@@ -272,6 +272,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
           creatorId: widget.recipe!.creatorId,
           homeIds: widget.recipe!.homeIds,
           url: url,
+          editDate: DateTime.now(),
           notes: widget.recipe!.notes,
           notesCreators: widget.recipe!.notesCreators,
           photoUrl: photoUrl);
@@ -290,6 +291,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
           queryName: recipeName.toLowerCase(),
           visibility: visibility,
           url: url,
+          createDate: DateTime.now(),
           photoUrl: photoUrl);
 
       await Provider.of<AppProvider>(context, listen: false).createRecipe(recipe);

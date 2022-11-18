@@ -1043,7 +1043,33 @@ class AppProvider extends ChangeNotifier {
         return recipes;
       }
     } else {
-      return <Recipe>[];
+      if (page != 0) {
+        final skipThese = await _firestore
+            .collection('recipes')
+            .where('visibility', isEqualTo: 'explore')
+            .limit(page)
+            .get();
+        final lastVisible = skipThese.docs[skipThese.size - 1];
+
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('recipes')
+            .where('visibility', isEqualTo: 'explore')
+            .startAt([lastVisible])
+            .limit(pageSize)
+            .get();
+
+        List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
+        return recipes;
+      } else {
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('recipes')
+            .where('visibility', isEqualTo: 'explore')
+            .limit(pageSize)
+            .get();
+
+        List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
+        return recipes;
+      }
     }
   }
 
@@ -1178,7 +1204,128 @@ class AppProvider extends ChangeNotifier {
         return <Recipe>[];
       }
     } else {
-      return <Recipe>[];
+      final following = await _firestore.collection('users').where('followers', arrayContains: _user.id).get();
+      List<String> followingList = following.docs.map((e) => e.id).toList();
+
+      if (followingList.isNotEmpty) {
+        if (followingList.length <= 10) {
+          if (page != 0) {
+            final skipThese = await _firestore
+                .collection('recipes')
+                .where('creatorId', whereIn: followingList)
+                .limit(page)
+                .get();
+            final lastVisible = skipThese.docs[skipThese.size - 1];
+
+            QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+                .collection('recipes')
+                .where('creatorId', whereIn: followingList)
+                .startAt([lastVisible]).get();
+            List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
+
+            List<Recipe> sortedRecipes = [];
+            for (var recipe in recipes) {
+              if (recipe.visibility != 'private') {
+                sortedRecipes.add(recipe);
+                if (sortedRecipes.length == pageSize) {
+                  return sortedRecipes;
+                }
+              }
+            }
+
+            return sortedRecipes;
+          } else {
+            QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+                .collection('recipes')
+                .where('creatorId', whereIn: followingList)
+                .get();
+            List<Recipe> recipes = snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList();
+
+            List<Recipe> sortedRecipes = [];
+            for (var recipe in recipes) {
+              if (recipe.visibility != 'private') {
+                sortedRecipes.add(recipe);
+                if (sortedRecipes.length == pageSize) {
+                  return sortedRecipes;
+                }
+              }
+            }
+
+            return sortedRecipes;
+          }
+        } else {
+          if (page != 0) {
+            final skipThese = await _firestore
+                .collection('recipes')
+                .where('creatorId', whereIn: followingList)
+                .limit(page)
+                .get();
+            final lastVisible = skipThese.docs[skipThese.size - 1];
+
+            List<Recipe> recipes = [];
+            for (int i = 0; i < followingList.length; i = i + 10) {
+              List<String> someFollowing = [];
+              if (followingList.skip(i).length > 10) {
+                someFollowing.addAll(followingList.sublist(i, i + 10));
+              } else {
+                someFollowing.addAll(followingList.skip(i));
+              }
+
+              QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+                  .collection('recipes')
+                  .where('creatorId', whereIn: followingList)
+                  .where('visibility', isNotEqualTo: 'private')
+                  .startAt([lastVisible]).get();
+
+              recipes.addAll(snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+            }
+
+            List<Recipe> sortedRecipes = [];
+            for (var recipe in recipes) {
+              if (recipe.visibility != 'private') {
+                sortedRecipes.add(recipe);
+                if (sortedRecipes.length == pageSize) {
+                  return sortedRecipes;
+                }
+              }
+            }
+
+            return sortedRecipes;
+          } else {
+            List<Recipe> recipes = [];
+
+            for (int i = 0; i < followingList.length; i = i + 10) {
+              List<String> someFollowing = [];
+              if (followingList.skip(i).length > 10) {
+                someFollowing.addAll(followingList.sublist(i, i + 10));
+              } else {
+                someFollowing.addAll(followingList.skip(i));
+              }
+
+              QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+                  .collection('recipes')
+                  .where('creatorId', whereIn: someFollowing)
+                  .get();
+
+              recipes.addAll(snapshot.docs.map((doc) => Recipe.fromJson(doc.data())).toList());
+            }
+
+            List<Recipe> sortedRecipes = [];
+            for (var recipe in recipes) {
+              if (recipe.visibility != 'private') {
+                sortedRecipes.add(recipe);
+                if (sortedRecipes.length == pageSize) {
+                  return sortedRecipes;
+                }
+              }
+            }
+
+            return sortedRecipes;
+          }
+        }
+      } else {
+        return <Recipe>[];
+      }
     }
   }
 
@@ -1215,7 +1362,33 @@ class AppProvider extends ChangeNotifier {
         return users;
       }
     } else {
-      return <AppUser>[];
+      if (page != 0) {
+        final skipThese = await _firestore
+            .collection('users')
+            .where('queryName', isNotEqualTo: _user.queryName)
+            .limit(page)
+            .get();
+        final lastVisible = skipThese.docs[skipThese.size - 1];
+
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('users')
+            .where('queryName', isNotEqualTo: _user.queryName)
+            .startAt([lastVisible])
+            .limit(pageSize)
+            .get();
+
+        List<AppUser> users = snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList();
+        return users;
+      } else {
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('users')
+            .where('queryName', isNotEqualTo: _user.queryName)
+            .limit(pageSize)
+            .get();
+
+        List<AppUser> users = snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList();
+        return users;
+      }
     }
   }
 
@@ -1255,7 +1428,36 @@ class AppProvider extends ChangeNotifier {
         return users;
       }
     } else {
-      return <AppUser>[];
+      if (page != 0) {
+        final skipThese = await _firestore
+            .collection('users')
+            .where('followers', arrayContains: _user.id)
+            .where('queryName', isNotEqualTo: _user.queryName)
+            .limit(page)
+            .get();
+        final lastVisible = skipThese.docs[skipThese.size - 1];
+
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('users')
+            .where('followers', arrayContains: _user.id)
+            .where('queryName', isNotEqualTo: _user.queryName)
+            .startAt([lastVisible])
+            .limit(pageSize)
+            .get();
+
+        List<AppUser> users = snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList();
+        return users;
+      } else {
+        QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+            .collection('users')
+            .where('followers', arrayContains: _user.id)
+            .where('queryName', isNotEqualTo: _user.queryName)
+            .limit(pageSize)
+            .get();
+
+        List<AppUser> users = snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList();
+        return users;
+      }
     }
   }
 

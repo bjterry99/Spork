@@ -24,6 +24,8 @@ class Recipe {
   String url;
   List<String> notes;
   List<String> notesCreators;
+  dynamic createDate;
+  dynamic editDate;
 
   Recipe({
     required this.id,
@@ -44,6 +46,8 @@ class Recipe {
     this.url = '',
     this.notes = const <String>[],
     this.notesCreators = const <String>[],
+    this.createDate = '',
+    this.editDate = '',
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) => _$RecipeFromJson(json);

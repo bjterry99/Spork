@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:spork/components/buttons/info_box_button.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
@@ -10,10 +11,12 @@ import 'package:spork/screens/details_screen/details_title_bar.dart';
 import 'package:spork/screens/details_screen/details_header.dart';
 import 'package:spork/screens/details_screen/ingredients.dart';
 import 'package:spork/screens/details_screen/instructions.dart';
+import 'package:spork/services/dialog_service.dart';
 import 'package:spork/services/notification_service.dart';
 import 'package:spork/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class DetailScreen extends StatefulWidget {
   const DetailScreen({required this.recipe, Key? key}) : super(key: key);
@@ -27,6 +30,20 @@ class _DetailScreenState extends State<DetailScreen> {
   bool isFabVisible = true;
   bool _expanded = false;
   final TextEditingController controller = TextEditingController();
+  final dateFormat = DateFormat('MMM dd, yyyy');
+  late DateTime createDate;
+  late DateTime editDate;
+
+  @override
+  void initState() {
+    if (widget.recipe.createDate != '') {
+      createDate = DateTime.fromMillisecondsSinceEpoch(widget.recipe.createDate.seconds * 1000);
+    }
+    if (widget.recipe.editDate.toString() != '') {
+      editDate = DateTime.fromMillisecondsSinceEpoch(widget.recipe.editDate.seconds * 1000);
+    }
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -401,12 +418,58 @@ class _DetailScreenState extends State<DetailScreen> {
                                     ),
                                   ],
                                 ),
+                                if (widget.recipe.createDate != '')
+                                const SizedBox(height: 5,),
+                                if (widget.recipe.createDate != '')
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.calendar_month_outlined,
+                                      color: CustomColors.grey4,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      dateFormat.format(createDate),
+                                      softWrap: true,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.fade,
+                                      style: const TextStyle(
+                                          color: CustomColors.grey4, fontSize: CustomFontSize.secondary),
+                                    ),
+                                  ],
+                                ),
+                                if (widget.recipe.editDate != '')
+                                  const SizedBox(height: 5,),
+                                if (widget.recipe.editDate != '')
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.edit,
+                                        color: CustomColors.grey4,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        dateFormat.format(editDate),
+                                        softWrap: true,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.fade,
+                                        style: const TextStyle(
+                                            color: CustomColors.grey4, fontSize: CustomFontSize.secondary),
+                                      ),
+                                    ],
+                                  ),
                               ],
                             ),
                           ),
                         ),
                       ),
-                      if (widget.recipe.notes.isNotEmpty || widget.recipe.savedIds.contains(user.id))
+                      if (widget.recipe.notes.isNotEmpty || widget.recipe.savedIds.contains(user.id)  || widget.recipe.homeIds.contains(user.homeId))
                       const Divider(
                         height: 20,
                         thickness: 1,
@@ -414,7 +477,6 @@ class _DetailScreenState extends State<DetailScreen> {
                         endIndent: 30,
                         color: Colors.grey,
                       ),
-                      if (widget.recipe.notes.isNotEmpty)
                         StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
                           stream: Provider.of<AppProvider>(context, listen: false).recipe(widget.recipe.id),
                           builder: (context, snapshot) {
@@ -427,70 +489,102 @@ class _DetailScreenState extends State<DetailScreen> {
                               List<Widget> displayNotes = [];
                               for (int i = 0; i < notes.length; i++) {
                                 displayNotes.add(
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(right: 10, left: 5, top: 6),
-                                        child: Container(
-                                          decoration: const BoxDecoration(
-                                            color: CustomColors.grey4,
-                                            shape: BoxShape.circle,
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 3),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(right: 10, left: 5, top: 0),
+                                          child: Container(
+                                            decoration: const BoxDecoration(
+                                              color: CustomColors.grey4,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            height: 3,
+                                            width: 3,
                                           ),
-                                          height: 3,
-                                          width: 3,
                                         ),
-                                      ),
-                                      Expanded(
-                                        child: Text(
-                                          notes[i],
-                                          softWrap: true,
-                                          style: const TextStyle(
-                                              color: CustomColors.grey4,
-                                              fontSize: CustomFontSize.secondary,
-                                              fontWeight: FontWeight.w400),
+                                        Expanded(
+                                          child: Text(
+                                            notes[i],
+                                            softWrap: true,
+                                            style: const TextStyle(
+                                                color: CustomColors.grey4,
+                                                fontSize: CustomFontSize.secondary,
+                                                fontWeight: FontWeight.w400),
+                                          ),
                                         ),
-                                      ),
-                                      if (notesCreators[i] == user.id || widget.recipe.creatorId == user.id)
-                                        IconButton(
-                                            onPressed: () async {
-                                              await Provider.of<AppProvider>(context, listen: false)
-                                                  .deleteNote(i, recipeStream);
-                                            },
-                                            icon: const Icon(
-                                              Icons.close,
-                                              color: CustomColors.grey4,
-                                              size: 20,
-                                            ))
-                                    ],
+                                        if (notesCreators[i] == user.id || widget.recipe.creatorId == user.id)
+                                          IconButton(
+                                              onPressed: () async {
+                                                bool? answer = await DialogService.dialogBox(
+                                                  context: context,
+                                                  title: 'Remove note?',
+                                                  body: Text(
+                                                      notes[i],
+                                                    style: InfoBoxTextStyle.body,
+                                                  ),
+                                                  actions: [
+                                                    InfoBoxButton(
+                                                      action: () {
+                                                        Navigator.of(context).pop(false);
+                                                      },
+                                                      text: 'Cancel',
+                                                      isPrimary: true,
+                                                    ),
+                                                    InfoBoxButton(
+                                                      action: () {
+                                                        Navigator.of(context).pop(true);
+                                                      },
+                                                      text: 'Confirm',
+                                                      isPrimary: true,
+                                                    ),
+                                                  ],
+                                                );
+                                                bool checkForNullAnswer = answer ?? false;
+                                                if (checkForNullAnswer) {
+                                                  await Provider.of<AppProvider>(context, listen: false)
+                                                      .deleteNote(i, recipeStream);
+                                                }
+                                              },
+                                              icon: const Icon(
+                                                Icons.close,
+                                                color: CustomColors.grey4,
+                                                size: 20,
+                                              ),)
+                                      ],
+                                    ),
                                   ),
                                 );
                               }
 
-                              return Column(
-                                children: [
-                                  const Center(
-                                    child: Text(
-                                      'Notes',
-                                      style: TextStyle(
-                                        fontSize: CustomFontSize.large,
-                                        fontFamily: 'LibreBodoni',
+                              if (recipeStream.notes.isNotEmpty) {
+                                return Column(
+                                  children: [
+                                    const Center(
+                                      child: Text(
+                                        'Notes',
+                                        style: TextStyle(
+                                          fontSize: CustomFontSize.big,
+                                          fontFamily: 'LibreBodoni',
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                                    child: Column(
-                                      children: displayNotes,
-                                    ),
-                                  )
-                                ],
-                              );
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 30),
+                                      child: Column(
+                                        children: displayNotes,
+                                      ),
+                                    )
+                                  ],
+                                );
+                              }
                             }
                             return const SizedBox();
                           },
                         ),
-                      if (widget.recipe.savedIds.contains(user.id))
+                      if (widget.recipe.savedIds.contains(user.id) || widget.recipe.homeIds.contains(user.homeId))
                         Padding(
                           padding: const EdgeInsets.only(left: 30, right: 30),
                           child: TextField(
@@ -519,7 +613,8 @@ class _DetailScreenState extends State<DetailScreen> {
                             ),
                           ),
                         ),
-                      if (controller.text.isNotEmpty) MyTextButton(text: 'submit', action: writeNote)
+                      if (controller.text.isNotEmpty) MyTextButton(text: 'submit', action: writeNote),
+                      const SizedBox(height: 30,)
                     ],
                   ),
                 ],

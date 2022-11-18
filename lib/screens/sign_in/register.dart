@@ -142,7 +142,7 @@ class _RegisterState extends State<Register> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(
-                    height: 100,
+                    height: 70,
                   ),
                   const Center(
                     child: Text(

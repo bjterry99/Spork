@@ -20,9 +20,11 @@ class UserCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (BuildContext context) => UserProfileScreen(user: user,),
-        ));
+        if (appUser.id != user.id) {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (BuildContext context) => UserProfileScreen(user: user,),
+          ));
+        }
       },
       child: Padding(
         padding: const EdgeInsets.only(
@@ -35,9 +37,9 @@ class UserCard extends StatelessWidget {
           color: CustomColors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Padding(
-            padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+            padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: appUser.id != user.id ? 0 : 10),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: appUser.id != user.id ? CrossAxisAlignment.start : CrossAxisAlignment.center,
               children: [
                 Hero(tag: user.id, child: ProfileImage(user.photoUrl, 75, 35)),
                 const SizedBox(
@@ -66,6 +68,7 @@ class UserCard extends StatelessWidget {
                             color: CustomColors.grey4, fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w400),
                       ),
                     ),
+                    if (appUser.id != user.id )
                     Row(
                       children: [
                         StreamBuilder<QuerySnapshot>(

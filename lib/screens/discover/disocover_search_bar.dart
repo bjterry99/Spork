@@ -18,7 +18,6 @@ class DelegateDiscover extends SliverPersistentHeaderDelegate {
         child: Column(
           children: [
             SearchBar(search: search, text: "Search for recipes or people...", controller: controller,),
-            if (controller.text != '')
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: GestureDetector(

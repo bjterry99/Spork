@@ -40,11 +40,13 @@ class _SporkSpinnerState extends State<SporkSpinner> with SingleTickerProviderSt
           ),
           child: Padding(
             padding: const EdgeInsets.all(5.0),
-            child: SvgPicture.asset(
-              "assets/spork.svg",
+            child: SizedBox(
               height: 50,
               width: 50,
-              color: CustomColors.white,
+              child: SvgPicture.asset(
+                "assets/spork.svg",
+                color: CustomColors.white,
+              ),
             ),
           ),
         ),

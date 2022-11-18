@@ -94,7 +94,7 @@ class _SettingsPageState extends State<SettingsPage> {
       );
       bool checkForNullAnswer = answer ?? false;
       if (checkForNullAnswer) {
-        Provider.of<AppProvider>(context, listen: false).signOut;
+        Provider.of<AppProvider>(context, listen: false).signOut();
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const SignIn()), (Route<dynamic> route) => false);
       }

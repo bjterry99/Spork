@@ -48,6 +48,8 @@ Recipe _$RecipeFromJson(Map<String, dynamic> json) => Recipe(
               ?.map((e) => e as String)
               .toList() ??
           const <String>[],
+      createDate: json['createDate'] ?? '',
+      editDate: json['editDate'] ?? '',
     );
 
 Map<String, dynamic> _$RecipeToJson(Recipe instance) => <String, dynamic>{
@@ -69,6 +71,8 @@ Map<String, dynamic> _$RecipeToJson(Recipe instance) => <String, dynamic>{
       'url': instance.url,
       'notes': instance.notes,
       'notesCreators': instance.notesCreators,
+      'createDate': instance.createDate,
+      'editDate': instance.editDate,
     };
 
 Grocery _$GroceryFromJson(Map<String, dynamic> json) => Grocery(

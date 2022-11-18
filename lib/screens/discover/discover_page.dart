@@ -39,6 +39,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       _fetchPageUsers(pageKey);
     });
     _pagingController2.addPageRequestListener((pageKey) {
+      print('hey');
       _fetchPage2(pageKey);
     });
     _pagingControllerUsers2.addPageRequestListener((pageKey) {
@@ -163,21 +164,17 @@ class _DiscoverPageState extends State<DiscoverPage> {
   @override
   Widget build(BuildContext context) {
     Widget getList() {
-      if (controller.text == '') {
-        return const SizedBox();
-      } else {
-        return isOnFollow
-            ? FollowList(
-                pagingController: _pagingController2,
-          isOnRecipes: isOnRecipe,
-          pagingControllerUsers: _pagingControllerUsers2,
-              )
-            : DiscoverList(
-                pagingController: _pagingController,
-          isOnRecipes: isOnRecipe,
-          pagingControllerUsers: _pagingControllerUsers,
-              );
-      }
+      return isOnFollow
+          ? FollowList(
+        pagingController: _pagingController2,
+        isOnRecipes: isOnRecipe,
+        pagingControllerUsers: _pagingControllerUsers2,
+      )
+          : DiscoverList(
+        pagingController: _pagingController,
+        isOnRecipes: isOnRecipe,
+        pagingControllerUsers: _pagingControllerUsers,
+      );
     }
 
     return Scaffold(

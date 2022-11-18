@@ -126,6 +126,17 @@ exports.home_OnUpdate = functions.firestore.document("homes/{homeId}")
               homeIds: FieldValue.arrayUnion(homeId),
             });
           });
+
+          const groceryCollection = db.collection("grocery")
+            .where("creatorId", "==", id);
+          const grocerySnap = await groceryCollection.get();
+          grocerySnap.forEach(async (grocery) => {
+            var groceryRef = db.collection("grocery").doc(grocery.id);
+
+            await groceryRef.update({
+              homeId: homeId,
+            });
+          });
         });
       }
 
@@ -158,6 +169,17 @@ exports.home_OnUpdate = functions.firestore.document("homes/{homeId}")
               });
             }
           });
+
+            const groceryCollection = db.collection("grocery")
+              .where("creatorId", "==", id);
+            const grocerySnap = await groceryCollection.get();
+            grocerySnap.forEach(async (grocery) => {
+              var groceryRef = db.collection("grocery").doc(grocery.id);
+
+              await groceryRef.update({
+                homeId: '',
+              });
+            });
         });
       }
   } catch (error) {
