@@ -8,9 +8,10 @@ import 'package:spork/provider.dart';
 import 'package:provider/provider.dart';
 
 class GroceryList extends StatelessWidget {
-  const GroceryList({required this.query, required this.save, Key? key}) : super(key: key);
+  const GroceryList({required this.query, required this.save, required this.clearList, Key? key}) : super(key: key);
   final String query;
   final Function save;
+  final Function clearList;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +31,8 @@ class GroceryList extends StatelessWidget {
             }
 
             if (item.name.toString().toLowerCase().contains(query)) {
+              display = true;
+            } else if (item.creatorName.toLowerCase().contains(query)) {
               display = true;
             } else if (item.recipeId != '') {
               if (recipeName.contains(query)) {
@@ -113,6 +116,10 @@ class GroceryList extends StatelessWidget {
                   ),
                   children: marked,
                 ),
+                if (marked.isNotEmpty || unmarked.isNotEmpty)
+                  MyTextButton(text: 'clear list', action: () async {
+                    clearList();
+                  })
               ],
             ),
           );

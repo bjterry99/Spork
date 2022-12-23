@@ -67,10 +67,7 @@ class RecipesList extends StatelessWidget {
                     child: Text(
                       'Recipes you save from the Discover page or recipes you create using the recipes button will appear here.',
                       style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          fontSize: CustomFontSize.secondary,
-                          color: CustomColors.grey3
-                      ),
+                          fontWeight: FontWeight.w400, fontSize: CustomFontSize.secondary, color: CustomColors.grey3),
                     ),
                   ),
                 if (main.isNotEmpty)
@@ -88,12 +85,30 @@ class RecipesList extends StatelessWidget {
                     children: main,
                   ),
                 if (side.isNotEmpty && main.isNotEmpty)
-                  const Divider(
-                    height: 30,
-                    thickness: 1,
-                    indent: 25,
-                    endIndent: 25,
-                    color: CustomColors.grey3,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5, bottom: 15),
+                    child: Stack(
+                      children: const [
+                        Padding(
+                          padding: EdgeInsets.only(left: 20),
+                          child: Icon(
+                            Icons.bakery_dining_outlined,
+                            color: CustomColors.grey3,
+                            size: 30,
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: 15),
+                          child: Divider(
+                            height: 1,
+                            thickness: 1,
+                            indent: 60,
+                            endIndent: 25,
+                            color: CustomColors.grey3,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 if (side.isNotEmpty)
                   GridView.count(
@@ -110,12 +125,30 @@ class RecipesList extends StatelessWidget {
                     children: side,
                   ),
                 if (dessert.isNotEmpty && (main.isNotEmpty || side.isNotEmpty))
-                  const Divider(
-                    height: 30,
-                    thickness: 1,
-                    indent: 25,
-                    endIndent: 25,
-                    color: CustomColors.grey3,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5, bottom: 15),
+                    child: Stack(
+                      children: const [
+                        Padding(
+                          padding: EdgeInsets.only(left: 20),
+                          child: Icon(
+                            Icons.icecream_outlined,
+                            color: CustomColors.grey3,
+                            size: 30,
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: 15),
+                          child: Divider(
+                            height: 1,
+                            thickness: 1,
+                            indent: 60,
+                            endIndent: 25,
+                            color: CustomColors.grey3,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 if (dessert.isNotEmpty)
                   GridView.count(

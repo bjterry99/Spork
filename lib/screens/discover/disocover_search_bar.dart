@@ -7,8 +7,10 @@ class DelegateDiscover extends SliverPersistentHeaderDelegate {
   final TextEditingController controller;
   final bool isOnRecipe;
   final Function changeSearch;
+  final Function clear;
+  final bool viewButtons;
 
-  DelegateDiscover(this.search, this.controller, this.isOnRecipe, this.changeSearch);
+  DelegateDiscover(this.search, this.controller, this.isOnRecipe, this.changeSearch, this.clear, this.viewButtons);
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
@@ -17,7 +19,7 @@ class DelegateDiscover extends SliverPersistentHeaderDelegate {
         padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
         child: Column(
           children: [
-            SearchBar(search: search, text: "Search for recipes or people...", controller: controller,),
+            SearchBar(search: search, text: "Search for recipes or people...", controller: controller, clear: clear,),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: GestureDetector(
@@ -25,7 +27,7 @@ class DelegateDiscover extends SliverPersistentHeaderDelegate {
                 onTap: () {
                   changeSearch();
                 },
-                child: Row(
+                child: viewButtons ? Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Text(
@@ -45,7 +47,7 @@ class DelegateDiscover extends SliverPersistentHeaderDelegate {
                       ),
                     )
                   ],
-                ),
+                ) : const SizedBox(),
               ),
             )
           ],

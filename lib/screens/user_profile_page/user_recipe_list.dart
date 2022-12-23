@@ -64,7 +64,7 @@ class UserRecipesList extends StatelessWidget {
               children: [
                 if (recipes.isEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
                     child: Text(
                       '${user.name} has not created any recipes.',
                       style: const TextStyle(

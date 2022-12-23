@@ -29,11 +29,21 @@ class _CreateRecipeState extends State<CreateRecipe> {
   late List<String> ingredientAmounts;
   late List<String> instructions;
   late String cookTime;
+  late int servings;
   late String prepTime;
   late String recipeName;
   late String photoUrl;
   late String url;
   bool edit = false;
+  final FocusNode focusNode = FocusNode();
+  final TextEditingController controller = TextEditingController();
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    controller.dispose();
+    super.dispose();
+  }
 
   Widget getIngredientInput() {
     List<Widget> inputs = [];
@@ -246,6 +256,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
           name: recipeName,
           className: recipeClass,
           cookTime: cookTime,
+          servings: servings,
           prepTime: prepTime,
           ingredientAmounts: recipeAmounts,
           ingredients: recipeIngredients,
@@ -269,6 +280,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
           name: recipeName,
           className: recipeClass,
           cookTime: cookTime,
+          servings: servings,
           prepTime: prepTime,
           ingredientAmounts: recipeAmounts,
           ingredients: recipeIngredients,
@@ -294,6 +306,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
       instructions = List<String>.from(widget.recipe!.instructions);
       prepTime = widget.recipe!.prepTime;
       cookTime = widget.recipe!.cookTime;
+      servings = widget.recipe!.servings;
       recipeName = widget.recipe!.name;
       photoUrl = widget.recipe!.photoUrl;
       url = widget.recipe!.url;
@@ -305,10 +318,12 @@ class _CreateRecipeState extends State<CreateRecipe> {
       instructions = ['', '', ''];
       cookTime = '0:30';
       prepTime = '0:10';
+      servings = 1;
       recipeName = '';
       photoUrl = '';
       url = '';
     }
+    controller.text = servings.toString();
     super.initState();
   }
 
@@ -378,634 +393,777 @@ class _CreateRecipeState extends State<CreateRecipe> {
       }
     }
 
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: () {
-        if (Platform.isAndroid) {
-          FocusScope.of(context).unfocus();
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          systemOverlayStyle: Platform.isIOS
-              ? SystemUiOverlayStyle.light
-              : const SystemUiOverlayStyle(
-                  statusBarColor: CustomColors.primary,
-                  statusBarIconBrightness: Brightness.light,
-                ),
+    return WillPopScope(
+      onWillPop: () async {
+        bool? answer = await DialogService.dialogBox(
+          context: context,
+          title: 'Leave page?',
+          body: const Text('All of your edits will be lost.', style: InfoBoxTextStyle.body),
           actions: [
-            if (edit)
-              Padding(
-                  padding: const EdgeInsets.only(right: 15),
-                  child: GestureDetector(
-                    onTap: delete,
-                    child: const Icon(
-                      Icons.delete_outline,
-                      color: CustomColors.white,
-                      size: 25,
-                    ),
-                  )),
-          ],
-          title: Text(
-            edit ? 'Edit Recipe' : 'Create New Recipe',
-            style: const TextStyle(
-                fontWeight: FontWeight.w500, fontSize: CustomFontSize.primary, color: CustomColors.white),
-          ),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(20),
+            InfoBoxButton(
+              action: () {
+                Navigator.of(context).pop(false);
+              },
+              text: 'Cancel',
+              isPrimary: true,
             ),
-          ),
-          elevation: 3,
-        ),
-        body: SingleChildScrollView(
-          keyboardDismissBehavior: Platform.isIOS ? ScrollViewKeyboardDismissBehavior.onDrag : ScrollViewKeyboardDismissBehavior.manual,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-            child: Column(
-              children: [
-                TextFormField(
-                  initialValue: recipeName,
-                  style: const TextStyle(
-                      color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
-                  textCapitalization: TextCapitalization.sentences,
-                  cursorColor: CustomColors.primary,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      recipeName = newValue!;
-                    });
-                  },
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    errorBorder: InputBorder.none,
-                    disabledBorder: InputBorder.none,
-                    icon: Icon(
-                      Icons.short_text_rounded,
-                      size: 20,
-                    ),
-                    hintText: "Recipe name...",
+            InfoBoxButton(
+              action: () {
+                Navigator.of(context).pop(true);
+              },
+              text: 'Confirm',
+              isPrimary: true,
+            ),
+          ],
+        );
+        bool checkForNullAnswer = answer ?? false;
+        return checkForNullAnswer;
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          if (Platform.isAndroid) {
+            FocusScope.of(context).unfocus();
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            systemOverlayStyle: Platform.isIOS
+                ? SystemUiOverlayStyle.light
+                : const SystemUiOverlayStyle(
+                    statusBarColor: CustomColors.primary,
+                    statusBarIconBrightness: Brightness.light,
                   ),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 1,
-                  indent: 0,
-                  endIndent: 0,
-                  color: CustomColors.grey3,
-                ),
+            actions: [
+              if (edit)
                 Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: const [
-                          Icon(
-                            Icons.category_outlined,
+                    padding: const EdgeInsets.only(right: 15),
+                    child: GestureDetector(
+                      onTap: delete,
+                      child: const Icon(
+                        Icons.delete_outline,
+                        color: CustomColors.white,
+                        size: 25,
+                      ),
+                    )),
+            ],
+            title: Text(
+              edit ? 'Edit Recipe' : 'Create New Recipe',
+              style: const TextStyle(
+                  fontWeight: FontWeight.w500, fontSize: CustomFontSize.primary, color: CustomColors.white),
+            ),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(20),
+              ),
+            ),
+            elevation: 3,
+          ),
+          body: SingleChildScrollView(
+            keyboardDismissBehavior:
+                Platform.isIOS ? ScrollViewKeyboardDismissBehavior.onDrag : ScrollViewKeyboardDismissBehavior.manual,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+              child: Column(
+                children: [
+                  TextFormField(
+                    initialValue: recipeName,
+                    style: const TextStyle(
+                        color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
+                    textCapitalization: TextCapitalization.sentences,
+                    cursorColor: CustomColors.primary,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        recipeName = newValue!;
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      icon: Icon(
+                        Icons.short_text_rounded,
+                        size: 20,
+                      ),
+                      hintText: "Recipe name...",
+                    ),
+                  ),
+                  const Divider(
+                    height: 10,
+                    thickness: 1,
+                    indent: 0,
+                    endIndent: 0,
+                    color: CustomColors.grey3,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: const [
+                            Icon(
+                              Icons.category_outlined,
+                              size: 20,
+                              color: CustomColors.grey4,
+                            ),
+                            SizedBox(
+                              width: 17,
+                            ),
+                            Text(
+                              'Recipe class',
+                              style: TextStyle(
+                                  color: CustomColors.grey4,
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: CustomFontSize.primary),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Radio<String>(
+                              value: 'Main',
+                              groupValue: recipeClass,
+                              activeColor: CustomColors.primary,
+                              onChanged: (String? value) async {
+                                setState(() {
+                                  recipeClass = 'Main';
+                                });
+                              },
+                            ),
+                            const Text(
+                              'Main',
+                              style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
+                            ),
+                            const Spacer(),
+                            Radio<String>(
+                              value: 'Side',
+                              groupValue: recipeClass,
+                              activeColor: CustomColors.primary,
+                              onChanged: (String? value) async {
+                                setState(() {
+                                  recipeClass = 'Side';
+                                });
+                              },
+                            ),
+                            const Text(
+                              'Side',
+                              style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
+                            ),
+                            const Spacer(),
+                            Radio<String>(
+                              value: 'Dessert',
+                              groupValue: recipeClass,
+                              activeColor: CustomColors.primary,
+                              onChanged: (String? value) async {
+                                setState(() {
+                                  recipeClass = 'Dessert';
+                                });
+                              },
+                            ),
+                            const Text(
+                              'Dessert',
+                              style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
+                            ),
+                            const SizedBox(
+                              width: 15,
+                            )
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                  const Divider(
+                    height: 10,
+                    thickness: 1,
+                    indent: 0,
+                    endIndent: 0,
+                    color: CustomColors.grey3,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () async {
+                        var duration = await showDurationPicker(
+                          context: context,
+                          initialTime: const Duration(minutes: 30),
+                          baseUnit: BaseUnit.minute,
+                        );
+
+                        if (duration != null) {
+                          String durationString = duration.toString();
+                          String hours = durationString.substring(0, durationString.indexOf(':'));
+                          durationString = durationString.replaceRange(0, int.parse(hours) > 9 ? 3 : 2, '');
+                          String minutes = durationString.substring(0, durationString.indexOf(':'));
+
+                          setState(() {
+                            prepTime = hours + ':' + minutes;
+                          });
+                        }
+                      },
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.access_time_rounded,
                             size: 20,
                             color: CustomColors.grey4,
-                          ),
-                          SizedBox(
-                            width: 17,
-                          ),
-                          Text(
-                            'Recipe class',
-                            style: TextStyle(
-                                color: CustomColors.grey4,
-                                fontWeight: FontWeight.w400,
-                                fontSize: CustomFontSize.primary),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Radio<String>(
-                            value: 'Main',
-                            groupValue: recipeClass,
-                            activeColor: CustomColors.primary,
-                            onChanged: (String? value) async {
-                              setState(() {
-                                recipeClass = 'Main';
-                              });
-                            },
-                          ),
-                          const Text(
-                            'Main',
-                            style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
-                          ),
-                          const Spacer(),
-                          Radio<String>(
-                            value: 'Side',
-                            groupValue: recipeClass,
-                            activeColor: CustomColors.primary,
-                            onChanged: (String? value) async {
-                              setState(() {
-                                recipeClass = 'Side';
-                              });
-                            },
-                          ),
-                          const Text(
-                            'Side',
-                            style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
-                          ),
-                          const Spacer(),
-                          Radio<String>(
-                            value: 'Dessert',
-                            groupValue: recipeClass,
-                            activeColor: CustomColors.primary,
-                            onChanged: (String? value) async {
-                              setState(() {
-                                recipeClass = 'Dessert';
-                              });
-                            },
-                          ),
-                          const Text(
-                            'Dessert',
-                            style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
                           ),
                           const SizedBox(
-                            width: 15,
-                          )
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 1,
-                  indent: 0,
-                  endIndent: 0,
-                  color: CustomColors.grey3,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () async {
-                      var duration = await showDurationPicker(
-                        context: context,
-                        initialTime: const Duration(minutes: 30),
-                        baseUnit: BaseUnit.minute,
-                      );
-
-                      if (duration != null) {
-                        String durationString = duration.toString();
-                        String hours = durationString.substring(0, durationString.indexOf(':'));
-                        durationString = durationString.replaceRange(0, int.parse(hours) > 9 ? 3 : 2, '');
-                        String minutes = durationString.substring(0, durationString.indexOf(':'));
-
-                        setState(() {
-                          prepTime = hours + ':' + minutes;
-                        });
-                      }
-                    },
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.access_time_rounded,
-                          size: 20,
-                          color: CustomColors.grey4,
-                        ),
-                        const SizedBox(
-                          width: 17,
-                        ),
-                        const Text(
-                          'Prep time',
-                          style: TextStyle(
-                              color: CustomColors.grey4, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
-                        ),
-                        const SizedBox(
-                          width: 22,
-                        ),
-                        Text(
-                          prepTime,
-                          style: const TextStyle(
-                              color: CustomColors.black, fontWeight: FontWeight.w500, fontSize: CustomFontSize.primary),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () async {
-                      var duration = await showDurationPicker(
-                        context: context,
-                        initialTime: const Duration(minutes: 10),
-                        baseUnit: BaseUnit.minute,
-                      );
-
-                      if (duration != null) {
-                        String durationString = duration.toString();
-                        String hours = durationString.substring(0, durationString.indexOf(':'));
-                        durationString = durationString.replaceRange(0, int.parse(hours) > 9 ? 3 : 2, '');
-                        String minutes = durationString.substring(0, durationString.indexOf(':'));
-
-                        setState(() {
-                          cookTime = hours + ':' + minutes;
-                        });
-                      }
-                    },
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.access_time_rounded,
-                          size: 20,
-                          color: CustomColors.grey4,
-                        ),
-                        const SizedBox(
-                          width: 17,
-                        ),
-                        const Text(
-                          'Cook time',
-                          style: TextStyle(
-                              color: CustomColors.grey4, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
-                        ),
-                        const SizedBox(
-                          width: 17,
-                        ),
-                        Text(
-                          cookTime,
-                          style: const TextStyle(
-                              color: CustomColors.black, fontWeight: FontWeight.w500, fontSize: CustomFontSize.primary),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 1,
-                  indent: 0,
-                  endIndent: 0,
-                  color: CustomColors.grey3,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.egg_outlined,
-                        size: 20,
-                        color: CustomColors.grey4,
-                      ),
-                      const SizedBox(
-                        width: 17,
-                      ),
-                      const Text(
-                        'Ingredients',
-                        style: TextStyle(
-                            color: CustomColors.grey4, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
-                      ),
-                      const Spacer(),
-                      if (ingredients.length > 1)
-                        GestureDetector(
-                          onTap: () {
-                            if (ingredients.length > 1) {
-                              setState(() {
-                                ingredients.removeLast();
-                              });
-                            }
-                          },
-                          child: Material(
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                            child: const Padding(
-                              padding: EdgeInsets.all(5),
-                              child: Icon(
-                                Icons.remove_rounded,
-                                color: CustomColors.primary,
-                              ),
-                            ),
-                          ),
-                        ),
-                      const SizedBox(
-                        width: 17,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            ingredients.add('');
-                            ingredientAmounts.add('');
-                          });
-                        },
-                        child: Material(
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                          child: const Padding(
-                            padding: EdgeInsets.all(5),
-                            child: Icon(
-                              Icons.add_rounded,
-                              color: CustomColors.primary,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 17,
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: getIngredientInput(),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 1,
-                  indent: 0,
-                  endIndent: 0,
-                  color: CustomColors.grey3,
-                ),
-                TextFormField(
-                  initialValue: url,
-                  keyboardType: TextInputType.url,
-                  style: const TextStyle(
-                      color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
-                  cursorColor: CustomColors.primary,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      url = newValue!;
-                    });
-                  },
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    errorBorder: InputBorder.none,
-                    disabledBorder: InputBorder.none,
-                    icon: Icon(
-                      Icons.link_outlined,
-                      size: 20,
-                    ),
-                    hintText: "Recipe link...",
-                  ),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 1,
-                  indent: 0,
-                  endIndent: 0,
-                  color: CustomColors.grey3,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.format_list_numbered_rounded,
-                        size: 20,
-                        color: CustomColors.grey4,
-                      ),
-                      const SizedBox(
-                        width: 17,
-                      ),
-                      const Text(
-                        'Instructions',
-                        style: TextStyle(
-                            color: CustomColors.grey4, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
-                      ),
-                      const Spacer(),
-                      if (instructions.length > 1)
-                        GestureDetector(
-                          onTap: () {
-                            if (instructions.length > 1) {
-                              setState(() {
-                                instructions.removeLast();
-                              });
-                            }
-                          },
-                          child: Material(
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                            child: const Padding(
-                              padding: EdgeInsets.all(5),
-                              child: Icon(
-                                Icons.remove_rounded,
-                                color: CustomColors.primary,
-                              ),
-                            ),
-                          ),
-                        ),
-                      const SizedBox(
-                        width: 17,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            instructions.add('');
-                          });
-                        },
-                        child: Material(
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                          child: const Padding(
-                            padding: EdgeInsets.all(5),
-                            child: Icon(
-                              Icons.add_rounded,
-                              color: CustomColors.primary,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 17,
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: getInstructionsInput(),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 1,
-                  indent: 0,
-                  endIndent: 0,
-                  color: CustomColors.grey3,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: const [
-                          Icon(
-                            Icons.image_outlined,
-                            size: 20,
-                            color: CustomColors.grey4,
-                          ),
-                          SizedBox(
                             width: 17,
                           ),
-                          Text(
-                            'Picture',
+                          const Text(
+                            'Prep time',
                             style: TextStyle(
                                 color: CustomColors.grey4,
                                 fontWeight: FontWeight.w400,
                                 fontSize: CustomFontSize.primary),
                           ),
+                          const SizedBox(
+                            width: 22,
+                          ),
+                          Text(
+                            prepTime,
+                            style: const TextStyle(
+                                color: CustomColors.black,
+                                fontWeight: FontWeight.w500,
+                                fontSize: CustomFontSize.primary),
+                          ),
                         ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10, bottom: 10, left: 15),
-                        child: GestureDetector(
-                          onTap: choosePicture,
-                          child: Stack(
-                            children: [
-                              Material(
-                                elevation: 3,
-                                color: CustomColors.grey2,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                child: getPhoto(),
-                              ),
-                              if (photoUrl != '')
-                              Positioned(
-                                top: 10,
-                                left: 70,
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    if (Uri.parse(photoUrl).isAbsolute && widget.recipe != null) {
-                                      await Provider.of<AppProvider>(context, listen: false).deleteImage(widget.recipe!.id);
-                                    }
-                                    setState(() {
-                                      photoUrl = '';
-                                    });
-                                  },
-                                  child: Material(
-                                    elevation: 3,
-                                    color: CustomColors.white,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                                    child: const Icon(Icons.close, color: CustomColors.grey4,),
-                                  ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () async {
+                        var duration = await showDurationPicker(
+                          context: context,
+                          initialTime: const Duration(minutes: 10),
+                          baseUnit: BaseUnit.minute,
+                        );
+
+                        if (duration != null) {
+                          String durationString = duration.toString();
+                          String hours = durationString.substring(0, durationString.indexOf(':'));
+                          durationString = durationString.replaceRange(0, int.parse(hours) > 9 ? 3 : 2, '');
+                          String minutes = durationString.substring(0, durationString.indexOf(':'));
+
+                          setState(() {
+                            cookTime = hours + ':' + minutes;
+                          });
+                        }
+                      },
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.access_time_rounded,
+                            size: 20,
+                            color: CustomColors.grey4,
+                          ),
+                          const SizedBox(
+                            width: 17,
+                          ),
+                          const Text(
+                            'Cook time',
+                            style: TextStyle(
+                                color: CustomColors.grey4,
+                                fontWeight: FontWeight.w400,
+                                fontSize: CustomFontSize.primary),
+                          ),
+                          const SizedBox(
+                            width: 17,
+                          ),
+                          Text(
+                            cookTime,
+                            style: const TextStyle(
+                                color: CustomColors.black,
+                                fontWeight: FontWeight.w500,
+                                fontSize: CustomFontSize.primary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Divider(
+                    height: 10,
+                    thickness: 1,
+                    indent: 0,
+                    endIndent: 0,
+                    color: CustomColors.grey3,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        focusNode.requestFocus();
+                      },
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.rice_bowl_outlined,
+                            size: 20,
+                            color: CustomColors.grey4,
+                          ),
+                          const SizedBox(
+                            width: 17,
+                          ),
+                          const Text(
+                            'Number of servings',
+                            style: TextStyle(
+                                color: CustomColors.grey4,
+                                fontWeight: FontWeight.w400,
+                                fontSize: CustomFontSize.primary),
+                          ),
+                          const SizedBox(
+                            width: 17,
+                          ),
+                          Flexible(
+                            child: TextField(
+                              focusNode: focusNode,
+                              controller: controller,
+                              onChanged: (_) {
+                                setState(() {
+                                  if (controller.text == '' || controller.text == '0') {
+                                    servings = 0;
+                                  } else {
+                                    servings = int.parse(controller.text);
+                                  }
+                                });
+                              },
+                              onEditingComplete: () async {
+                                  if (controller.text == '' || controller.text == '0') {
+                                    servings = 0;
+                                  } else {
+                                    servings = int.parse(controller.text);
+                                  }
+                                FocusManager.instance.primaryFocus?.unfocus();
+                              },
+                              inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+                              keyboardType: TextInputType.number,
+                              textAlign: TextAlign.right,
+                              style: const TextStyle(
+                                  fontSize: CustomFontSize.primary, fontWeight: FontWeight.w400, color: CustomColors.grey4),
+                              decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  errorBorder: InputBorder.none,
+                                  disabledBorder: InputBorder.none,
+                                  hintStyle: TextStyle(
+                                      fontSize: CustomFontSize.primary, fontWeight: FontWeight.w300, color: CustomColors.grey4),
+                                  hintText: "--"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Divider(
+                    height: 10,
+                    thickness: 1,
+                    indent: 0,
+                    endIndent: 0,
+                    color: CustomColors.grey3,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.egg_outlined,
+                          size: 20,
+                          color: CustomColors.grey4,
+                        ),
+                        const SizedBox(
+                          width: 17,
+                        ),
+                        const Text(
+                          'Ingredients',
+                          style: TextStyle(
+                              color: CustomColors.grey4, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
+                        ),
+                        const Spacer(),
+                        if (ingredients.length > 1)
+                          GestureDetector(
+                            onTap: () {
+                              if (ingredients.length > 1) {
+                                setState(() {
+                                  ingredients.removeLast();
+                                });
+                              }
+                            },
+                            child: Material(
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                              child: const Padding(
+                                padding: EdgeInsets.all(5),
+                                child: Icon(
+                                  Icons.remove_rounded,
+                                  color: CustomColors.primary,
                                 ),
                               ),
-                            ],
+                            ),
+                          ),
+                        const SizedBox(
+                          width: 17,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              ingredients.add('');
+                              ingredientAmounts.add('');
+                            });
+                          },
+                          child: Material(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                            child: const Padding(
+                              padding: EdgeInsets.all(5),
+                              child: Icon(
+                                Icons.add_rounded,
+                                color: CustomColors.primary,
+                              ),
+                            ),
                           ),
                         ),
-                      )
-                    ],
-                  ),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 1,
-                  indent: 0,
-                  endIndent: 0,
-                  color: CustomColors.grey3,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: const [
-                          Icon(
-                            Icons.mobile_screen_share_rounded,
-                            size: 20,
-                            color: CustomColors.grey4,
-                          ),
-                          SizedBox(
-                            width: 17,
-                          ),
-                          Text(
-                            'Share recipe with...',
-                            style: TextStyle(
-                                color: CustomColors.grey4,
-                                fontWeight: FontWeight.w400,
-                                fontSize: CustomFontSize.primary),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          Row(
-                            children: [
-                              Radio<String>(
-                                value: 'private',
-                                groupValue: visibility,
-                                activeColor: CustomColors.primary,
-                                onChanged: (String? value) async {
-                                  setState(() {
-                                    visibility = 'private';
-                                  });
-                                },
-                              ),
-                              Text(
-                                user.homeId == '' ? 'Myself' : 'My Home',
-                                style: const TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
-                              ),
-                              const SizedBox(
-                                width: 20,
-                              ),
-                              Radio<String>(
-                                value: 'follow',
-                                groupValue: visibility,
-                                activeColor: CustomColors.primary,
-                                onChanged: (String? value) async {
-                                  setState(() {
-                                    visibility = 'follow';
-                                  });
-                                },
-                              ),
-                              const Text(
-                                'Followers',
-                                style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Radio<String>(
-                                value: 'explore',
-                                groupValue: visibility,
-                                activeColor: CustomColors.primary,
-                                onChanged: (String? value) async {
-                                  setState(() {
-                                    visibility = 'explore';
-                                  });
-                                },
-                              ),
-                              const Text(
-                                'Everyone',
-                                style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SecondaryButton(text: 'Cancel', action: () => Navigator.pop(context)),
-                      const SizedBox(
-                        width: 15,
-                      ),
-                      PrimaryButton(
-                        text: !edit ? 'Create' : 'Save',
-                        action: submit,
-                        isActive: true,
-                        icon: const Icon(
-                          Icons.restaurant_menu_rounded,
-                          color: CustomColors.white,
+                        const SizedBox(
+                          width: 17,
                         ),
-                      )
-                    ],
+                      ],
+                    ),
                   ),
-                )
-              ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: getIngredientInput(),
+                  ),
+                  const Divider(
+                    height: 10,
+                    thickness: 1,
+                    indent: 0,
+                    endIndent: 0,
+                    color: CustomColors.grey3,
+                  ),
+                  TextFormField(
+                    initialValue: url,
+                    keyboardType: TextInputType.url,
+                    style: const TextStyle(
+                        color: CustomColors.black, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
+                    cursorColor: CustomColors.primary,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        url = newValue!;
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      icon: Icon(
+                        Icons.link_outlined,
+                        size: 20,
+                      ),
+                      hintText: "Recipe link...",
+                    ),
+                  ),
+                  const Divider(
+                    height: 10,
+                    thickness: 1,
+                    indent: 0,
+                    endIndent: 0,
+                    color: CustomColors.grey3,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.format_list_numbered_rounded,
+                          size: 20,
+                          color: CustomColors.grey4,
+                        ),
+                        const SizedBox(
+                          width: 17,
+                        ),
+                        const Text(
+                          'Instructions',
+                          style: TextStyle(
+                              color: CustomColors.grey4, fontWeight: FontWeight.w400, fontSize: CustomFontSize.primary),
+                        ),
+                        const Spacer(),
+                        if (instructions.length > 1)
+                          GestureDetector(
+                            onTap: () {
+                              if (instructions.length > 1) {
+                                setState(() {
+                                  instructions.removeLast();
+                                });
+                              }
+                            },
+                            child: Material(
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                              child: const Padding(
+                                padding: EdgeInsets.all(5),
+                                child: Icon(
+                                  Icons.remove_rounded,
+                                  color: CustomColors.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(
+                          width: 17,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              instructions.add('');
+                            });
+                          },
+                          child: Material(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                            child: const Padding(
+                              padding: EdgeInsets.all(5),
+                              child: Icon(
+                                Icons.add_rounded,
+                                color: CustomColors.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 17,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: getInstructionsInput(),
+                  ),
+                  const Divider(
+                    height: 10,
+                    thickness: 1,
+                    indent: 0,
+                    endIndent: 0,
+                    color: CustomColors.grey3,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: const [
+                            Icon(
+                              Icons.image_outlined,
+                              size: 20,
+                              color: CustomColors.grey4,
+                            ),
+                            SizedBox(
+                              width: 17,
+                            ),
+                            Text(
+                              'Picture',
+                              style: TextStyle(
+                                  color: CustomColors.grey4,
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: CustomFontSize.primary),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10, bottom: 10, left: 15),
+                          child: GestureDetector(
+                            onTap: choosePicture,
+                            child: Stack(
+                              children: [
+                                Material(
+                                  elevation: 3,
+                                  color: CustomColors.grey2,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                  child: getPhoto(),
+                                ),
+                                if (photoUrl != '')
+                                  Positioned(
+                                    top: 10,
+                                    left: 70,
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        if (Uri.parse(photoUrl).isAbsolute && widget.recipe != null) {
+                                          await Provider.of<AppProvider>(context, listen: false)
+                                              .deleteImage(widget.recipe!.id);
+                                        }
+                                        setState(() {
+                                          photoUrl = '';
+                                        });
+                                      },
+                                      child: Material(
+                                        elevation: 3,
+                                        color: CustomColors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                                        child: const Icon(
+                                          Icons.close,
+                                          color: CustomColors.grey4,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  const Divider(
+                    height: 10,
+                    thickness: 1,
+                    indent: 0,
+                    endIndent: 0,
+                    color: CustomColors.grey3,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: const [
+                            Icon(
+                              Icons.mobile_screen_share_rounded,
+                              size: 20,
+                              color: CustomColors.grey4,
+                            ),
+                            SizedBox(
+                              width: 17,
+                            ),
+                            Text(
+                              'Share recipe with...',
+                              style: TextStyle(
+                                  color: CustomColors.grey4,
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: CustomFontSize.primary),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Row(
+                              children: [
+                                Radio<String>(
+                                  value: 'private',
+                                  groupValue: visibility,
+                                  activeColor: CustomColors.primary,
+                                  onChanged: (String? value) async {
+                                    setState(() {
+                                      visibility = 'private';
+                                    });
+                                  },
+                                ),
+                                Text(
+                                  user.homeId == '' ? 'Myself' : 'My Home',
+                                  style:
+                                      const TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
+                                ),
+                                const SizedBox(
+                                  width: 20,
+                                ),
+                                Radio<String>(
+                                  value: 'follow',
+                                  groupValue: visibility,
+                                  activeColor: CustomColors.primary,
+                                  onChanged: (String? value) async {
+                                    setState(() {
+                                      visibility = 'follow';
+                                    });
+                                  },
+                                ),
+                                const Text(
+                                  'Followers',
+                                  style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Radio<String>(
+                                  value: 'explore',
+                                  groupValue: visibility,
+                                  activeColor: CustomColors.primary,
+                                  onChanged: (String? value) async {
+                                    setState(() {
+                                      visibility = 'explore';
+                                    });
+                                  },
+                                ),
+                                const Text(
+                                  'Everyone',
+                                  style: TextStyle(fontSize: CustomFontSize.secondary, fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SecondaryButton(
+                          text: 'Cancel',
+                          action: () async {
+                            bool? answer = await DialogService.dialogBox(
+                              context: context,
+                              title: 'Leave page?',
+                              body: const Text('All of your edits will be lost.', style: InfoBoxTextStyle.body),
+                              actions: [
+                                InfoBoxButton(
+                                  action: () {
+                                    Navigator.of(context).pop(false);
+                                  },
+                                  text: 'Cancel',
+                                  isPrimary: true,
+                                ),
+                                InfoBoxButton(
+                                  action: () {
+                                    Navigator.of(context).pop(true);
+                                  },
+                                  text: 'Confirm',
+                                  isPrimary: true,
+                                ),
+                              ],
+                            );
+                            bool checkForNullAnswer = answer ?? false;
+                            return checkForNullAnswer;
+                          },
+                        ),
+                        const SizedBox(
+                          width: 15,
+                        ),
+                        PrimaryButton(
+                          text: !edit ? 'Create' : 'Save',
+                          action: submit,
+                          isActive: true,
+                          icon: const Icon(
+                            Icons.restaurant_menu_rounded,
+                            color: CustomColors.white,
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),

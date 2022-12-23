@@ -134,7 +134,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(left: 25, right: 25),
+                    padding: const EdgeInsets.only(left: 15, right: 25),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -214,6 +214,27 @@ class _DetailScreenState extends State<DetailScreen> {
                             ),
                           ],
                         )
+                      ],
+                    ),
+                  ),
+                  if (widget.recipe.servings != 0)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10, left: 25, right: 25),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.rice_bowl_outlined,
+                          color: CustomColors.grey4,
+                          size: 30,
+                        ),
+                        const SizedBox(width: 5,),
+                        Text(
+                          '${widget.recipe.servings.toString()} ${widget.recipe.servings == 1 ? 'serving' : 'servings'}',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: CustomFontSize.primary,
+                              color: CustomColors.grey4),
+                        ),
                       ],
                     ),
                   ),

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
@@ -25,6 +26,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
   bool isOnFollow = true;
   bool isOnRecipe = true;
   static const _pageSize = 20;
+  bool viewButtons = true;
   final PagingController<int, Recipe> _pagingController = PagingController(firstPageKey: 0);
   final PagingController<int, AppUser> _pagingControllerUsers = PagingController(firstPageKey: 0);
   final PagingController<int, Recipe> _pagingController2 = PagingController(firstPageKey: 0);
@@ -160,6 +162,15 @@ class _DiscoverPageState extends State<DiscoverPage> {
     _pagingControllerUsers2.refresh();
   }
 
+  void clearSearch() {
+    FocusScope.of(context).unfocus();
+    controller.clear();
+    _pagingController.refresh();
+    _pagingControllerUsers.refresh();
+    _pagingController2.refresh();
+    _pagingControllerUsers2.refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget getList() {
@@ -185,40 +196,41 @@ class _DiscoverPageState extends State<DiscoverPage> {
             FocusScope.of(context).unfocus();
           }
         },
-        child: NestedScrollView(
-          floatHeaderSlivers: true,
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[
-              SliverAppBar(
-                elevation: 0,
-                flexibleSpace: DiscoverHeader(
-                  change: change,
-                  isOnFollow: isOnFollow,
-                ),
-                floating: true,
-                toolbarHeight: 110,
-                snap: false,
-                backgroundColor: Colors.transparent,
-              ),
-              SliverPersistentHeader(
-                pinned: true,
-                floating: false,
-                delegate: DelegateDiscover(updateSearch, controller, isOnRecipe, changeSearch),
-              ),
-            ];
+        child: NotificationListener<UserScrollNotification>(
+          onNotification: (not) {
+            setState(() {
+              if (not.direction == ScrollDirection.forward) {
+                viewButtons = true;
+              } else if (not.direction == ScrollDirection.reverse) {
+                viewButtons = false;
+              }
+            });
+            return true;
           },
-          body: PageTransitionSwitcher(
-            reverse: true,
-            transitionBuilder: (child, animation, secondaryAnimation) {
-              return SharedAxisTransition(
-                animation: animation,
-                secondaryAnimation: secondaryAnimation,
-                transitionType: SharedAxisTransitionType.horizontal,
-                child: child,
-              );
+          child: NestedScrollView(
+            floatHeaderSlivers: true,
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverAppBar(
+                  elevation: 0,
+                  flexibleSpace: DiscoverHeader(
+                    change: change,
+                    isOnFollow: isOnFollow,
+                  ),
+                  floating: true,
+                  toolbarHeight: 110,
+                  snap: false,
+                  backgroundColor: Colors.transparent,
+                ),
+                SliverPersistentHeader(
+                  pinned: true,
+                  floating: false,
+                  delegate: DelegateDiscover(updateSearch, controller, isOnRecipe, changeSearch, clearSearch, viewButtons),
+                ),
+              ];
             },
-            child: PageTransitionSwitcher(
-              reverse: isOnFollow,
+            body: PageTransitionSwitcher(
+              reverse: true,
               transitionBuilder: (child, animation, secondaryAnimation) {
                 return SharedAxisTransition(
                   animation: animation,
@@ -227,9 +239,20 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   child: child,
                 );
               },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: getList(),
+              child: PageTransitionSwitcher(
+                reverse: isOnFollow,
+                transitionBuilder: (child, animation, secondaryAnimation) {
+                  return SharedAxisTransition(
+                    animation: animation,
+                    secondaryAnimation: secondaryAnimation,
+                    transitionType: SharedAxisTransitionType.horizontal,
+                    child: child,
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: getList(),
+                ),
               ),
             ),
           ),

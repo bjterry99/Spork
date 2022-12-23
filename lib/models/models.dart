@@ -24,6 +24,7 @@ class Recipe {
   String url;
   List<String> notes;
   List<String> notesCreators;
+  int servings;
   dynamic createDate;
   dynamic editDate;
 
@@ -46,6 +47,7 @@ class Recipe {
     this.url = '',
     this.notes = const <String>[],
     this.notesCreators = const <String>[],
+    this.servings = 0,
     this.createDate = '',
     this.editDate = '',
   });

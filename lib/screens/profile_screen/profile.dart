@@ -49,6 +49,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  void clearSearch() {
+    FocusScope.of(context).unfocus();
+    controller.clear();
+    setState(() {
+      query = '';
+    });
+  }
+
   void change() {
     setState(() {
       isOnRecipe = !isOnRecipe;
@@ -75,7 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SliverPersistentHeader(
                 pinned: true,
                 floating: false,
-                delegate: DelegateProfile(search, controller, isOnRecipe),
+                delegate: DelegateProfile(search, controller, isOnRecipe, clearSearch),
               ),
             ];
           },

@@ -7,8 +7,6 @@ import 'package:spork/screens/user_profile_page/user_header.dart';
 import 'package:spork/screens/user_profile_page/user_recipe_list.dart';
 import 'package:spork/screens/user_profile_page/user_search_bar.dart';
 import 'package:spork/theme.dart';
-import 'package:spork/provider.dart';
-import 'package:provider/provider.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({required this.user, Key? key}) : super(key: key);
@@ -34,31 +32,73 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     });
   }
 
+  void clearSearch() {
+    FocusScope.of(context).unfocus();
+    controller.clear();
+    setState(() {
+      query = '';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
+      appBar: AppBar(
+        iconTheme: const IconThemeData(color: CustomColors.grey4),
+        backgroundColor: CustomColors.white,
+        systemOverlayStyle: Platform.isIOS
+            ? null
+            : const SystemUiOverlayStyle(
+                statusBarColor: CustomColors.white,
+                statusBarIconBrightness: Brightness.dark,
+              ),
+        title: RichText(
+          softWrap: false,
+          overflow: TextOverflow.fade,
+          text: TextSpan(
+            text: widget.user.name,
+            style: const TextStyle(
+              color: CustomColors.grey4,
+              fontWeight: FontWeight.w600,
+              fontSize: CustomFontSize.primary
+            ),
+            children: <TextSpan>[
+              TextSpan(text: ' @${widget.user.userName}', style: const TextStyle(fontWeight: FontWeight.w400)),
+            ],
+          ),
+        ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ),
+        ),
+        elevation: 3,
+      ),
       body: NestedScrollView(
         floatHeaderSlivers: true,
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
             SliverAppBar(
               elevation: 0,
-              flexibleSpace: UserProfileHeader(user: widget.user,),
+              flexibleSpace: UserProfileHeader(
+                user: widget.user,
+              ),
               floating: true,
-              toolbarHeight: 125,
+              toolbarHeight: 80,
               snap: false,
               automaticallyImplyLeading: false,
               backgroundColor: CustomColors.white,
-              systemOverlayStyle: Platform.isAndroid ? const SystemUiOverlayStyle(
-                statusBarColor: CustomColors.white,
-                statusBarIconBrightness: Brightness.dark,
-              ) : null,
+              systemOverlayStyle: Platform.isAndroid
+                  ? const SystemUiOverlayStyle(
+                      statusBarColor: CustomColors.white,
+                      statusBarIconBrightness: Brightness.dark,
+                    )
+                  : null,
             ),
             SliverPersistentHeader(
               pinned: true,
               floating: false,
-              delegate: UserDelegateProfile(search, controller),
+              delegate: UserDelegateProfile(search, controller, clearSearch),
             ),
           ];
         },
@@ -80,7 +120,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
                 return true;
               },
-              child: UserRecipesList(query: query, user: widget.user,),
+              child: UserRecipesList(
+                query: query,
+                user: widget.user,
+              ),
             ),
           ),
         ),

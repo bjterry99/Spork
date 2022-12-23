@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:spork/components/buttons/info_box_button.dart';
 import 'package:spork/models/models.dart';
 import 'package:spork/provider.dart';
 import 'package:spork/screens/grocery_screen/grocery_header.dart';
 import 'package:spork/screens/grocery_screen/grocery_list.dart';
 import 'package:spork/components/buttons/my_text_button.dart';
 import 'package:spork/screens/grocery_screen/grocery_search_bar.dart';
+import 'package:spork/services/dialog_service.dart';
 import 'package:spork/theme.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:provider/provider.dart';
@@ -68,6 +70,14 @@ class _GroceryScreenState extends State<GroceryScreen> {
     });
   }
 
+  void clear() {
+    FocusScope.of(context).unfocus();
+    controller.clear();
+    setState(() {
+      query = '';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppProvider>(context, listen: false).user;
@@ -114,6 +124,34 @@ class _GroceryScreenState extends State<GroceryScreen> {
       controller.clear();
     }
 
+    void clearGrocery() async {
+      bool? answer = await DialogService.dialogBox(
+        context: context,
+        title: 'Clear Grocery List?',
+        body: const Text('This cannot be undone.', style: InfoBoxTextStyle.body),
+        actions: [
+          InfoBoxButton(
+            action: () {
+              Navigator.of(context).pop(false);
+            },
+            text: 'Cancel',
+            isPrimary: true,
+          ),
+          InfoBoxButton(
+            action: () {
+              Navigator.of(context).pop(true);
+            },
+            text: 'Confirm',
+            isPrimary: true,
+          ),
+        ],
+      );
+      bool checkForNullAnswer = answer ?? false;
+      if (checkForNullAnswer) {
+        await Provider.of<AppProvider>(context, listen: false).deleteAllGroceryItem();
+      }
+    }
+
     return SafeArea(
       child: Scaffold(
         body: Column(
@@ -134,7 +172,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                     SliverPersistentHeader(
                       pinned: true,
                       floating: false,
-                      delegate: DelegateGrocery(search, controller),
+                      delegate: DelegateGrocery(search, controller, clear),
                     ),
                   ];
                 },
@@ -164,6 +202,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
                       child: GroceryList(
                         query: query,
                         save: saveSearchItem,
+                        clearList: clearGrocery,
                       ),
                     ),
                   ),

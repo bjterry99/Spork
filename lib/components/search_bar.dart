@@ -7,11 +7,13 @@ class SearchBar extends StatelessWidget {
     required this.search,
     required this.text,
     required this.controller,
+    required this.clear,
   }) : super(key: key);
 
   final Function search;
   final String text;
   final TextEditingController controller;
+  final Function clear;
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +43,14 @@ class SearchBar extends StatelessWidget {
               icon: const Icon(
                 Icons.search_rounded,
               ),
-              suffixIcon: controller.text.isNotEmpty ? GestureDetector(
-                onTap: () {
-                  print('hey');
-                },
-                child: const Icon(
-                  Icons.close
-                ),
-              ) : null,
+              suffixIcon: controller.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        clear();
+                      },
+                    )
+                  : null,
               hintText: text,
             ),
           ),

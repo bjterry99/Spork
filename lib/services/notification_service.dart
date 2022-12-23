@@ -15,7 +15,7 @@ class NotificationService {
           Material(
             color: CustomColors.grey4,
             elevation: 3,
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(20),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
               child: Row(
