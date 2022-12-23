@@ -36,51 +36,55 @@ class RecipeCardProfile extends StatelessWidget {
                 tag: recipe.id,
                 child: recipe.photoUrl != ''
                     ? CachedNetworkImage(
-                  imageUrl: recipe.photoUrl,
-                  imageBuilder: (context, imageProvider) => SizedBox(
-                    height: imgWidth,
-                    width: imgWidth,
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20)),
-                      child: Image(
-                        image: imageProvider,
-                      ),
-                    ),
-                  ),
-                  placeholder: (context, url) => Container(
-                    height: imgWidth,
-                    width: imgWidth,
-                    decoration: const BoxDecoration(
-                        color: CustomColors.grey2,
-                        borderRadius: BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20))),
-                    child: const Icon(
-                      Icons.image_not_supported_outlined,
-                      color: CustomColors.grey4,
-                    ),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    height: imgWidth,
-                    width: imgWidth,
-                    decoration: const BoxDecoration(
-                        color: CustomColors.grey2,
-                        borderRadius: BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20))),
-                    child: const Icon(
-                      Icons.image_not_supported_outlined,
-                      color: CustomColors.grey4,
-                    ),
-                  ),
-                )
+                        imageUrl: recipe.photoUrl,
+                        imageBuilder: (context, imageProvider) => SizedBox(
+                          height: imgWidth,
+                          width: imgWidth,
+                          child: ClipRRect(
+                            borderRadius:
+                                const BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20)),
+                            child: Image(
+                              image: imageProvider,
+                            ),
+                          ),
+                        ),
+                        placeholder: (context, url) => Container(
+                          height: imgWidth,
+                          width: imgWidth,
+                          decoration: const BoxDecoration(
+                              color: CustomColors.grey2,
+                              borderRadius:
+                                  BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20))),
+                          child: const Icon(
+                            Icons.image_not_supported_outlined,
+                            color: CustomColors.grey4,
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          height: imgWidth,
+                          width: imgWidth,
+                          decoration: const BoxDecoration(
+                              color: CustomColors.grey2,
+                              borderRadius:
+                                  BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20))),
+                          child: const Icon(
+                            Icons.image_not_supported_outlined,
+                            color: CustomColors.grey4,
+                          ),
+                        ),
+                      )
                     : Container(
-                  height: imgWidth,
-                  width: imgWidth,
-                  decoration: const BoxDecoration(
-                      color: CustomColors.grey2,
-                      borderRadius: BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20))),
-                  child: const Icon(
-                    Icons.image_not_supported_outlined,
-                    color: CustomColors.grey4,
-                  ),
-                ),
+                        height: imgWidth,
+                        width: imgWidth,
+                        decoration: const BoxDecoration(
+                            color: CustomColors.grey2,
+                            borderRadius:
+                                BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20))),
+                        child: const Icon(
+                          Icons.image_not_supported_outlined,
+                          color: CustomColors.grey4,
+                        ),
+                      ),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 5, right: 5, left: 5),
@@ -109,19 +113,31 @@ class RecipeCardProfile extends StatelessWidget {
                         }
                         bool onMenu = ids.contains(recipe.id);
 
-                        return MyTextButton(text: onMenu ? 'remove' : 'add', icon: Icons.menu_book_rounded, action: onMenu ? () async {
-                          await Provider.of<AppProvider>(context, listen: false).removeFromMenu(recipe.id);
-                        } : () async {
-                          await Provider.of<AppProvider>(context, listen: false).addToMenu(recipe);
-                        },);
+                        return MyTextButton(
+                          text: onMenu ? 'remove' : 'add',
+                          icon: Icons.menu_book_rounded,
+                          action: onMenu
+                              ? () async {
+                                  await Provider.of<AppProvider>(context, listen: false).removeFromMenu(recipe.id);
+                                }
+                              : () async {
+                                  await Provider.of<AppProvider>(context, listen: false).addToMenu(recipe);
+                                },
+                        );
                       } else {
-                        return MyTextButton(text: 'add', action: (){}, icon: Icons.menu_book_rounded,);
+                        return MyTextButton(
+                          text: 'add',
+                          action: () {},
+                          icon: Icons.menu_book_rounded,
+                        );
                       }
                     },
                   ),
                 ),
               ),
-              const SizedBox(height: 5,)
+              const SizedBox(
+                height: 5,
+              )
             ],
           ),
         ),

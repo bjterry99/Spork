@@ -8,10 +8,41 @@ class NotificationService {
     final snackBar = SnackBar(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
       behavior: SnackBarBehavior.floating,
-      backgroundColor: CustomColors.grey4,
-      elevation: 3,
-      content: Text(message,
-      style: const TextStyle(color: CustomColors.white, fontWeight: FontWeight.w400, fontSize: CustomFontSize.secondary),),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      content: Row(
+        children: [
+          Material(
+            color: CustomColors.grey4,
+            elevation: 3,
+            borderRadius: BorderRadius.circular(5),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              child: Row(
+                children: [
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: CustomColors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    height: 5,
+                    width: 5,
+                  ),
+                  const SizedBox(width: 10,),
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      color: CustomColors.white,
+                      fontWeight: FontWeight.w400,
+                      fontSize: CustomFontSize.secondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
       duration: const Duration(seconds: 2),
     );
 

@@ -427,7 +427,7 @@ class AppProvider extends ChangeNotifier {
       if (url.startsWith('http:')) {
         url = 'https${url.substring(4)}';
       }
-      await launchUrl(url.trim().substring(0, 8) == 'https://' ? Uri.parse(url) : Uri.parse('https://$url'));
+      await launchUrl(url.trim().substring(0, 8) == 'https://' ? Uri.parse(url) : Uri.parse('https://$url'), mode: LaunchMode.externalApplication);
     } catch (error) {
       throw Exception('Failed to open url');
     }

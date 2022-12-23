@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:spork/home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -32,9 +31,9 @@ class MyApp extends StatelessWidget {
             home: Builder(
               builder: (context) {
                 if (Provider.of<AppProvider>(context).fireUser == null) {
-                  return const SignIn();
+                  return MediaQuery(data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0, boldText: false), child: const SignIn());
                 } else {
-                  return const Home();
+                  return MediaQuery(data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0, boldText: false), child: const Home());
                 }
               },
             ),

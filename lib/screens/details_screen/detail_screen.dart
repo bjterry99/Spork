@@ -318,6 +318,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                     child: Padding(
                                       padding: const EdgeInsets.only(bottom: 20),
                                       child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           const Icon(
                                             Icons.link_rounded,
@@ -326,17 +327,19 @@ class _DetailScreenState extends State<DetailScreen> {
                                           const SizedBox(
                                             width: 7.5,
                                           ),
-                                          Linkify(
-                                            onOpen: (link) async {
-                                              await Provider.of<AppProvider>(context, listen: false)
-                                                  .openUrl(widget.recipe.url);
-                                            },
-                                            text: widget.recipe.url,
-                                            style: const TextStyle(
-                                                fontSize: CustomFontSize.primary, color: CustomColors.black),
-                                            linkStyle: const TextStyle(
-                                              fontSize: CustomFontSize.primary,
-                                              color: CustomColors.black,
+                                          Expanded(
+                                            child: Linkify(
+                                              onOpen: (link) async {
+                                                await Provider.of<AppProvider>(context, listen: false)
+                                                    .openUrl(widget.recipe.url);
+                                              },
+                                              text: widget.recipe.url,
+                                              style: const TextStyle(
+                                                  fontSize: CustomFontSize.primary, color: CustomColors.black),
+                                              linkStyle: const TextStyle(
+                                                fontSize: CustomFontSize.primary,
+                                                color: CustomColors.black,
+                                              ),
                                             ),
                                           ),
                                         ],

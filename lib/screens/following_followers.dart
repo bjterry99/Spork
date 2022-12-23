@@ -57,10 +57,11 @@ class _FollowingFollowersState extends State<FollowingFollowers> {
                         listItems.add(UserCard(item));
                       }
 
-                      return ListView(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        children: listItems,
+                      return Expanded(
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: listItems,
+                        ),
                       );
                     }
                   }

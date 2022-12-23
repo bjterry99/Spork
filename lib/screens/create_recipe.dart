@@ -139,16 +139,6 @@ class _CreateRecipeState extends State<CreateRecipe> {
     }
   }
 
-  bool verifyIngredients() {
-    bool verify = false;
-    for (String ingredient in ingredients) {
-      if (ingredient != '') {
-        verify = true;
-      }
-    }
-    return verify;
-  }
-
   bool verifyInstructions() {
     bool verify = url.isNotEmpty;
     for (String instruction in instructions) {
@@ -213,11 +203,6 @@ class _CreateRecipeState extends State<CreateRecipe> {
     verify = verifyName();
     if (!verify) {
       NotificationService.notify('Recipe must have a name.');
-      return;
-    }
-    verify = verifyIngredients();
-    if (!verify) {
-      NotificationService.notify('Must include at least one ingredient.');
       return;
     }
     verify = verifyAmounts();

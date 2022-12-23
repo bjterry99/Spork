@@ -152,8 +152,9 @@ class RecipeCardExplore extends StatelessWidget {
                           ],
                         );
                         bool checkForNullAnswer = answer ?? false;
-                        if (checkForNullAnswer)
+                        if (checkForNullAnswer) {
                           await Provider.of<AppProvider>(context, listen: false).reportRecipe(recipe.id);
+                        }
                       },
                       borderRadius: BorderRadius.circular(10),
                       child: const Padding(

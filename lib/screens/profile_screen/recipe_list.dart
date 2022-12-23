@@ -53,6 +53,11 @@ class RecipesList extends StatelessWidget {
               }
             }
           }
+
+          dessert.sort((a, b) => a.recipe.queryName.compareTo(b.recipe.queryName));
+          side.sort((a, b) => a.recipe.queryName.compareTo(b.recipe.queryName));
+          main.sort((a, b) => a.recipe.queryName.compareTo(b.recipe.queryName));
+
           return SingleChildScrollView(
             child: Column(
               children: [

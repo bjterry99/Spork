@@ -41,6 +41,14 @@ class SearchBar extends StatelessWidget {
               icon: const Icon(
                 Icons.search_rounded,
               ),
+              suffixIcon: controller.text.isNotEmpty ? GestureDetector(
+                onTap: () {
+                  print('hey');
+                },
+                child: const Icon(
+                  Icons.close
+                ),
+              ) : null,
               hintText: text,
             ),
           ),

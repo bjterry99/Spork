@@ -27,6 +27,7 @@ class _RegisterState extends State<Register> {
   String photoUrl = '';
   bool check = false;
   TextEditingController codeController = TextEditingController();
+  bool allowVerify = false;
 
   String? get handleError {
     final text = userName;
@@ -250,6 +251,17 @@ class _RegisterState extends State<Register> {
                           maxLength: 6,
                           controller: codeController,
                           keyboardType: TextInputType.number,
+                          onChanged: (String value) {
+                            if (value.length == 6 && !allowVerify) {
+                              setState(() {
+                                allowVerify = true;
+                              });
+                            } else if (allowVerify) {
+                              setState(() {
+                                allowVerify = false;
+                              });
+                            }
+                          },
                           style: const TextStyle(
                               color: CustomColors.black,
                               fontWeight: FontWeight.w400,
@@ -266,6 +278,7 @@ class _RegisterState extends State<Register> {
                             ),
                           ),
                         ),
+                  if (!enterCode)
                   Row(
                     children: [
                       Checkbox(
@@ -327,7 +340,7 @@ class _RegisterState extends State<Register> {
                             : PrimaryButton(
                                 text: 'Verify',
                                 action: verify,
-                                isActive: (codeController.text.length == 6),
+                                isActive: allowVerify,
                               )
                       ],
                     ),

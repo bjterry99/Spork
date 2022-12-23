@@ -82,20 +82,6 @@ class _DetailsActionButtonState extends State<DetailsActionButton> with SingleTi
                         ));
                       },
                     ),
-                  Bubble(
-                    title: onMenu ? 'Remove' : 'Add',
-                    iconColor: CustomColors.white,
-                    bubbleColor: CustomColors.primary,
-                    icon: Icons.menu_book_rounded,
-                    titleStyle: const TextStyle(fontSize: CustomFontSize.secondary, color: CustomColors.white),
-                    onPress: () async {
-                      if (onMenu) {
-                        await Provider.of<AppProvider>(context, listen: false).removeFromMenu(widget.recipe.id);
-                      } else {
-                        await Provider.of<AppProvider>(context, listen: false).addToMenu(widget.recipe);
-                      }
-                    },
-                  ),
                   if (widget.recipe.creatorId != user.id)
                     Bubble(
                       title: saved ? 'Unsave' : 'Save',
@@ -111,6 +97,20 @@ class _DetailsActionButtonState extends State<DetailsActionButton> with SingleTi
                         }
                       },
                     ),
+                  Bubble(
+                    title: onMenu ? 'Remove' : 'Add',
+                    iconColor: CustomColors.white,
+                    bubbleColor: CustomColors.primary,
+                    icon: Icons.menu_book_rounded,
+                    titleStyle: const TextStyle(fontSize: CustomFontSize.secondary, color: CustomColors.white),
+                    onPress: () async {
+                      if (onMenu) {
+                        await Provider.of<AppProvider>(context, listen: false).removeFromMenu(widget.recipe.id);
+                      } else {
+                        await Provider.of<AppProvider>(context, listen: false).addToMenu(widget.recipe);
+                      }
+                    },
+                  ),
                   if (widget.recipe.creatorId != user.id)
                     Bubble(
                       title: "Report",

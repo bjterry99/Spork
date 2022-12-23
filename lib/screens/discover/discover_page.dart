@@ -39,7 +39,6 @@ class _DiscoverPageState extends State<DiscoverPage> {
       _fetchPageUsers(pageKey);
     });
     _pagingController2.addPageRequestListener((pageKey) {
-      print('hey');
       _fetchPage2(pageKey);
     });
     _pagingControllerUsers2.addPageRequestListener((pageKey) {
