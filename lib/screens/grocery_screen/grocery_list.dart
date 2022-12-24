@@ -57,12 +57,15 @@ class GroceryList extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    "Looks like that item isn't added",
-                    style: TextStyle(
-                      fontSize: CustomFontSize.primary,
-                      fontWeight: FontWeight.w400,
-                      color: CustomColors.grey4,
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 40),
+                    child: Text(
+                      "Looks like that item isn't added",
+                      style: TextStyle(
+                        fontSize: CustomFontSize.primary,
+                        fontWeight: FontWeight.w400,
+                        color: CustomColors.grey4,
+                      ),
                     ),
                   ),
                   MyTextButton(text: 'add now', action: () async {

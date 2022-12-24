@@ -133,111 +133,119 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15, right: 25),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0, boldText: false),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 15, right: 25),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Total Time:',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: CustomFontSize.primary,
+                                    color: CustomColors.grey4),
+                              ),
+                              const SizedBox(
+                                height: 3,
+                              ),
+                              Text(
+                                getTotalTime(widget.recipe.cookTime, widget.recipe.prepTime),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: CustomFontSize.primary,
+                                    color: CustomColors.grey4),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          Row(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const [
+                                  Text(
+                                    "Prep Time:",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: CustomFontSize.primary,
+                                        color: CustomColors.grey4),
+                                  ),
+                                  SizedBox(
+                                    height: 3,
+                                  ),
+                                  Text(
+                                    "Cook Time:",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: CustomFontSize.primary,
+                                        color: CustomColors.grey4),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.recipe.prepTime,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: CustomFontSize.primary,
+                                        color: CustomColors.grey4),
+                                  ),
+                                  const SizedBox(
+                                    height: 3,
+                                  ),
+                                  Text(
+                                    widget.recipe.cookTime,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: CustomFontSize.primary,
+                                        color: CustomColors.grey4),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (widget.recipe.servings != 0)
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0, boldText: false),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 10, left: 25, right: 25),
+                        child: Row(
                           children: [
-                            const Text(
-                              'Total Time:',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: CustomFontSize.primary,
-                                  color: CustomColors.grey4),
-                            ),
-                            const SizedBox(
-                              height: 3,
-                            ),
-                            Text(
-                              getTotalTime(widget.recipe.cookTime, widget.recipe.prepTime),
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: CustomFontSize.primary,
-                                  color: CustomColors.grey4),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          width: 20,
-                        ),
-                        Row(
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                Text(
-                                  "Prep Time:",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: CustomFontSize.primary,
-                                      color: CustomColors.grey4),
-                                ),
-                                SizedBox(
-                                  height: 3,
-                                ),
-                                Text(
-                                  "Cook Time:",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: CustomFontSize.primary,
-                                      color: CustomColors.grey4),
-                                ),
-                              ],
+                            const Icon(
+                              Icons.rice_bowl_outlined,
+                              color: CustomColors.grey4,
+                              size: 30,
                             ),
                             const SizedBox(
                               width: 5,
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.recipe.prepTime,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: CustomFontSize.primary,
-                                      color: CustomColors.grey4),
-                                ),
-                                const SizedBox(
-                                  height: 3,
-                                ),
-                                Text(
-                                  widget.recipe.cookTime,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: CustomFontSize.primary,
-                                      color: CustomColors.grey4),
-                                ),
-                              ],
+                            Text(
+                              '${widget.recipe.servings.toString()} ${widget.recipe.servings == 1 ? 'serving' : 'servings'}',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: CustomFontSize.primary,
+                                  color: CustomColors.grey4),
                             ),
                           ],
-                        )
-                      ],
-                    ),
-                  ),
-                  if (widget.recipe.servings != 0)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10, left: 25, right: 25),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.rice_bowl_outlined,
-                          color: CustomColors.grey4,
-                          size: 30,
                         ),
-                        const SizedBox(width: 5,),
-                        Text(
-                          '${widget.recipe.servings.toString()} ${widget.recipe.servings == 1 ? 'serving' : 'servings'}',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: CustomFontSize.primary,
-                              color: CustomColors.grey4),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
                   Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: ExpansionPanelList(
@@ -276,7 +284,9 @@ class _DetailScreenState extends State<DetailScreen> {
                             );
                           },
                           body: ListTile(
-                            title: Ingredients(widget.recipe.ingredients, widget.recipe.ingredientAmounts),
+                            title: MediaQuery(
+                                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0, boldText: false),
+                                child: Ingredients(widget.recipe.ingredients, widget.recipe.ingredientAmounts)),
                           ),
                           isExpanded: _expanded,
                           canTapOnHeader: true,
@@ -443,30 +453,34 @@ class _DetailScreenState extends State<DetailScreen> {
                                   ],
                                 ),
                                 if (widget.recipe.createDate != '')
-                                const SizedBox(height: 5,),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
                                 if (widget.recipe.createDate != '')
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.calendar_month_outlined,
-                                      color: CustomColors.grey4,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(
-                                      width: 5,
-                                    ),
-                                    Text(
-                                      dateFormat.format(createDate),
-                                      softWrap: true,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.fade,
-                                      style: const TextStyle(
-                                          color: CustomColors.grey4, fontSize: CustomFontSize.secondary),
-                                    ),
-                                  ],
-                                ),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.calendar_month_outlined,
+                                        color: CustomColors.grey4,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        dateFormat.format(createDate),
+                                        softWrap: true,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.fade,
+                                        style: const TextStyle(
+                                            color: CustomColors.grey4, fontSize: CustomFontSize.secondary),
+                                      ),
+                                    ],
+                                  ),
                                 if (widget.recipe.editDate != '')
-                                  const SizedBox(height: 5,),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
                                 if (widget.recipe.editDate != '')
                                   Row(
                                     children: [
@@ -493,121 +507,124 @@ class _DetailScreenState extends State<DetailScreen> {
                           ),
                         ),
                       ),
-                      if (widget.recipe.notes.isNotEmpty || widget.recipe.savedIds.contains(user.id)  || widget.recipe.homeIds.contains(user.homeId))
-                      const Divider(
-                        height: 20,
-                        thickness: 1,
-                        indent: 30,
-                        endIndent: 30,
-                        color: Colors.grey,
-                      ),
-                        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                          stream: Provider.of<AppProvider>(context, listen: false).recipe(widget.recipe.id),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              final recipeDoc = snapshot.data;
-                              final recipeStream = Recipe.fromJson(recipeDoc!.data()!);
-                              List<String> notes = recipeStream.notes;
-                              List<String> notesCreators = recipeStream.notesCreators;
+                      if (widget.recipe.notes.isNotEmpty ||
+                          widget.recipe.savedIds.contains(user.id) ||
+                          widget.recipe.homeIds.contains(user.homeId))
+                        const Divider(
+                          height: 20,
+                          thickness: 1,
+                          indent: 30,
+                          endIndent: 30,
+                          color: Colors.grey,
+                        ),
+                      StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                        stream: Provider.of<AppProvider>(context, listen: false).recipe(widget.recipe.id),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final recipeDoc = snapshot.data;
+                            final recipeStream = Recipe.fromJson(recipeDoc!.data()!);
+                            List<String> notes = recipeStream.notes;
+                            List<String> notesCreators = recipeStream.notesCreators;
 
-                              List<Widget> displayNotes = [];
-                              for (int i = 0; i < notes.length; i++) {
-                                displayNotes.add(
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 3),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.only(right: 10, left: 5, top: 0),
-                                          child: Container(
-                                            decoration: const BoxDecoration(
+                            List<Widget> displayNotes = [];
+                            for (int i = 0; i < notes.length; i++) {
+                              displayNotes.add(
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 3),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(right: 10, left: 5, top: 0),
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                            color: CustomColors.grey4,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          height: 3,
+                                          width: 3,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          notes[i],
+                                          softWrap: true,
+                                          style: const TextStyle(
                                               color: CustomColors.grey4,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            height: 3,
-                                            width: 3,
-                                          ),
+                                              fontSize: CustomFontSize.secondary,
+                                              fontWeight: FontWeight.w400),
                                         ),
-                                        Expanded(
-                                          child: Text(
-                                            notes[i],
-                                            softWrap: true,
-                                            style: const TextStyle(
-                                                color: CustomColors.grey4,
-                                                fontSize: CustomFontSize.secondary,
-                                                fontWeight: FontWeight.w400),
+                                      ),
+                                      if (notesCreators[i] == user.id || widget.recipe.creatorId == user.id)
+                                        IconButton(
+                                          onPressed: () async {
+                                            bool? answer = await DialogService.dialogBox(
+                                              context: context,
+                                              title: 'Remove note?',
+                                              body: Text(
+                                                notes[i],
+                                                style: InfoBoxTextStyle.body,
+                                              ),
+                                              actions: [
+                                                InfoBoxButton(
+                                                  action: () {
+                                                    Navigator.of(context).pop(false);
+                                                  },
+                                                  text: 'Cancel',
+                                                  isPrimary: true,
+                                                ),
+                                                InfoBoxButton(
+                                                  action: () {
+                                                    Navigator.of(context).pop(true);
+                                                  },
+                                                  text: 'Confirm',
+                                                  isPrimary: true,
+                                                ),
+                                              ],
+                                            );
+                                            bool checkForNullAnswer = answer ?? false;
+                                            if (checkForNullAnswer) {
+                                              await Provider.of<AppProvider>(context, listen: false)
+                                                  .deleteNote(i, recipeStream);
+                                            }
+                                          },
+                                          icon: const Icon(
+                                            Icons.close,
+                                            color: CustomColors.grey4,
+                                            size: 20,
                                           ),
-                                        ),
-                                        if (notesCreators[i] == user.id || widget.recipe.creatorId == user.id)
-                                          IconButton(
-                                              onPressed: () async {
-                                                bool? answer = await DialogService.dialogBox(
-                                                  context: context,
-                                                  title: 'Remove note?',
-                                                  body: Text(
-                                                      notes[i],
-                                                    style: InfoBoxTextStyle.body,
-                                                  ),
-                                                  actions: [
-                                                    InfoBoxButton(
-                                                      action: () {
-                                                        Navigator.of(context).pop(false);
-                                                      },
-                                                      text: 'Cancel',
-                                                      isPrimary: true,
-                                                    ),
-                                                    InfoBoxButton(
-                                                      action: () {
-                                                        Navigator.of(context).pop(true);
-                                                      },
-                                                      text: 'Confirm',
-                                                      isPrimary: true,
-                                                    ),
-                                                  ],
-                                                );
-                                                bool checkForNullAnswer = answer ?? false;
-                                                if (checkForNullAnswer) {
-                                                  await Provider.of<AppProvider>(context, listen: false)
-                                                      .deleteNote(i, recipeStream);
-                                                }
-                                              },
-                                              icon: const Icon(
-                                                Icons.close,
-                                                color: CustomColors.grey4,
-                                                size: 20,
-                                              ),)
-                                      ],
+                                        )
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+
+                            if (recipeStream.notes.isNotEmpty) {
+                              return Column(
+                                children: [
+                                  const Center(
+                                    child: Text(
+                                      'Notes',
+                                      style: TextStyle(
+                                        fontSize: CustomFontSize.big,
+                                        fontFamily: 'LibreBodoni',
+                                      ),
                                     ),
                                   ),
-                                );
-                              }
-
-                              if (recipeStream.notes.isNotEmpty) {
-                                return Column(
-                                  children: [
-                                    const Center(
-                                      child: Text(
-                                        'Notes',
-                                        style: TextStyle(
-                                          fontSize: CustomFontSize.big,
-                                          fontFamily: 'LibreBodoni',
-                                        ),
-                                      ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                                    child: Column(
+                                      children: displayNotes,
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                                      child: Column(
-                                        children: displayNotes,
-                                      ),
-                                    )
-                                  ],
-                                );
-                              }
+                                  )
+                                ],
+                              );
                             }
-                            return const SizedBox();
-                          },
-                        ),
+                          }
+                          return const SizedBox();
+                        },
+                      ),
                       if (widget.recipe.savedIds.contains(user.id) || widget.recipe.homeIds.contains(user.homeId))
                         Padding(
                           padding: const EdgeInsets.only(left: 30, right: 30),
@@ -638,7 +655,9 @@ class _DetailScreenState extends State<DetailScreen> {
                           ),
                         ),
                       if (controller.text.isNotEmpty) MyTextButton(text: 'submit', action: writeNote),
-                      const SizedBox(height: 30,)
+                      const SizedBox(
+                        height: 30,
+                      )
                     ],
                   ),
                 ],

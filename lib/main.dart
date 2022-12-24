@@ -31,9 +31,9 @@ class MyApp extends StatelessWidget {
             home: Builder(
               builder: (context) {
                 if (Provider.of<AppProvider>(context).fireUser == null) {
-                  return MediaQuery(data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0, boldText: false), child: const SignIn());
+                  return const SignIn();
                 } else {
-                  return MediaQuery(data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0, boldText: false), child: const Home());
+                  return const Home();
                 }
               },
             ),

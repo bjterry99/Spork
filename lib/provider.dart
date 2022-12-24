@@ -233,33 +233,41 @@ class AppProvider extends ChangeNotifier {
   }
 
   Stream<List<AppUser>> followersUsers(AppUser thisUser) {
-    if (thisUser.followers.length < 11) {
+    if (thisUser.followers.isNotEmpty) {
+      if (thisUser.followers.length < 11) {
+        return _firestore
+            .collection('users')
+            .where('id', whereIn: thisUser.followers)
+            .snapshots()
+            .map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList());
+      } else {
+        int numberStreams = (thisUser.followers.length / 10).ceil();
+        int remainder = thisUser.followers.length % 10;
+        List<Stream<List<AppUser>>> listStreams = [];
+        for (int i = 0; i < numberStreams; i++) {
+          if (i != numberStreams - 1) {
+            listStreams.add(_firestore
+                .collection('users')
+                .where('id', whereIn: thisUser.followers.sublist(i * 10, (i * 10) + 10))
+                .snapshots()
+                .map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList()));
+          } else {
+            listStreams.add(_firestore
+                .collection('users')
+                .where('id', whereIn: thisUser.followers.sublist(i * 10, (i * 10) + remainder))
+                .snapshots()
+                .map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList()));
+          }
+        }
+        var group = StreamGroup.merge(listStreams);
+        return group;
+      }
+    } else {
       return _firestore
           .collection('users')
-          .where('id', whereIn: thisUser.followers)
+          .where('id', isEqualTo: 'null')
           .snapshots()
           .map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList());
-    } else {
-      int numberStreams = (thisUser.followers.length / 10).ceil();
-      int remainder = thisUser.followers.length % 10;
-      List<Stream<List<AppUser>>> listStreams = [];
-      for (int i = 0; i < numberStreams; i++) {
-        if (i != numberStreams - 1) {
-          listStreams.add(_firestore
-              .collection('users')
-              .where('id', whereIn: thisUser.followers.sublist(i * 10, (i * 10) + 10))
-              .snapshots()
-              .map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList()));
-        } else {
-          listStreams.add(_firestore
-              .collection('users')
-              .where('id', whereIn: thisUser.followers.sublist(i * 10, (i * 10) + remainder))
-              .snapshots()
-              .map((snapshot) => snapshot.docs.map((doc) => AppUser.fromJson(doc.data())).toList()));
-        }
-      }
-      var group = StreamGroup.merge(listStreams);
-      return group;
     }
   }
 

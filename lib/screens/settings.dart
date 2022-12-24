@@ -223,30 +223,33 @@ class _SettingsPageState extends State<SettingsPage> {
                       const SizedBox(
                         height: 10,
                       ),
-                      Row(
-                        children: [
-                          MyTextButton(text: 'New Image', action: choosePicture),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          CustomButton(
-                              content: Text(
-                                'SAVE',
-                                style: TextStyle(
-                                    color: validate() ? CustomColors.white : CustomColors.grey4,
-                                    fontSize: CustomFontSize.secondary,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              action: edit,
-                              width: MediaQuery.of(context).size.width / 1.76,
-                              height: 35,
-                              isActive: validate(),
-                              verticalPadding: 0,
-                              horizontalPadding: 5),
-                          const SizedBox(
-                            width: 10,
-                          )
-                        ],
+                      MediaQuery(
+                        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0, boldText: false),
+                        child: Row(
+                          children: [
+                            MyTextButton(text: 'New Image', action: choosePicture),
+                            const SizedBox(
+                              width: 15,
+                            ),
+                            CustomButton(
+                                content: Text(
+                                  'SAVE',
+                                  style: TextStyle(
+                                      color: validate() ? CustomColors.white : CustomColors.grey4,
+                                      fontSize: CustomFontSize.secondary,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                                action: edit,
+                                width: MediaQuery.of(context).size.width / 1.76,
+                                height: 35,
+                                isActive: validate(),
+                                verticalPadding: 0,
+                                horizontalPadding: 5),
+                            const SizedBox(
+                              width: 10,
+                            )
+                          ],
+                        ),
                       ),
                       const Divider(
                         height: 25,

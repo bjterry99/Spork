@@ -20,34 +20,37 @@ class DelegateDiscover extends SliverPersistentHeaderDelegate {
         child: Column(
           children: [
             SearchBar(search: search, text: "Search for recipes or people...", controller: controller, clear: clear,),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
-                  changeSearch();
-                },
-                child: viewButtons ? Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(
-                      'recipes',
-                      style: TextStyle(
-                        fontWeight: !isOnRecipe ? FontWeight.w400 : FontWeight.w800,
-                        fontSize: CustomFontSize.secondary,
-                        color: CustomColors.secondary,
+            MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0, boldText: false),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    changeSearch();
+                  },
+                  child: viewButtons ? Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text(
+                        'recipes',
+                        style: TextStyle(
+                          fontWeight: !isOnRecipe ? FontWeight.w400 : FontWeight.w800,
+                          fontSize: CustomFontSize.secondary,
+                          color: CustomColors.secondary,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'people',
-                      style: TextStyle(
-                        fontWeight: isOnRecipe ? FontWeight.w400 : FontWeight.w800,
-                        fontSize: CustomFontSize.secondary,
-                        color: CustomColors.secondary,
-                      ),
-                    )
-                  ],
-                ) : const SizedBox(),
+                      Text(
+                        'people',
+                        style: TextStyle(
+                          fontWeight: isOnRecipe ? FontWeight.w400 : FontWeight.w800,
+                          fontSize: CustomFontSize.secondary,
+                          color: CustomColors.secondary,
+                        ),
+                      )
+                    ],
+                  ) : const SizedBox(),
+                ),
               ),
             )
           ],

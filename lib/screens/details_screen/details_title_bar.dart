@@ -32,28 +32,31 @@ class DelegateDetails extends SliverPersistentHeaderDelegate {
       }
     }
 
-    return Align(
-      child: Container(
-        color: CustomColors.white,
-        child: Padding(
-          padding: const EdgeInsets.only(
-              left: 20, right: 20, bottom: 10, top: 10),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              getIcon(),
-              const SizedBox(width: 10,),
-              Flexible(
-                child: Text(
-                  recipe.name,
-                  softWrap: true,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: CustomFontSize.large,
-                      color: CustomColors.black),
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0, boldText: false),
+      child: Align(
+        child: Container(
+          color: CustomColors.white,
+          child: Padding(
+            padding: const EdgeInsets.only(
+                left: 20, right: 20, bottom: 10, top: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                getIcon(),
+                const SizedBox(width: 10,),
+                Flexible(
+                  child: Text(
+                    recipe.name,
+                    softWrap: true,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: CustomFontSize.large,
+                        color: CustomColors.black),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

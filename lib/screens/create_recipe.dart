@@ -694,72 +694,69 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     endIndent: 0,
                     color: CustomColors.grey3,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () {
-                        focusNode.requestFocus();
-                      },
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.rice_bowl_outlined,
-                            size: 20,
-                            color: CustomColors.grey4,
+                  GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      focusNode.requestFocus();
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.rice_bowl_outlined,
+                          size: 20,
+                          color: CustomColors.grey4,
+                        ),
+                        const SizedBox(
+                          width: 17,
+                        ),
+                        const Text(
+                          'Number of servings',
+                          style: TextStyle(
+                              color: CustomColors.grey4,
+                              fontWeight: FontWeight.w400,
+                              fontSize: CustomFontSize.primary),
+                        ),
+                        const SizedBox(
+                          width: 17,
+                        ),
+                        Flexible(
+                          child: TextField(
+                            focusNode: focusNode,
+                            controller: controller,
+                            onChanged: (_) {
+                              setState(() {
+                                if (controller.text == '' || controller.text == '0') {
+                                  servings = 0;
+                                } else {
+                                  servings = int.parse(controller.text);
+                                }
+                              });
+                            },
+                            onEditingComplete: () async {
+                                if (controller.text == '' || controller.text == '0') {
+                                  servings = 0;
+                                } else {
+                                  servings = int.parse(controller.text);
+                                }
+                              FocusManager.instance.primaryFocus?.unfocus();
+                            },
+                            inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.right,
+                            style: const TextStyle(
+                                fontSize: CustomFontSize.primary, fontWeight: FontWeight.w400, color: CustomColors.grey4),
+                            decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                                hintStyle: TextStyle(
+                                    fontSize: CustomFontSize.primary, fontWeight: FontWeight.w300, color: CustomColors.grey4),
+                                hintText: "--"),
                           ),
-                          const SizedBox(
-                            width: 17,
-                          ),
-                          const Text(
-                            'Number of servings',
-                            style: TextStyle(
-                                color: CustomColors.grey4,
-                                fontWeight: FontWeight.w400,
-                                fontSize: CustomFontSize.primary),
-                          ),
-                          const SizedBox(
-                            width: 17,
-                          ),
-                          Flexible(
-                            child: TextField(
-                              focusNode: focusNode,
-                              controller: controller,
-                              onChanged: (_) {
-                                setState(() {
-                                  if (controller.text == '' || controller.text == '0') {
-                                    servings = 0;
-                                  } else {
-                                    servings = int.parse(controller.text);
-                                  }
-                                });
-                              },
-                              onEditingComplete: () async {
-                                  if (controller.text == '' || controller.text == '0') {
-                                    servings = 0;
-                                  } else {
-                                    servings = int.parse(controller.text);
-                                  }
-                                FocusManager.instance.primaryFocus?.unfocus();
-                              },
-                              inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.right,
-                              style: const TextStyle(
-                                  fontSize: CustomFontSize.primary, fontWeight: FontWeight.w400, color: CustomColors.grey4),
-                              decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  errorBorder: InputBorder.none,
-                                  disabledBorder: InputBorder.none,
-                                  hintStyle: TextStyle(
-                                      fontSize: CustomFontSize.primary, fontWeight: FontWeight.w300, color: CustomColors.grey4),
-                                  hintText: "--"),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   const Divider(
