@@ -1,7 +1,7 @@
 name: spork
 description: Recipe book and grocery list app
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 2022.12.23+5
+version: 2022.12.24+6
 
 environment:
   sdk: ">=2.16.2 <3.0.5"
