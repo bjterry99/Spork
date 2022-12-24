@@ -26,8 +26,8 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    Provider.of<AppProvider>(context, listen: false).subscribeUser();
     super.initState();
+    Provider.of<AppProvider>(context, listen: false).subscribeUser();
   }
 
   @override

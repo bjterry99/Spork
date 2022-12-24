@@ -343,7 +343,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> syncUser() async {
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 2));
     var userData = await _firestore.collection('users').where('id', isEqualTo: _fireUser!.uid).get();
     _user = AppUser.fromJson(userData.docs.first.data());
   }

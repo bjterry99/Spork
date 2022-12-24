@@ -28,6 +28,7 @@ class _RegisterState extends State<Register> {
   bool check = false;
   TextEditingController codeController = TextEditingController();
   bool allowVerify = false;
+  bool allowPress = true;
 
   String? get handleError {
     final text = userName;
@@ -67,63 +68,67 @@ class _RegisterState extends State<Register> {
     super.dispose();
   }
 
+  void updateItems(verify) {
+    NotificationService.notify('Verification code sent.');
+    setState(() {
+      verificationId = verify;
+      enterCode = true;
+    });
+  }
+
+  Future<void> submit() async {
+    bool userNameCheck =
+    await Provider.of<AppProvider>(context, listen: false)
+        .userNameExists(userName, null);
+    if (userNameCheck) {
+      NotificationService.notify('Username already taken.');
+      return;
+    }
+
+    setState(() {
+      allowPress = false;
+    });
+
+    await Provider.of<AppProvider>(context, listen: false)
+        .verifyPhoneNumber(phone, updateItems);
+  }
+
+  Future<void> verify() async {
+    bool verify = await Provider.of<AppProvider>(context, listen: false)
+        .sync(null, verificationId, codeController.text);
+    if (verify) {
+      AppUser appUser = AppUser(
+          id: '',
+          name: name,
+          userName: userName,
+          phone: phone,
+          followers: <String>[],
+          queryName: name.toLowerCase(),
+          photoUrl: photoUrl,
+          homeId: '');
+      await Provider.of<AppProvider>(context, listen: false)
+          .createAccount(appUser);
+
+      await Provider.of<AppProvider>(context, listen: false).syncUser();
+
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const Home()),
+              (Route<dynamic> route) => false);
+    }
+  }
+
+  void choosePicture() async {
+    String string64 = await Provider.of<AppProvider>(context, listen: false)
+        .choosePicture();
+    setState(() {
+      if (string64 != '') {
+        photoUrl = string64;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    void updateItems(verify) {
-      NotificationService.notify('Verification code sent.');
-      setState(() {
-        verificationId = verify;
-        enterCode = true;
-      });
-    }
-
-    Future<void> submit() async {
-      bool userNameCheck =
-          await Provider.of<AppProvider>(context, listen: false)
-              .userNameExists(userName, null);
-      if (userNameCheck) {
-        NotificationService.notify('Username already taken.');
-        return;
-      }
-
-      await Provider.of<AppProvider>(context, listen: false)
-          .verifyPhoneNumber(phone, updateItems);
-    }
-
-    Future<void> verify() async {
-      bool verify = await Provider.of<AppProvider>(context, listen: false)
-          .sync(null, verificationId, codeController.text);
-      if (verify) {
-        AppUser appUser = AppUser(
-            id: '',
-            name: name,
-            userName: userName,
-            phone: phone,
-            followers: <String>[],
-            queryName: name.toLowerCase(),
-            photoUrl: photoUrl,
-            homeId: '');
-        await Provider.of<AppProvider>(context, listen: false)
-            .createAccount(appUser);
-
-        await Provider.of<AppProvider>(context, listen: false).syncUser();
-
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const Home()),
-            (Route<dynamic> route) => false);
-      }
-    }
-
-    void choosePicture() async {
-      String string64 = await Provider.of<AppProvider>(context, listen: false)
-          .choosePicture();
-      setState(() {
-        if (string64 != '') {
-          photoUrl = string64;
-        }
-      });
-    }
-
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -335,7 +340,7 @@ class _RegisterState extends State<Register> {
                             ? PrimaryButton(
                                 text: 'Register',
                                 action: submit,
-                                isActive: (validated),
+                                isActive: (validated && allowPress),
                               )
                             : PrimaryButton(
                                 text: 'Verify',

@@ -23,6 +23,7 @@ class _SignInState extends State<SignIn> {
   bool enterCode = false;
   String verificationId = '';
   String code = '';
+  bool allowPress = true;
 
   @override
   void dispose() {
@@ -30,30 +31,33 @@ class _SignInState extends State<SignIn> {
     super.dispose();
   }
 
+  void updateItems(verify) {
+    NotificationService.notify('Verification code sent.');
+    setState(() {
+      verificationId = verify;
+      enterCode = true;
+    });
+  }
+
+  Future<void> submit() async {
+    setState(() {
+      allowPress = false;
+    });
+    await Provider.of<AppProvider>(context, listen: false).login(phone, updateItems);
+  }
+
+  Future<void> verify() async {
+    bool verify = await Provider.of<AppProvider>(context, listen: false).sync(null, verificationId, codeController.text);
+
+    if (verify) {
+      await Provider.of<AppProvider>(context, listen: false).syncUser();
+
+      await Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const Home()), (Route<dynamic> route) => false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    void updateItems(verify) {
-      NotificationService.notify('Verification code sent.');
-      setState(() {
-        verificationId = verify;
-        enterCode = true;
-      });
-    }
-
-    Future<void> submit() async {
-      await Provider.of<AppProvider>(context, listen: false).login(phone, updateItems);
-    }
-
-    Future<void> verify() async {
-      bool verify = await Provider.of<AppProvider>(context, listen: false).sync(null, verificationId, codeController.text);
-
-      if (verify) {
-        await Provider.of<AppProvider>(context, listen: false).syncUser();
-
-        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const Home()), (Route<dynamic> route) => false);
-      }
-    }
-
     return Scaffold(
       appBar: Provider.of<AppProvider>(context, listen: false).getZeroAppBar(CustomColors.white),
       body: GestureDetector(
@@ -159,7 +163,7 @@ class _SignInState extends State<SignIn> {
                           ? PrimaryButton(
                         text: 'login',
                         action: submit,
-                        isActive: (phone.length == 12),
+                        isActive: (phone.length == 12 && allowPress),
                       )
                           : PrimaryButton(
                         text: 'Verify',
